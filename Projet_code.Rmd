@@ -1,0 +1,749 @@
+---
+title: "Projet"
+author: "ruth"
+date: "2025-03-07"
+output: pdf_document
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+# Introduction
+
+## Contexte
+
+L’augmentation du nombre de cas de maladies cardiovasculaires à
+l’échelle mondiale représente un défi majeur pour les systèmes de santé.
+Parmi celles-ci, l’infarctus du myocarde figure comme l'une des
+principales causes de mortalité. La prévention, via une détection
+précoce des risques, constitue une voie cruciale d’intervention. Dans ce
+contexte, l’analyse de données cliniques par des méthodes de
+classification supervisée peut permettre de prédire efficacement le
+risque d’infarctus chez un patient, et ainsi d'orienter plus rapidement
+les stratégies de prise en charge.
+
+## Objectif
+
+Le présent projet vise à développer un modèle prédictif permettant
+d’estimer, à partir de données médicales et comportementales, la
+probabilité qu’un individu présente un risque d’infarctus. L’objectif
+est double : D’une part, explorer les variables influentes dans la
+prédiction du risque cardiovasculaire. D’autre part, évaluer les
+performances de modèles de classification supervisée (arbre de décision,
+k-NN et classification naive bayésienne) implémentés dans le langage R.
+
+# I. Préparation des données
+
+## 1. Présentation du jeu de données
+
+Le jeu de données utilisé comprend 8763 individus et 26 variables, dont
+une variable cible Heart.Attack.Risk indiquant si l’individu présente
+(1) ou non (0) un risque d’infarctus. Les observations portent sur des
+aspects cliniques (cholestérol, pression artérielle, triglycérides,
+etc.), comportementaux (tabagisme, activité physique, régime
+alimentaire) et démographiques (âge, sexe, revenu, pays de résidence).
+
+```{r}
+data=read.csv("~/Téléchargements/heart_attack_prediction_dataset.csv")
+dim(data)
+colnames(data)
+```
+
+Un aperçu des variables montre une diversité de types (quantitatif
+continu, qualitatif binaire ou nominal, ordinal...), ce qui implique un
+traitement différencié lors du prétraitement.
+
+## 2. Description et pertinence des variables
+
+Le jeu de données comprend 26 variables. Celles-ci couvrent des
+informations cliniques, comportementales, démographiques et
+géographiques. Afin de garantir la qualité de la modélisation, il est
+essentiel d’identifier les variables les plus pertinentes, et d’en
+exclure certaines qui peuvent introduire du bruit ou de la redondance.
+
+Le tableau ci-dessous présente une description synthétique de chaque
+variable, son type, ainsi que son niveau de pertinence pour le projet de
+prédiction du risque d’infarctus :
+
+```{r message=FALSE, warning=FALSE}
+library(knitr)
+
+variable_info <- data.frame(
+  Variable = c("Patient.ID", "Age", "Sex", "Cholesterol", "Blood.Pressure", "Heart.Rate",
+               "Diabetes", "Family.History", "Smoking", "Obesity", "Alcohol.Consumption",
+               "Exercise.Hours.Per.Week", "Diet", "Previous.Heart.Problems",
+               "Medication.Use", "Stress.Level", "Sedentary.Hours.Per.Day", "Income",
+               "BMI", "Triglycerides", "Physical.Activity.Days.Per.Week",
+               "Sleep.Hours.Per.Day", "Country", "Continent", "Hemisphere", "Heart.Attack.Risk"),
+  
+  Description = c("Identifiant unique du patient", "Âge du patient", "Sexe (Male/Female)",
+                  "Taux de cholestérol total", "Tension artérielle (ex: 120/80)",
+                  "Fréquence cardiaque", "Présence de diabète", 
+                  "Antécédents familiaux de maladies cardiaques",
+                  "Fumeur ou non", "Obésité", "Consommation d’alcool",
+                  "Heures d’exercice par semaine", "Qualité de l’alimentation",
+                  "Antécédents cardiaques", "Utilisation de médicaments", 
+                  "Niveau de stress", "Heures assises par jour",
+                  "Revenu annuel", "Indice de masse corporelle",
+                  "Taux de triglycérides", "Jours d’activité physique/semaine",
+                  "Heures de sommeil par jour", "Pays de résidence", 
+                  "Continent de résidence", "Hémisphère", 
+                  "Risque d’infarctus (0 ou 1)"),
+  
+  Type = c("Identifiant", "Quantitative", "Qualitative", "Quantitative", "Texte",
+           "Quantitative", "Binaire", "Binaire", "Binaire", "Binaire", "Binaire",
+           "Quantitative", "Qualitative", "Binaire", "Binaire", "Quantitative",
+           "Quantitative", "Quantitative", "Quantitative", "Quantitative",
+           "Quantitative", "Quantitative", "Qualitative", "Qualitative",
+           "Qualitative", "Binaire"),
+  
+  Pertinence = c("Non pertinente", "Très pertinente", "Pertinente", "Pertinente",
+                 " À transformer", " Pertinente", " Très pertinente",
+                 " Pertinente", " Pertinente", " Pertinente", " Moyennement pertinente",
+                 " Pertinente", " Pertinente", " Très pertinente", " Moyennement pertinente",
+                 " Pertinente", " Pertinente", " Moyennement pertinente",
+                 " Pertinente", " Pertinente", " Pertinente", " Moyennement pertinente",
+                 " Non pertinente", " Non pertinente", " Non pertinente",
+                 " Variable cible")
+)
+
+kable(variable_info, caption = "Tableau 1 : Description des variables et évaluation de leur pertinence", align = "l", booktabs = TRUE)
+
+```
+
+> Certaines variables comme `Patient.ID`, `Country`, `Continent` et
+> `Hemisphere` seront écartées, car elles n’apportent pas de valeur
+> informative dans la prédiction du risque cardiaque.
+
+## 3. Typologie des variables
+
+Les variables présentes dans le jeu de données peuvent être regroupées
+en deux grandes catégories : **quantitatives** et **qualitatives**.
+Cette distinction est importante, car elle détermine les techniques
+statistiques et les méthodes de modélisation à employer.
+
+### • Variables quantitatives
+
+Il s’agit de variables **numériques continues ou discrètes** pouvant
+faire l’objet de calculs statistiques classiques (moyenne, écart-type,
+corrélation, etc.). Elles traduisent des mesures physiologiques ou
+comportementales.
+
+Les variables suivantes peuvent être considérées comme **quantitatives**
+:
+
+-   `Age` : Âge du patient\
+-   `Cholesterol` : Taux de cholestérol\
+-   `Heart.Rate` : Fréquence cardiaque\
+-   `Exercise.Hours.Per.Week` : Heures d’exercice par semaine\
+-   `Sedentary.Hours.Per.Day` : Heures passées assis par jour\
+-   `Stress.Level` : Niveau de stress\
+-   `Income` : Revenu annuel\
+-   `BMI` : Indice de masse corporelle\
+-   `Triglycerides` : Taux de triglycérides\
+-   `Physical.Activity.Days.Per.Week` : Jours d’activité physique par
+    semaine\
+-   `Sleep.Hours.Per.Day` : Heures de sommeil par jour\
+-   `Blood.Pressure` : À décomposer en `Systolic_BP` et `Diastolic_BP`
+    pour une utilisation correcte
+
+> Ces variables peuvent nécessiter un traitement préalable
+> (normalisation, transformation logarithmique ou catégorisation) selon
+> le modèle utilisé.
+
+------------------------------------------------------------------------
+
+### • Variables qualitatives
+
+Ces variables sont de nature **catégorielle** (nominale ou binaire) et
+doivent être **encodées** avant d’être intégrées dans un modèle de
+machine learning. Elles représentent des caractéristiques
+comportementales, médicales ou sociodémographiques.
+
+Les variables suivantes relèvent de cette catégorie :
+
+-   `Sex` : Sexe du patient\
+-   `Diabetes` : Diabète (Oui/Non)\
+-   `Family.History` : Antécédents familiaux de maladies cardiaques\
+-   `Smoking` : Tabagisme\
+-   `Obesity` : Obésité\
+-   `Alcohol.Consumption` : Consommation d’alcool\
+-   `Diet` : Qualité de l’alimentation (Healthy, Average, Unhealthy)\
+-   `Previous.Heart.Problems` : Antécédents cardiaques\
+-   `Medication.Use` : Prise de médicaments\
+-   `Country` : Pays de résidence\
+-   `Continent` : Continent de résidence\
+-   `Hemisphere` : Hémisphère géographique\
+-   `Heart.Attack.Risk` : **Variable cible**, binaire (0 = Pas de
+    risque, 1 = Risque)
+
+> Certaines de ces variables (comme `Country`, `Continent` ou
+> `Hemisphere`) seront exclues de la modélisation en raison de leur
+> faible lien explicite avec le risque d’infarctus. La distinction entre
+> ces deux types est essentielle pour : - orienter les **prétraitements
+> nécessaires** (encodage, normalisation, transformation), - choisir les
+> **méthodes de visualisation exploratoire** adaptées, - **adapter les
+> algorithmes de classification** à la structure des données.
+
+```{r}
+str(data)
+```
+
+## 4. La variable target
+
+Notre variable target sera la variable Heart.Attack.Risk qui est une
+variable binaire prenant la valeur 0 ou 1.
+
+```{r}
+target=as.factor(data$Heart.Attack.Risk)
+class(target)
+```
+
+## 5. Nettoyage et vérification du data type
+Les variables non pertinentes à l'analyse prédictive (comme Patient.ID, Country, Continent, Hemisphere) ont été retirées, car elles n’apportent pas d’information discriminante sur le risque d’infarctus.
+
+De plus, la variable Blood.Pressure a été décomposée en deux variables numériques distinctes : Systolic_BP (pression systolique) et Diastolic_BP (pression diastolique), pour permettre une analyse fine.
+
+
+```{r}
+# Transformer Blood Pressure en deux colonnes numériques sans mutate()
+data$Systolic_BP <- as.numeric(sub("/.*", "", data$Blood.Pressure))  # Extraire la pression systolique
+data$Diastolic_BP <- as.numeric(sub(".*/", "", data$Blood.Pressure))  # Extraire la pression diastolique
+
+# Supprimer la colonne originale Blood Pressure
+data <- data[, !(names(data) %in% "Blood.Pressure")]
+
+```
+
+### Modification du type des variables
+
+Avant d’appliquer les algorithmes de classification supervisée, il est
+indispensable d’adapter le format des variables à leur nature et à
+l’exigence des modèles utilisés. Les variables quantitatives doivent
+être **converties en numériques** (`numeric`) pour permettre les calculs
+statistiques, tandis que les variables qualitatives doivent être
+**converties en facteurs** (`factor`) afin que les modèles puissent
+reconnaître leurs modalités comme des catégories distinctes.
+
+Ainsi, les variables représentant des **mesures continues** telles que
+l’âge, le taux de cholestérol, le BMI ou encore le nombre d’heures de
+sport sont converties en format `numeric`.\
+En parallèle, les variables catégorielles comme le sexe, la présence de
+diabète, le régime alimentaire ou les antécédents médicaux sont
+converties en `factor`.
+
+Une discrétisation de l’âge a également été réalisée pour créer une
+variable `Age_cat`, classant les individus en tranches d’âge (`Jeune`,
+`Middle-aged`, `Senior`, `Elderly`) afin de faciliter certaines analyses
+exploratoires et comparatives.
+
+Le code suivant présente ces différentes opérations de typage :
+
+```{r}
+# **Variables numériques continues (mesures)**
+data$Age_cat <- cut(data$Age, 
+                    breaks = c(0, 30, 50, 70, 100), 
+                    labels = c("Jeune", "Middle-aged", "Senior", "Elderly"))
+
+data$Cholesterol <- as.numeric(data$Cholesterol)
+data$Heart.Rate <- as.numeric(data$Heart.Rate)
+data$BMI <- as.numeric(data$BMI)
+data$Triglycerides <- as.numeric(data$Triglycerides)
+data$Exercise.Hours.Per.Week <- as.numeric(data$Exercise.Hours.Per.Week)
+data$Sedentary.Hours.Per.Day <- as.numeric(data$Sedentary.Hours.Per.Day)
+data$Stress.Level <- as.numeric(data$Stress.Level)
+data$Income <- as.numeric(data$Income)
+data$Physical.Activity.Days.Per.Week <- as.numeric(data$Physical.Activity.Days.Per.Week)
+data$Sleep.Hours.Per.Day <- as.numeric(data$Sleep.Hours.Per.Day)
+
+#  **Variables catégorielles (facteurs)**
+data$Sex <- as.factor(data$Sex)
+data$Smoking <- as.factor(data$Smoking)
+data$Diabetes <- as.factor(data$Diabetes)
+data$Family.History <- as.factor(data$Family.History)
+data$Diet <- as.factor(data$Diet)
+data$Previous.Heart.Problems <- as.factor(data$Previous.Heart.Problems)
+data$Medication.Use <- as.factor(data$Medication.Use)
+data$Alcohol.Consumption <- as.factor(data$Alcohol.Consumption)
+data$Obesity <- as.factor(data$Obesity)
+
+str(data) 
+
+```
+
+
+## 6. Séparation des variables quantitatives et qualitatives
+
+Dans le but de faciliter l’analyse statistique et la modélisation, les
+variables du jeu de données ont été regroupées en deux sous-ensembles
+distincts :
+
+-   **Les variables quantitatives**, qui correspondent à des mesures
+    numériques continues, sont destinées à des analyses statistiques
+    classiques (statistiques descriptives, corrélations, boxplots,
+    etc.).
+-   **Les variables qualitatives**, qui regroupent les catégories (sexe,
+    antécédents, comportement, etc.), feront l’objet d’analyses de
+    fréquence et de visualisations spécifiques (diagrammes en barres,
+    tables de contingence, etc.).
+
+Ce regroupement permet une gestion plus efficace des données lors des
+étapes suivantes du projet, notamment lors de l’analyse exploratoire, de
+l’encodage, et de l’entraînement des modèles.
+
+Le code suivant permet d’extraire ces deux sous-ensembles à l’aide du
+package `dplyr` :
+
+```{r}
+library(dplyr)
+quantitative_vars <- select(data, Age, Cholesterol, Heart.Rate, BMI, Triglycerides, 
+                            Systolic_BP, Diastolic_BP, Exercise.Hours.Per.Week, Sedentary.Hours.Per.Day, 
+                            Stress.Level, Physical.Activity.Days.Per.Week, 
+                            Sleep.Hours.Per.Day)
+
+
+qualitative_vars <- select(data, Age_cat, Sex, Smoking, Diabetes, Obesity, Family.History, 
+                           Diet, Previous.Heart.Problems)
+
+
+```
+
+# II. Analyse exploratoire
+
+## 1. Analyse univariée
+
+### Variables quantitatives
+
+Un résumé statistique a été effectué afin d’identifier les
+distributions, valeurs aberrantes et échelles des variables continues :
+
+```{r}
+summary(quantitative_vars)
+```
+
+L’analyse descriptive des variables quantitatives met en évidence une
+population adulte globalement bien répartie en âge, avec une moyenne de
+54 ans. Les principales variables cliniques présentent des valeurs
+réalistes et médicalement cohérentes.
+
+La variable Cholesterol varie entre 120 et 400 mg/dL, avec une moyenne
+d’environ 260 mg/dL, ce qui indique une population présentant une
+hypercholestérolémie modérée à sévère, sans valeur aberrante.
+
+Les triglycérides atteignent en moyenne 417 mg/dL, avec un maximum de
+800 mg/dL, ce qui reste plausible pour des patients à haut risque
+cardiovasculaire, bien qu’une attention particulière aux valeurs
+extrêmes puisse être envisagée.
+
+L’IMC moyen est de 28.9, ce qui correspond à une population en surpoids,
+et le niveau d’activité physique varie fortement entre les individus. Le
+stress perçu est relativement élevé, tandis que le sommeil reste
+globalement dans les normes (7h/jour en moyenne).
+
+Ces résultats confirment que les variables quantitatives sont à la fois
+exploitables pour la modélisation et pertinentes pour prédire un risque
+d’infarctus.
+
+### Variables qualitatives
+
+Le nombre d’observations tombées dans chacune des catégories
+
+```{r}
+sapply(qualitative_vars, table)
+```
+
+Les variables qualitatives présentent globalement des répartitions bien
+équilibrées, à l’exception notable des variables `Sex`, `Smoking` et
+`Diabetes`, où l’on observe une nette dominance de certaines catégories
+(masculin, fumeurs, diabétiques). Cela reflète le profil d'une
+population à risque cardiovasculaire élevé. D'autres variables, comme
+`Diet`, `Obesity`, `Family.History` et `Previous.Heart.Problems`, sont
+bien réparties, ce qui est favorable pour une modélisation équilibrée.
+
+### Variable Target
+
+La variable cible `Heart.Attack.Risk` est bien équilibrée :
+
+```{r}
+table(target)
+```
+
+On observe 5624 observations dans la classe 0 (soit 64,2%) et 3139 dans
+la classe 1 (35,8%). Cette répartition présente un léger déséquilibre,
+mais reste suffisamment équilibrée pour permettre une modélisation
+fiable des deux classes.
+
+## 2. Analyse graphique
+
+### Variables quantitatives : boxplot
+
+```{r}
+for(i in 1:ncol(quantitative_vars)){
+  boxplot(quantitative_vars[,i] ~ target, main=paste("Boxplot de", colnames(quantitative_vars)[i]),
+          col = c("pink", "lightblue"), xlab = "Risque d'infarctus")
+}
+```
+
+### Variables qualitatives : barplot
+
+```{r, out.width="50%", fig.align = "center"}
+for (col in colnames(qualitative_vars)){
+  barplot(table(qualitative_vars[[col]]), main=paste("Histogramme de", col), col="pink")
+}
+```
+
+```{r}
+for (i in 1:ncol(qualitative_vars)) {
+  var_name <- colnames(qualitative_vars)[i]
+  tab <- table(qualitative_vars[[i]], target)
+
+  barplot(tab,
+          beside = TRUE,
+          col = c("pink", "lightblue"),
+          main = paste("Répartition de", var_name, "selon le risque d'infarctus"),
+          xlab = var_name,
+          ylab = "Effectifs",
+          legend.text = c("Absence de risque", "Présence de risque"))
+}
+
+```
+
+## 3. Analyse multivariée
+
+Une matrice de corrélation a été générée entre les variables
+quantitatives. Cette analyse permet :
+
+-   d'identifier les redondances potentielles entre variables
+-   de détecter les associations utiles pour la modélisation.
+
+```{r}
+cor_mat = cor(quantitative_vars, use = "complete.obs")
+cor_mat
+```
+
+```{r, eval = TRUE}
+library(reshape2)
+library(ggplot2)
+#cor_mat = cor(quantitative_vars, use = "complete.obs")
+#cor_mat
+melted_cor_mat = melt(cor_mat)
+ggplot(data = melted_cor_mat, aes(x = Var1, y = Var2, fill = value)) + 
+  geom_tile() + scale_fill_gradient2(low = "blue", mid = "white", high = "red") +
+  labs(title = "Correlation heatmap", x =  " ", fill = "correlation", y = " ")
+```
+
+```{r, eval = FALSE}
+cor_mat = cor(quantitative_vars, use = "complete.obs")
+cor_mat
+```
+
+#### Gestion des valeurs manquantes
+
+```{r}
+colSums(is.na(data))
+```
+
+Il n'y a aucune valeur manquante dans notre base de données
+
+#### Transformation des variables
+
+```{r}
+library(caret)
+dummy <- dummyVars(" ~ Sex", data = qualitative_vars)
+Sex_dummy <- data.frame(predict(dummy, newdata = qualitative_vars))
+Sex_dummy
+
+
+```
+
+#### Encodage de la variable Diet
+
+```{r}
+library(superml)
+label_encoder <- LabelEncoder$new()
+qualitative_vars$Diet_encoded <- label_encoder$fit_transform(qualitative_vars$Diet)
+head(qualitative_vars$Diet_encoded)
+```
+
+#### Encodage de la variable Age_cat
+
+```{r}
+label_encoder <- LabelEncoder$new()
+qualitative_vars$AgeC_encoded <- label_encoder$fit_transform(qualitative_vars$Age_cat)
+head(qualitative_vars$AgeC_encoded)
+```
+
+#### Création d'un data frame contenant les variables encodés
+
+```{r}
+qualitative_vars_encoded = data.frame(Diet = lbl$fit_transform(qualitative_vars$Diet))
+
+#qualitative_vars_encoded <- qualitative_vars
+#qualitative_vars_encoded$Diet<- label_encoder$fit_transform(qualitative_vars_encoded$Diet)
+#qualitative_vars_encoded$Age_cat <- label_encoder$fit_transform(qualitative_vars_encoded$Age_cat)
+head(qualitative_vars_encoded)
+```
+
+## Arbre de classification
+
+### Variables explicatives
+
+```{r}
+predictive_vars = cbind(quantitative_vars, qualitative_vars)
+head(predictive_vars)
+str(predictive_vars)
+```
+
+### Partage du jeu de données
+
+```{r, eval = FALSE}
+set.seed(1234)
+nobs    = nrow(qualitative_vars) 
+inTrain = sample(1:nobs, size = round(0.8 * nobs), replace = FALSE)
+
+predictive_vars_test    = predictive_vars[-inTrain,]
+target_test             = target[-inTrain] 
+predictive_vars_train   = predictive_vars[inTrain,]
+target_train            = target[inTrain] 
+```
+
+### 2.3. Phase d'apprentissage
+
+Installation des packages `rpart`et `rpart.plot`
+
+```{r, eval = FALSE}
+install.packages("rpart")
+install.packages("rpart.plot")
+```
+
+Chargement des librairies
+
+```{r, results = "hide", message = FALSE}
+library(rpart)
+library(rpart.plot)
+?rpart
+?rpart.plot
+```
+
+### Entrainement d'un arbre de classification.
+
+```{r, eval = FALSE}
+
+
+predictive_vars_train <- as.data.frame(predictive_vars_train)
+predictive_vars_test <- as.data.frame(predictive_vars_test)
+
+classifTree <- rpart(target_train ~ ., data = predictive_vars_train, 
+                     method = "class",
+                     control = rpart.control(minsplit = 10, cp = 0.001, maxdepth = 5))
+
+```
+
+Ce code entraine un arbre de classification. Il trouve les meilleurs
+seuils de séparation pour classer correctement les observations.
+
+### Trcé de l'arbre de décision
+
+```{r, eval = FALSE}
+rpart.plot(classifTree, type = 3, extra = 3, fallen.leaves = TRUE,  
+           main = "Arbre de prédiction du risque d'infarctus d'un patient", roundint=FALSE)  
+```
+
+### Phase de test
+
+```{r, eval = FALSE}
+
+predictive_vars_test <- as.data.frame(predictive_vars_test)
+
+classifTree <- rpart(target_test ~ ., data = predictive_vars_test, 
+                     method = "class",
+                     control = rpart.control(minsplit = 10, cp = 0.001, maxdepth = 5))
+
+rpart.plot(classifTree, type = 3, extra = 3, fallen.leaves = TRUE,  
+           main = "Arbre de prédiction du risque d'infarctus d'un patient", roundint=FALSE)  
+
+```
+
+### 2.4. Prédiction de la target avec l'arbre de décision sur le jeu de données de test
+
+```{r, eval = FALSE}
+library(caret)
+target_pred = predict(classifTree, predictive_vars_test, type = "class")
+conf_matrix <- confusionMatrix(target_pred, target_test)
+print(conf_matrix)
+# à compléter
+# à compléter
+# à compléter
+```
+
+### Matrice de confusion
+
+```{r}
+library(Metrics)
+confusionMatrix(target_pred, target_test)$table
+
+```
+
+### Arbre de classification avec évaluation des performances en 10-fold cross-validation
+
+```{r}
+qualitative_vars$Age_cat=NULL
+qualitative_vars$Diet=NULL
+qualitative_vars$Sex=NULL
+predictive_vars = cbind(quantitative_vars, qualitative_vars, Sex_dummy)
+head(predictive_vars)
+str(predictive_vars)
+```
+
+### Partage du jeu de données
+
+```{r, eval = FALSE}
+set.seed(1357)
+nobs    = nrow(qualitative_vars) 
+inTrain = sample(1:nobs, size = round(0.8 * nobs), replace = FALSE)
+
+predictive_vars_test    = predictive_vars[-inTrain,]
+target_test             = target[-inTrain]
+predictive_vars_train   = predictive_vars[inTrain,]
+target_train            = target[inTrain]
+
+# si votre target est un dataframe, il faut utiliser target_train = target[inTrain,]
+```
+
+```{r, results = 'hide', eval = FALSE}
+set.seed(1357)
+inTest        = sample(1:nobs, size = round(0.1 * nobs), replace = FALSE)
+notinTest     = (1:nobs)[-inTest]
+inValidation  = sample(notinTest, size = round(0.1 * nobs), replace = FALSE)
+
+c(inTest, inValidation)
+```
+
+```{r, eval = FALSE}
+predictive_vars_test        = predictive_vars[inTest,]
+target_test                 = target[inTest]
+
+predictive_vars_validation  = predictive_vars[inValidation,]
+target_validation           = target[inValidation]
+
+predictive_vars_train       = predictive_vars[inTrain,]
+target_train                = target[inTrain]
+
+```
+
+### 2.3. Sélection de l'hyperparamètre
+
+```{r, results = 'hide'}
+library(class)
+```
+
+### Méthode des k plus proches voisins
+
+```{r, results = 'hide', eval = FALSE}
+KGrid         = seq(1, 20, by = 2)
+accuracy_val  = NULL
+recall_val    = NULL
+precision_val = NULL
+for(k in KGrid){
+  
+  target_pred = knn(train = predictive_vars_train ,
+                    test = predictive_vars_validation,  
+                    cl = target_train,
+                    k = k) 
+  
+  conf_matrix <- confusionMatrix(factor(target_pred), factor(target_validation))
+  
+  # Stocker Accuracy, Recall et Précision
+  accuracy_val  = c(accuracy_val, conf_matrix$overall["Accuracy"])
+  recall_val    = c(recall_val, conf_matrix$byClass["Sensitivity"])  # Sensitivity = Recall
+  precision_val = c(precision_val, conf_matrix$byClass["Precision"]) # Precision
+}
+```
+
+### Graphique
+
+```{r, out.width="50%", fig.align = "center", eval = FALSE}
+plot(KGrid, accuracy_val, type = 'l', xlab = "K, nombre de voisins", ylab = "Accuracy")
+plot(KGrid, recall_val, type = 'l', xlab = "K, nombre de voisins", ylab = "Recall")
+plot(KGrid, precision_val, type = 'l', xlab = "K, nombre de voisins", ylab = "Precision")
+```
+
+```{r, results = 'hide', eval = FALSE}
+rbind(predictive_vars_train, predictive_vars_validation)
+c(target_train, target_validation)
+
+
+```
+
+```{r, eval = FALSE}
+target_pred = knn(train = rbind(predictive_vars_train, predictive_vars_validation),
+                  test = predictive_vars_test, 
+                  cl = c(target_train, target_validation), 
+                  k = 7) 
+  
+conf_matrix <- confusionMatrix(factor(target_pred), factor(target_test))
+
+# Extraire Accuracy, Recall et Précision
+accuracy_test  = conf_matrix$overall["Accuracy"]
+recall_test    = conf_matrix$byClass["Sensitivity"]  # Sensitivity = Recall
+precision_test = conf_matrix$byClass["Precision"]    # Precision
+
+# Afficher les résultats
+accuracy_test
+recall_test
+precision_test
+```
+
+```{r, eval = FALSE}
+library(caret)
+library(class)
+
+accuracy_fold = NULL
+recall_fold = NULL
+precision_fold = NULL
+
+for(fold in 1:nfolds){
+  inFold = which(folds == fold)
+  predictive_vars_train = predictive_vars_remain[-inFold, ]
+  predictive_vars_validation = predictive_vars_remain[inFold, ]
+  target_train = target_remain[-inFold]
+  target_validation = target_remain[inFold]
+
+  # Prétraitement : imputation + normalisation
+  Proc = preProcess(predictive_vars_train, method = c("medianImpute", "range"))
+  predictive_vars_train = predict(Proc, predictive_vars_train)
+  predictive_vars_validation = predict(Proc, predictive_vars_validation)
+
+  accuracy_k = NULL
+  recall_k = NULL
+  precision_k = NULL
+
+  for(k in KGrid){
+    target_pred = knn(train = predictive_vars_train,
+                      test = predictive_vars_validation,
+                      cl = target_train,
+                      k = k)
+
+    
+    cm = confusionMatrix(factor(target_pred), factor(target_validation))
+
+    # Stocker les métriques
+    accuracy_k = c(accuracy_k, cm$overall["Accuracy"])
+    recall_k = c(recall_k, cm$byClass["Sensitivity"])
+    precision_k = c(precision_k, cm$byClass["Precision"])
+  }
+
+  accuracy_fold = rbind(accuracy_fold, accuracy_k)
+  recall_fold = rbind(recall_fold, recall_k)
+  precision_fold = rbind(precision_fold, precision_k)
+}
+
+rownames(accuracy_fold) = paste0("fold_", 1:nfolds)
+rownames(recall_fold) = paste0("fold_", 1:nfolds)
+rownames(precision_fold) = paste0("fold_", 1:nfolds)
+
+colnames(accuracy_fold) = paste0("K_", KGrid)
+colnames(recall_fold) = paste0("K_", KGrid)
+colnames(precision_fold) = paste0("K_", KGrid)
+
+```
