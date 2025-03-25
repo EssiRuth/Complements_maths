@@ -191,9 +191,12 @@ str(data)
 
 ## 4. La variable target
 
-Notre variable target sera la variable Heart.Attack.Risk qui est une
-variable binaire prenant la valeur 0 ou 1.
+L’objectif principal de ce projet étant de prédire si un patient présente un risque de crise cardiaque à partir de ses caractéristiques médicales, il est essentiel d’identifier avec précision la **variable cible** du modèle supervisé.
+Dans notre jeu de données, la variable `Heart.Attack.Risk` remplit ce rôle. Elle indique si un individu est **à risque d’infarctus (1)** ou **non (0)**, en se basant sur une série de facteurs cliniques, comportementaux et démographiques.
+Cette variable est de nature **binaire**, ce qui rend la problématique bien adaptée à une **approche de classification supervisée**.
+Avant d’être utilisée dans les modèles, elle est convertie en facteur (`factor`) pour que les algorithmes de machine learning puissent la traiter comme une variable catégorielle.
 
+Le code ci-dessous illustre cette conversion :
 ```{r}
 target=as.factor(data$Heart.Attack.Risk)
 class(target)
