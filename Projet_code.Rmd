@@ -206,11 +206,11 @@ De plus, la variable Blood.Pressure a été décomposée en deux variables numé
 
 
 ```{r}
-# Transformer Blood Pressure en deux colonnes numériques sans mutate()
+# Transformation de Blood Pressure en deux colonnes numériques 
 data$Systolic_BP <- as.numeric(sub("/.*", "", data$Blood.Pressure))  # Extraire la pression systolique
 data$Diastolic_BP <- as.numeric(sub(".*/", "", data$Blood.Pressure))  # Extraire la pression diastolique
 
-# Supprimer la colonne originale Blood Pressure
+# Supprime la colonne originale Blood Pressure
 data <- data[, !(names(data) %in% "Blood.Pressure")]
 
 ```
@@ -375,139 +375,39 @@ fiable des deux classes.
 
 ## 2. Analyse graphique
 
-### Variables quantitatives : boxplot
+### 2.1 Variables quantitatives : boxplot
 
-```{r}
-for(i in 1:ncol(quantitative_vars)){
-  boxplot(quantitative_vars[,i] ~ target, main=paste("Boxplot de", colnames(quantitative_vars)[i]),
-          col = c("pink", "lightblue"), xlab = "Risque d'infarctus")
-}
-```
 
-### Variables qualitatives : barplot
+### 2.2 Variables qualitatives : barplot
 
-```{r, out.width="50%", fig.align = "center"}
-for (col in colnames(qualitative_vars)){
-  barplot(table(qualitative_vars[[col]]), main=paste("Histogramme de", col), col="pink")
-}
-```
 
-```{r}
-for (i in 1:ncol(qualitative_vars)) {
-  var_name <- colnames(qualitative_vars)[i]
-  tab <- table(qualitative_vars[[i]], target)
-
-  barplot(tab,
-          beside = TRUE,
-          col = c("pink", "lightblue"),
-          main = paste("Répartition de", var_name, "selon le risque d'infarctus"),
-          xlab = var_name,
-          ylab = "Effectifs",
-          legend.text = c("Absence de risque", "Présence de risque"))
-}
-
-```
 
 ## 3. Analyse multivariée
 
-Une matrice de corrélation a été générée entre les variables
-quantitatives. Cette analyse permet :
-
--   d'identifier les redondances potentielles entre variables
--   de détecter les associations utiles pour la modélisation.
-
-```{r}
-cor_mat = cor(quantitative_vars, use = "complete.obs")
-cor_mat
-```
-
-```{r, eval = TRUE}
-library(reshape2)
-library(ggplot2)
-#cor_mat = cor(quantitative_vars, use = "complete.obs")
-#cor_mat
-melted_cor_mat = melt(cor_mat)
-ggplot(data = melted_cor_mat, aes(x = Var1, y = Var2, fill = value)) + 
-  geom_tile() + scale_fill_gradient2(low = "blue", mid = "white", high = "red") +
-  labs(title = "Correlation heatmap", x =  " ", fill = "correlation", y = " ")
-```
-
-```{r, eval = FALSE}
-cor_mat = cor(quantitative_vars, use = "complete.obs")
-cor_mat
-```
-
-#### Gestion des valeurs manquantes
-
-```{r}
-colSums(is.na(data))
-```
-
-Il n'y a aucune valeur manquante dans notre base de données
-
-#### Transformation des variables
-
-```{r}
-library(caret)
-dummy <- dummyVars(" ~ Sex", data = qualitative_vars)
-Sex_dummy <- data.frame(predict(dummy, newdata = qualitative_vars))
-Sex_dummy
 
 
-```
+### 3.1 Gestion des valeurs manquantes
+
+### 3.2 Transformation des variables
 
 #### Encodage de la variable Diet
 
-```{r}
-library(superml)
-label_encoder <- LabelEncoder$new()
-qualitative_vars$Diet_encoded <- label_encoder$fit_transform(qualitative_vars$Diet)
-head(qualitative_vars$Diet_encoded)
-```
+
 
 #### Encodage de la variable Age_cat
 
-```{r}
-label_encoder <- LabelEncoder$new()
-qualitative_vars$AgeC_encoded <- label_encoder$fit_transform(qualitative_vars$Age_cat)
-head(qualitative_vars$AgeC_encoded)
-```
 
 #### Création d'un data frame contenant les variables encodés
 
-```{r}
-qualitative_vars_encoded = data.frame(Diet = lbl$fit_transform(qualitative_vars$Diet))
-
-#qualitative_vars_encoded <- qualitative_vars
-#qualitative_vars_encoded$Diet<- label_encoder$fit_transform(qualitative_vars_encoded$Diet)
-#qualitative_vars_encoded$Age_cat <- label_encoder$fit_transform(qualitative_vars_encoded$Age_cat)
-head(qualitative_vars_encoded)
-```
-
-## Arbre de classification
+# III Modèles d'évaluation
+## 1. Arbre de classification
 
 ### Variables explicatives
 
-```{r}
-predictive_vars = cbind(quantitative_vars, qualitative_vars)
-head(predictive_vars)
-str(predictive_vars)
-```
 
 ### Partage du jeu de données
 
-```{r, eval = FALSE}
-set.seed(1234)
-nobs    = nrow(qualitative_vars) 
-inTrain = sample(1:nobs, size = round(0.8 * nobs), replace = FALSE)
-
-predictive_vars_test    = predictive_vars[-inTrain,]
-target_test             = target[-inTrain] 
-predictive_vars_train   = predictive_vars[inTrain,]
-target_train            = target[inTrain] 
-```
-
-### 2.3. Phase d'apprentissage
+### 1.1 Phase d'apprentissage
 
 Installation des packages `rpart`et `rpart.plot`
 
@@ -525,225 +425,13 @@ library(rpart.plot)
 ?rpart.plot
 ```
 
-### Entrainement d'un arbre de classification.
-
-```{r, eval = FALSE}
+### 1.2. Entrainement d'un arbre de classification.
 
 
-predictive_vars_train <- as.data.frame(predictive_vars_train)
-predictive_vars_test <- as.data.frame(predictive_vars_test)
+### 1.3. Tracé de l'arbre de décision
 
-classifTree <- rpart(target_train ~ ., data = predictive_vars_train, 
-                     method = "class",
-                     control = rpart.control(minsplit = 10, cp = 0.001, maxdepth = 5))
-
-```
-
-Ce code entraine un arbre de classification. Il trouve les meilleurs
-seuils de séparation pour classer correctement les observations.
-
-### Trcé de l'arbre de décision
-
-```{r, eval = FALSE}
-rpart.plot(classifTree, type = 3, extra = 3, fallen.leaves = TRUE,  
-           main = "Arbre de prédiction du risque d'infarctus d'un patient", roundint=FALSE)  
-```
-
-### Phase de test
-
-```{r, eval = FALSE}
-
-predictive_vars_test <- as.data.frame(predictive_vars_test)
-
-classifTree <- rpart(target_test ~ ., data = predictive_vars_test, 
-                     method = "class",
-                     control = rpart.control(minsplit = 10, cp = 0.001, maxdepth = 5))
-
-rpart.plot(classifTree, type = 3, extra = 3, fallen.leaves = TRUE,  
-           main = "Arbre de prédiction du risque d'infarctus d'un patient", roundint=FALSE)  
-
-```
-
-### 2.4. Prédiction de la target avec l'arbre de décision sur le jeu de données de test
-
-```{r, eval = FALSE}
-library(caret)
-target_pred = predict(classifTree, predictive_vars_test, type = "class")
-conf_matrix <- confusionMatrix(target_pred, target_test)
-print(conf_matrix)
-# à compléter
-# à compléter
-# à compléter
-```
-
-### Matrice de confusion
-
-```{r}
-library(Metrics)
-confusionMatrix(target_pred, target_test)$table
-
-```
-
-### Arbre de classification avec évaluation des performances en 10-fold cross-validation
-
-```{r}
-qualitative_vars$Age_cat=NULL
-qualitative_vars$Diet=NULL
-qualitative_vars$Sex=NULL
-predictive_vars = cbind(quantitative_vars, qualitative_vars, Sex_dummy)
-head(predictive_vars)
-str(predictive_vars)
-```
-
-### Partage du jeu de données
-
-```{r, eval = FALSE}
-set.seed(1357)
-nobs    = nrow(qualitative_vars) 
-inTrain = sample(1:nobs, size = round(0.8 * nobs), replace = FALSE)
-
-predictive_vars_test    = predictive_vars[-inTrain,]
-target_test             = target[-inTrain]
-predictive_vars_train   = predictive_vars[inTrain,]
-target_train            = target[inTrain]
-
-# si votre target est un dataframe, il faut utiliser target_train = target[inTrain,]
-```
-
-```{r, results = 'hide', eval = FALSE}
-set.seed(1357)
-inTest        = sample(1:nobs, size = round(0.1 * nobs), replace = FALSE)
-notinTest     = (1:nobs)[-inTest]
-inValidation  = sample(notinTest, size = round(0.1 * nobs), replace = FALSE)
-
-c(inTest, inValidation)
-```
-
-```{r, eval = FALSE}
-predictive_vars_test        = predictive_vars[inTest,]
-target_test                 = target[inTest]
-
-predictive_vars_validation  = predictive_vars[inValidation,]
-target_validation           = target[inValidation]
-
-predictive_vars_train       = predictive_vars[inTrain,]
-target_train                = target[inTrain]
-
-```
-
-### 2.3. Sélection de l'hyperparamètre
-
-```{r, results = 'hide'}
-library(class)
-```
-
-### Méthode des k plus proches voisins
-
-```{r, results = 'hide', eval = FALSE}
-KGrid         = seq(1, 20, by = 2)
-accuracy_val  = NULL
-recall_val    = NULL
-precision_val = NULL
-for(k in KGrid){
-  
-  target_pred = knn(train = predictive_vars_train ,
-                    test = predictive_vars_validation,  
-                    cl = target_train,
-                    k = k) 
-  
-  conf_matrix <- confusionMatrix(factor(target_pred), factor(target_validation))
-  
-  # Stocker Accuracy, Recall et Précision
-  accuracy_val  = c(accuracy_val, conf_matrix$overall["Accuracy"])
-  recall_val    = c(recall_val, conf_matrix$byClass["Sensitivity"])  # Sensitivity = Recall
-  precision_val = c(precision_val, conf_matrix$byClass["Precision"]) # Precision
-}
-```
-
-### Graphique
-
-```{r, out.width="50%", fig.align = "center", eval = FALSE}
-plot(KGrid, accuracy_val, type = 'l', xlab = "K, nombre de voisins", ylab = "Accuracy")
-plot(KGrid, recall_val, type = 'l', xlab = "K, nombre de voisins", ylab = "Recall")
-plot(KGrid, precision_val, type = 'l', xlab = "K, nombre de voisins", ylab = "Precision")
-```
-
-```{r, results = 'hide', eval = FALSE}
-rbind(predictive_vars_train, predictive_vars_validation)
-c(target_train, target_validation)
+### 1.4. Phase de test
 
 
-```
+### 1.5. Prédiction de la target avec l'arbre de décision sur le jeu de données de test
 
-```{r, eval = FALSE}
-target_pred = knn(train = rbind(predictive_vars_train, predictive_vars_validation),
-                  test = predictive_vars_test, 
-                  cl = c(target_train, target_validation), 
-                  k = 7) 
-  
-conf_matrix <- confusionMatrix(factor(target_pred), factor(target_test))
-
-# Extraire Accuracy, Recall et Précision
-accuracy_test  = conf_matrix$overall["Accuracy"]
-recall_test    = conf_matrix$byClass["Sensitivity"]  # Sensitivity = Recall
-precision_test = conf_matrix$byClass["Precision"]    # Precision
-
-# Afficher les résultats
-accuracy_test
-recall_test
-precision_test
-```
-
-```{r, eval = FALSE}
-library(caret)
-library(class)
-
-accuracy_fold = NULL
-recall_fold = NULL
-precision_fold = NULL
-
-for(fold in 1:nfolds){
-  inFold = which(folds == fold)
-  predictive_vars_train = predictive_vars_remain[-inFold, ]
-  predictive_vars_validation = predictive_vars_remain[inFold, ]
-  target_train = target_remain[-inFold]
-  target_validation = target_remain[inFold]
-
-  # Prétraitement : imputation + normalisation
-  Proc = preProcess(predictive_vars_train, method = c("medianImpute", "range"))
-  predictive_vars_train = predict(Proc, predictive_vars_train)
-  predictive_vars_validation = predict(Proc, predictive_vars_validation)
-
-  accuracy_k = NULL
-  recall_k = NULL
-  precision_k = NULL
-
-  for(k in KGrid){
-    target_pred = knn(train = predictive_vars_train,
-                      test = predictive_vars_validation,
-                      cl = target_train,
-                      k = k)
-
-    
-    cm = confusionMatrix(factor(target_pred), factor(target_validation))
-
-    # Stocker les métriques
-    accuracy_k = c(accuracy_k, cm$overall["Accuracy"])
-    recall_k = c(recall_k, cm$byClass["Sensitivity"])
-    precision_k = c(precision_k, cm$byClass["Precision"])
-  }
-
-  accuracy_fold = rbind(accuracy_fold, accuracy_k)
-  recall_fold = rbind(recall_fold, recall_k)
-  precision_fold = rbind(precision_fold, precision_k)
-}
-
-rownames(accuracy_fold) = paste0("fold_", 1:nfolds)
-rownames(recall_fold) = paste0("fold_", 1:nfolds)
-rownames(precision_fold) = paste0("fold_", 1:nfolds)
-
-colnames(accuracy_fold) = paste0("K_", KGrid)
-colnames(recall_fold) = paste0("K_", KGrid)
-colnames(precision_fold) = paste0("K_", KGrid)
-
-```
