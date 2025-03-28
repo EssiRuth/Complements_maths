@@ -112,7 +112,7 @@ kable(variable_info, caption = "Tableau 1 : Description des variables et évalua
 ```
 
 > Certaines variables comme `Patient.ID`, `Country`, `Continent` et
-> `Hemisphere` seront écartées, car elles n’apportent pas de valeur
+> `Hemisphere` sont écartées, car elles n’apportent pas de valeur
 > informative dans la prédiction du risque cardiaque.
 
 ## 3. Typologie des variables
@@ -151,7 +151,6 @@ Les variables suivantes peuvent être considérées comme **quantitatives**
 > (normalisation, transformation logarithmique ou catégorisation) selon
 > le modèle utilisé.
 
-------------------------------------------------------------------------
 
 ### • Variables qualitatives
 
@@ -301,12 +300,12 @@ package `dplyr` :
 library(dplyr)
 quantitative_vars <- select(data, Age, Cholesterol, Heart.Rate, BMI, Triglycerides, 
                             Systolic_BP, Diastolic_BP, Exercise.Hours.Per.Week, Sedentary.Hours.Per.Day, 
-                            Stress.Level, Physical.Activity.Days.Per.Week, 
+                            Stress.Level, Physical.Activity.Days.Per.Week, Income
                             Sleep.Hours.Per.Day)
 
 
 qualitative_vars <- select(data, Age_cat, Sex, Smoking, Diabetes, Obesity, Family.History, 
-                           Diet, Previous.Heart.Problems)
+                           Diet, Previous.Heart.Problems, Alcohol.Consumption)
 
 
 ```
