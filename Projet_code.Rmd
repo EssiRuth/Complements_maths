@@ -465,70 +465,15 @@ La médiane des heures passées assis est très proche dans les deux groupes.Il 
 -  Stress Level en fonction du risque cardiaque : 
 Le niveau de stress est similaire dans les deux groupes, avec des médianes quasi identiques. La distribution est symétrique et il n’y a aucune séparation nette. Le stress ne semble pas lié directement au risque, du moins dans ce jeu de données.
 
-
-
 - Income en fonction du risque cardiaque : 
 La médiane du revenu est presque équivalente dans les deux groupes.
 La variabilité est aussi comparable.Le revenu semble donc ne pas jouer un rôle discriminant, et sa contribution à la prédiction paraît limitée.
 
-
-
 - Physical Activity Days Per Week en fonction du risque cardiaque : 
 Les deux groupes ont des distributions très proches, avec une médiane identique. Cela suggère que le nombre de jours d’activité physique ne permet pas de différencier clairement les patients à risque.Cette variable est donc peu pertinente seule.
 
-
 - Sleep Hours Per Day en fonction du risque cardiaque :
 La durée de sommeil quotidienne est pratiquement la même dans les deux groupes.Aucune différence visible sur la médiane ou l’étendue. Le sommeil semble donc ne pas être un facteur déterminant du risque cardiaque ici.
-
-Interprétation : 
-- Age en fonction du risque cardiaque : 
-L’âge présente une légère différence entre les deux groupes, suggérant une capacité prédictive modérée. Pris seul, son pouvoir explicatif est limité, mais il peut contribuer utilement au modèle en combinaison avec d’autres variables.
-
-- Cholesterol en fonction du risque cardiaque :
-Les patients à risque ont en moyenne un taux de cholestérol plus élevé. Cela montre que le cholestérol est lié au risque cardiaque et peut être utile pour prédire ce risque.
-
-- Heart rate en fonction du risque cardiaque : 
-Les deux groupes ont une fréquence cardiaque très similaire, avec des médianes proches.
-Cela montre que Heart Rate n’est pas une variable utile seule pour distinguer les patients à risque. Son pouvoir prédictif est donc faible dans ce cas.
-
-- BMI en fonction du risque cardiaque :
-La médiane du BMI est légèrement plus élevée chez les patients à risque. Cela suggère que le surpoids pourrait être associé à un risque accru, même si la différence reste modérée.
-Le BMI peut donc contribuer à la prédiction, mais ne suffit pas seul à distinguer les deux groupes.
-
-- Triglycerides en fonction du risque cardiaque :
-La médiane des triglycérides est plus élevée chez les patients à risque.
-Cela suggère qu’un taux élevé de triglycérides est clairement associé à un risque accru d’infarctus.Les triglycérides sont donc une variable importante pour la prédiction du risque.
-
-- Systolic_BP en fonction du risque cardiaque : 
-La pression systolique est légèrement plus élevée chez les patients à risque. Cela indique que l’hypertension systolique peut être liée au risque cardiovasculaire, même si la séparation entre les groupes reste modérée. Cette variable peut donc contribuer à la prédiction, mais n’est pas déterminante seule.
-
-- Diastolic_BP en fonction du risque cardiaque : 
-Les médianes et les étendues sont très proches entre les deux groupes. Il n’y a pas de différence marquée sur la pression diastolique.Cette variable semble donc peu utile seule dans la prédiction du risque.
-
-- Exercise Hours Per Week en fonction du risque cardiaque : 
-Les heures d’exercice sont similaires dans les deux groupes.Les médianes et la variabilité sont très proches.L’exercice hebdomadaire semble donc peu discriminant, et son impact prédictif est limité lorsqu’il est pris seul.
-
-- Sedentary Hours Per Day en fonction du risque cardiaque :
-La médiane des heures passées assis est très proche dans les deux groupes.Il n’y a pas de différence claire, ni de tendance significative.Cette variable semble donc peu informative seule pour prédire le risque cardiaque.
-
--  Stress Level en fonction du risque cardiaque : 
-Le niveau de stress est similaire dans les deux groupes, avec des médianes quasi identiques. La distribution est symétrique et il n’y a aucune séparation nette. Le stress ne semble pas lié directement au risque, du moins dans ce jeu de données.
-
-
-
-- Income en fonction du risque cardiaque : 
-La médiane du revenu est presque équivalente dans les deux groupes.
-La variabilité est aussi comparable.Le revenu semble donc ne pas jouer un rôle discriminant, et sa contribution à la prédiction paraît limitée.
-
-
-
-- Physical Activity Days Per Week en fonction du risque cardiaque : 
-Les deux groupes ont des distributions très proches, avec une médiane identique. Cela suggère que le nombre de jours d’activité physique ne permet pas de différencier clairement les patients à risque.Cette variable est donc peu pertinente seule.
-
-
-- Sleep Hours Per Day en fonction du risque cardiaque :
-La durée de sommeil quotidienne est pratiquement la même dans les deux groupes.Aucune différence visible sur la médiane ou l’étendue. Le sommeil semble donc ne pas être un facteur déterminant du risque cardiaque ici.
-
 
 
 
