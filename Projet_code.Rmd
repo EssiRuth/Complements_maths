@@ -30,7 +30,7 @@ probabilité qu’un individu présente un risque d’infarctus. L’objectif
 est double : D’une part, explorer les variables influentes dans la
 prédiction du risque cardiovasculaire. D’autre part, évaluer les
 performances de modèles de classification supervisée (arbre de décision,
-k-NN et classification naive bayésienne) implémentés dans le langage R.
+k-NN, classification naive bayésienne et la régression logistique) implémentés dans le langage R.
 
 # I. Préparation des données
 
