@@ -425,8 +425,13 @@ table(target)
 On observe 5624 observations dans la classe 0 (soit 64,2%) et 3139 dans
 la classe 1 (35,8%). 
 ## 2. Analyse graphique
-
 ### 2.1 Variables quantitatives : boxplot
+
+```{r, out.width="50%", fig.align = "center"}
+for (col in colnames(quantitative_vars)){
+  boxplot(quantitative_vars[[col]], main=paste("Histogramme de", col), col="lightblue", breaks=30)
+}
+```
 Interprétation : 
 - Age en fonction du risque cardiaque : 
 L’âge présente une légère différence entre les deux groupes, suggérant une capacité prédictive modérée. Pris seul, son pouvoir explicatif est limité, mais il peut contribuer utilement au modèle en combinaison avec d’autres variables.
