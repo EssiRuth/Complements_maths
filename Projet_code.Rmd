@@ -423,10 +423,7 @@ table(target)
 ```
 
 On observe 5624 observations dans la classe 0 (soit 64,2%) et 3139 dans
-la classe 1 (35,8%). Cette répartition présente un léger déséquilibre,
-mais reste suffisamment équilibrée pour permettre une modélisation
-fiable des deux classes.
-
+la classe 1 (35,8%). 
 ## 2. Analyse graphique
 
 ### 2.1 Variables quantitatives : boxplot
