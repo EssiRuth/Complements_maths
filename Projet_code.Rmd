@@ -323,29 +323,58 @@ distributions, valeurs aberrantes et échelles des variables continues :
 ```{r}
 summary(quantitative_vars)
 ```
+Les statistiques descriptives des variables quantitatives montrent que
+les données sont globalement cohérentes et réalistes, sans valeurs
+aberrantes majeures. On peut en dégager les observations suivantes :
 
-L’analyse descriptive des variables quantitatives met en évidence une
-population adulte globalement bien répartie en âge, avec une moyenne de
-54 ans. Les principales variables cliniques présentent des valeurs
-réalistes et médicalement cohérentes.
+-   **Âge** : les patients ont entre 18 et 90 ans, avec une moyenne
+    d’environ **54 ans**. La distribution semble centrée sur la
+    population adulte à senior, ce qui est cohérent avec une étude sur
+    les risques cardiovasculaires.
 
-La variable Cholesterol varie entre 120 et 400 mg/dL, avec une moyenne
-d’environ 260 mg/dL, ce qui indique une population présentant une
-hypercholestérolémie modérée à sévère, sans valeur aberrante.
+-   **Cholestérol** : les valeurs varient de **120 à 400 mg/dL**, avec
+    une moyenne de **260 mg/dL**, indiquant une population globalement
+    en situation d’**hypercholestérolémie modérée à sévère**.
 
-Les triglycérides atteignent en moyenne 417 mg/dL, avec un maximum de
-800 mg/dL, ce qui reste plausible pour des patients à haut risque
-cardiovasculaire, bien qu’une attention particulière aux valeurs
-extrêmes puisse être envisagée.
+-   **Fréquence cardiaque (`Heart.Rate`)** : entre **40 et 110
+    battements par minute**, avec une moyenne à **75 bpm**, ce qui reste
+    dans les normes physiologiques générales.
 
-L’IMC moyen est de 28.9, ce qui correspond à une population en surpoids,
-et le niveau d’activité physique varie fortement entre les individus. Le
-stress perçu est relativement élevé, tandis que le sommeil reste
-globalement dans les normes (7h/jour en moyenne).
+-   **IMC (`BMI`)** : varie entre **18 et 40**, avec une moyenne
+    d’environ **29**, ce qui correspond à une population en **surpoids
+    voire obèse**, ce qui est attendu dans ce contexte médical.
 
-Ces résultats confirment que les variables quantitatives sont à la fois
-exploitables pour la modélisation et pertinentes pour prédire un risque
-d’infarctus.
+-   **Triglycérides** : valeurs allant de **30 à 800 mg/dL**, avec une
+    moyenne de **417 mg/dL**. Bien que la valeur maximale soit élevée,
+    elle reste possible médicalement, et reflète un fort risque
+    métabolique chez une partie de la population.
+
+-   **Pression artérielle systolique et diastolique** : les valeurs
+    moyennes sont de **135 mmHg** pour la systolique et **85 mmHg** pour
+    la diastolique, proches des seuils de l’hypertension. Les valeurs
+    minimales et maximales sont plausibles.
+
+-   **Exercise.Hours.Per.Week** et **Physical.Activity.Days.Per.Week** :
+    montrent une forte variabilité. La moyenne d’heures d’exercice est
+    autour de **10 heures**, avec une distribution allant de **0 à près
+    de 20 heures**, ce qui indique une **hétérogénéité importante dans
+    les habitudes d’activité physique**.
+
+-   **Sedentary.Hours.Per.Day** : varie de **0 à près de 12 heures**,
+    avec une moyenne proche de **6 heures**, ce qui est élevé, mais
+    réaliste pour une population potentiellement à risque.
+
+-   **Stress.Level** : notée entre **1 et 10**, avec une moyenne autour
+    de **5.5**, traduisant un **niveau de stress perçu modéré à élevé**.
+
+-   **Sleep.Hours.Per.Day** : moyenne autour de **7 heures**, avec une
+    distribution raisonnable (entre 4 et 10 heures), cohérente avec les
+    recommandations de sommeil pour adultes.
+
+-   **Income** : exprimé en unités monétaires (non spécifiées), varie de
+    **\~80 000 à \~300 000**, avec une moyenne de **158 263**. Cette
+    variable présente une distribution large, probablement asymétrique.
+
 
 ### Variables qualitatives
 
@@ -354,14 +383,37 @@ Le nombre d’observations tombées dans chacune des catégories
 ```{r}
 sapply(qualitative_vars, table)
 ```
+L’analyse des variables qualitatives met en évidence des répartitions
+globalement équilibrées pour la majorité d’entre elles, tout en
+soulignant certains déséquilibres notables qui reflètent le profil à
+risque cardiovasculaire de la population étudiée.
 
-Les variables qualitatives présentent globalement des répartitions bien
-équilibrées, à l’exception notable des variables `Sex`, `Smoking` et
-`Diabetes`, où l’on observe une nette dominance de certaines catégories
-(masculin, fumeurs, diabétiques). Cela reflète le profil d'une
-population à risque cardiovasculaire élevé. D'autres variables, comme
-`Diet`, `Obesity`, `Family.History` et `Previous.Heart.Problems`, sont
-bien réparties, ce qui est favorable pour une modélisation équilibrée.
+La variable `Age_cat`, répartie en quatre tranches d’âge (Jeune,
+Middle-aged, Senior, Elderly), montre une bonne répartition, légèrement
+concentrée autour des personnes d’âge moyen et senior. Cela garantit une
+représentation suffisante de chaque classe d’âge dans l’analyse.
+
+La variable `Sex` présente un déséquilibre important, avec près de 70%
+d’hommes. Cette surreprésentation du sexe masculin devra être prise en
+compte dans l’interprétation des résultats, car elle peut influencer la
+prédiction du risque.
+
+Concernant le mode de vie et les antécédents médicaux : - La majorité
+des individus sont **fumeurs** (près de 90%), **diabétiques** (65%) et
+**obèses** (50%). Ces proportions très élevées soulignent le caractère à
+haut risque de la population. - La variable `Family.History`, qui
+indique la présence d’antécédents familiaux de maladies cardiaques, est
+bien équilibrée (≈ 50/50), tout comme `Previous.Heart.Problems`,
+`Medication.Use` et `Obesity`, permettant une modélisation comparative
+efficace. - Les types de régime (`Diet`) sont également répartis de
+manière homogène entre "Healthy", "Average" et "Unhealthy", ce qui
+permet d’étudier leur impact potentiel sans biais de distribution. -
+Enfin, `Alcohol.Consumption` révèle que 60% des individus consomment de
+l’alcool, contre 40% qui n’en consomment pas, ce qui constitue une base
+statistique suffisamment variée pour en évaluer les effets. Toutes ces
+variables sont conservées dans l’analyse car elles sont soit bien
+réparties, soit médicalement pertinentes, et permettent d’alimenter
+efficacement la modélisation du risque d’infarctus.
 
 ### Variable Target
 
