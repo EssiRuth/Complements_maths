@@ -416,7 +416,7 @@ efficacement la modélisation du risque d’infarctus.
 
 ### Variable Target
 
-La variable cible `Heart.Attack.Risk` est bien équilibrée :
+La variable cible est `Heart.Attack.Risk`
 
 ```{r}
 table(target)
