@@ -628,3 +628,56 @@ On a 	:
 Accuracy = 0.5602
 Le modèle est correct dans 56% des cas. C’est inférieur au taux de majorité (voir ci-dessous), donc pas très performant.
 
+```{r message=FALSE, warning=FALSE, results='hold'}
+#Séparation des données (train / test)
+train_data <- data_clean[train_index, ]
+test_data  <- data_clean[-train_index, ]
+
+target_train <- as.factor(train_data$Heart.Attack.Risk)
+target_test  <- as.factor(test_data$Heart.Attack.Risk)
+
+predictive_vars_train <- train_data[, setdiff(names(train_data), "Heart.Attack.Risk")]
+predictive_vars_test  <- test_data[, setdiff(names(test_data), "Heart.Attack.Risk")]
+
+#  Chargement des packages nécessaires
+library(caret)
+
+# S'assurer que les jeux d'entraînement et de test sont bien des data.frames
+predictive_vars_train <- as.data.frame(predictive_vars_train)
+predictive_vars_test <- as.data.frame(predictive_vars_test)
+table(target_train)
+prop.table(table(target_train))
+#  Entraînement du modèle de régression logistique
+logit_model <- glm(target_train ~ ., 
+                   data = predictive_vars_train, 
+                   weights = ifelse(target_train == 1, 1.5, 1),  # Pondère plus fort les 1
+                   family = binomial(link = "logit"))
+
+#  Prédictions : probabilité que la classe soit 1
+target_pred_prob <- predict(logit_model, newdata = predictive_vars_test, type = "response")
+
+#  Transformation des probabilités en classes (seuil 0.5)
+target_pred_logit <- ifelse(target_pred_prob > 0.5, 1, 0)
+
+#  Conversion en facteur avec les bons niveaux
+target_pred_logit <- factor(target_pred_logit, levels = levels(target_test))
+
+# Vérification des longueurs
+stopifnot(length(target_pred_logit) == length(target_test))
+
+#  Matrice de confusion
+confusionMatrix(target_pred_logit, target_test)
+```
+***Interpretation***
+	-	Accuracy : 0.6218 => Le modèle est correct dans 62% des cas. C’est un peu moins bon que le taux de majorité (0.6446), donc pas très performant globalement.
+	-	Sensitivity : 0.9389 => Excellente détection des patients sans risque (classe 0). Presque tous les vrais 0 sont bien identifiés.
+	-	Specificity : 0.0465 =>  Très mauvaise détection des patients à risque (classe 1). Le modèle ne reconnaît presque aucun vrai cas de risque.
+	-	Pos Pred Value : 0.641 => Quand le modèle prédit “0”, c’est bon à 64% du temps.
+	-	Neg Pred Value : 0.296 => Quand le modèle prédit “1”, il se trompe souvent.
+	-	Balanced Accuracy : 0.4927 => En dessous de 0.5 = pire qu’un tirage au sort binaire.
+	-	Kappa : -0.0179 => Accord entre le modèle et la vérité à peine mieux qu’un hasard.
+
+Conclusion :
+
+Ton modèle prédit quasiment toujours la classe 0, et il a du mal à détecter les vrais patients à risque. Il est biaisé vers la classe majoritaire.
+
