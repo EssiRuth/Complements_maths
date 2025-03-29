@@ -572,59 +572,61 @@ library(rpart.plot)
 
 ### Classification naive bayensienne
 
-
 ```{r, results='hold', message=FALSE, warning=FALSE}
-# Charger les packages
-library(e1071)
+# 2.3 Phase d’apprentissage : Installation et chargement du package Naïve Bayésien
+install.packages("naivebayes") # Installer le package
+library(naivebayes) # Charger le package
+
+# 2.3 Apprentissage du classifieur Naïve Bayésien
+# Assurez-vous d'utiliser la partie Train uniquement
+# 'train_data' doit être un data frame avec les variables explicatives
+# 'target_train' doit être la variable cible (Heart.Attack.Risk)
+
+# Vérification des dimensions des données
+dim(train_data)
+head(target_train)
+
+# Entraînement du modèle avec les variables explicatives et la cible
+classif = naive_bayes(x = train_data, y = target_train)
+
+# Retourner le modèle pour vérifier qu'il a bien été créé
+classif
+
+# 2.4 Prédiction des probabilités sur le jeu de test
+# Utilisation de la fonction 'predict' pour obtenir les probabilités pour chaque classe (survivant / décédé)
+pred = predict(classif, predictive_vars_test, type = "prob")
+
+# Affichage des probabilités prédictes
+head(pred)
+
+# 2.4.1 Prédiction de la catégorie (classe prédite)
+# Nous allons maintenant prédire directement la classe (0 ou 1) pour chaque observation du jeu de test
+target_pred = predict(classif, predictive_vars_test, type = "class")
+
+# Vérification de la longueur des prédictions et de la cible de test
+stopifnot(length(target_pred) == length(target_test))
+
+# 2.5 Calcul des performances du modèle
+# Installer et charger le package caret pour le calcul des métriques
 library(caret)
 
-# S'assurer que target est factor
-target <- as.factor(data$Heart.Attack.Risk)
+# Affichage de la matrice de confusion
+conf_matrix = confusionMatrix(target_pred, target_test)
+print(conf_matrix)
 
-# Supprimer les variables non pertinentes
-data_clean <- subset(data, select = -c(Patient.ID, Country, Continent, Hemisphere))
+# Accuracy : vérifier combien de prédictions étaient correctes
+accuracy = mean(target_pred == target_test)
 
-# Séparation des données
-set.seed(1234)
-train_index <- sample(1:nrow(data_clean), size = 0.8 * nrow(data_clean))
-train_data <- data_clean[train_index, ]
-test_data <- data_clean[-train_index, ]
+# Recall (rappel des survivants) : calcul du rappel pour la classe "survivant" (1)
+recall_value = recall(target_pred, target_test, positive = "1")
 
-# Variable target
-target_train <- as.factor(train_data$Heart.Attack.Risk)
-target_test <- as.factor(test_data$Heart.Attack.Risk)
+# Precision (précision des survivants) : calcul de la précision pour la classe "survivant" (1)
+precision_value = precision(target_pred, target_test, positive = "1")
 
-# Retirer la colonne target des prédicteurs
-train_data <- subset(train_data, select = -Heart.Attack.Risk)
-test_data <- subset(test_data, select = -Heart.Attack.Risk)
-
-# Convertir les colonnes character en facteur
-train_data[] <- lapply(train_data, function(x) if (is.character(x)) as.factor(x) else x)
-test_data[] <- lapply(test_data, function(x) if (is.character(x)) as.factor(x) else x)
-
-# Entraînement du modèle Naïve Bayes
-nb_model <- naiveBayes(x = train_data, y = target_train)
-
-# Prédictions
-target_pred_nb <- predict(nb_model, newdata = test_data)
-
-# Vérification des longueurs
-stopifnot(length(target_pred_nb) == length(target_test))
-
-# Conversion en facteur si nécessaire
-target_pred_nb <- factor(target_pred_nb, levels = levels(target_test))
-
-# Matrice de confusion
-confusionMatrix(target_pred_nb, target_test)
+# Affichage des résultats de performance
+print(paste("Accuracy: ", accuracy))
+print(paste("Recall (survivant): ", recall_value))
+print(paste("Precision (survivant): ", precision_value))
 ```
-*Interprétation*
-On a 	:
-- TN (True Negatives) = 710 : le modèle a correctement prédit “pas de risque”
-- FP (False Positives) = 420 : le modèle a prédit “risque” alors qu’il n’y en avait pas
-- FN (False Negatives) = 351 : le modèle n’a pas détecté un vrai cas de risque
-- TP (True Positives) = 272 : le modèle a bien détecté un vrai cas de risque
 	
 	
-Accuracy = 0.5602
-Le modèle est correct dans 56% des cas. C’est inférieur au taux de majorité (voir ci-dessous), donc pas très performant.
-
