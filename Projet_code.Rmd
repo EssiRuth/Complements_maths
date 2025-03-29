@@ -426,56 +426,51 @@ On observe 5624 observations dans la classe 0 (soit 64,2%) et 3139 dans
 la classe 1 (35,8%). 
 
 ## 2. Analyse graphique
-### 2.1 Variables quantitatives : boxplot
-
-```{r, out.width="50%", fig.align = "center"}
-for (col in colnames(quantitative_vars)){
-  boxplot(quantitative_vars[[col]], main=paste("Histogramme de", col), col="lightblue", breaks=30)
-}
-```
 Interprétation : 
-- Age en fonction du risque cardiaque : 
-L’âge présente une légère différence entre les deux groupes, suggérant une capacité prédictive modérée. Pris seul, son pouvoir explicatif est limité, mais il peut contribuer utilement au modèle en combinaison avec d’autres variables.
+- Age : Q1 = 35, Médiane = 54, Q3 = 72
+=> Les moustaches s’étendent de 18 à 90
+=> Aucune valeur aberrante détectée
+=> 50 % des individus ont un âge compris entre 35 et 72 ans. La médiane est de 54 ans. Toutes les valeurs sont incluses dans les moustaches, donc aucune valeur extrême n’est détectée.
 
-- Cholesterol en fonction du risque cardiaque :
-Les patients à risque ont en moyenne un taux de cholestérol plus élevé. Cela montre que le cholestérol est lié au risque cardiaque et peut être utile pour prédire ce risque.
+- Cholesterol : Q1 = 192, Médiane = 259, Q3 = 330 et Pas de valeurs aberrantes
+=> 50 % des données se situent entre 192 et 330. La médiane est de 259 mg/dL. L’ensemble des observations reste dans la plage normale définie par les moustaches.
 
-- Heart rate en fonction du risque cardiaque : 
-Les deux groupes ont une fréquence cardiaque très similaire, avec des médianes proches.
-Cela montre que Heart Rate n’est pas une variable utile seule pour distinguer les patients à risque. Son pouvoir prédictif est donc faible dans ce cas.
 
-- BMI en fonction du risque cardiaque :
-La médiane du BMI est légèrement plus élevée chez les patients à risque. Cela suggère que le surpoids pourrait être associé à un risque accru, même si la différence reste modérée.
-Le BMI peut donc contribuer à la prédiction, mais ne suffit pas seul à distinguer les deux groupes.
+- Heart Rate : Q1 = 57, Médiane = 75, Q3 = 93 , Min = 40, Max = 110 et	Pas de valeurs extrêmes
+=> La moitié des individus ont une fréquence cardiaque entre 57 et 93 bpm. La médiane est à 75. Aucune valeur n’est considérée comme aberrante selon les critères du boxplot.
 
-- Triglycerides en fonction du risque cardiaque :
-La médiane des triglycérides est plus élevée chez les patients à risque.
-Cela suggère qu’un taux élevé de triglycérides est clairement associé à un risque accru d’infarctus.Les triglycérides sont donc une variable importante pour la prédiction du risque.
+- xercise Hours Per Week: 	Q1 ≈ 5, Médiane ≈ 10, Q3 ≈ 15 ,Min ≈ 0, Max ≈ 20 et Pas de points au-delà des moustaches
+=> 50 % des individus font entre 5 et 15 heures d’exercice par semaine. La médiane est de 10. La distribution est régulière et aucune valeur n’est jugée extrême.
 
-- Systolic_BP en fonction du risque cardiaque : 
-La pression systolique est légèrement plus élevée chez les patients à risque. Cela indique que l’hypertension systolique peut être liée au risque cardiovasculaire, même si la séparation entre les groupes reste modérée. Cette variable peut donc contribuer à la prédiction, mais n’est pas déterminante seule.
+- Stress Level : Q1 = 3, Médiane = 5, Q3 = 8 et Min = 1, Max = 10 Pas de valeurs extrêmes
+=> Le niveau de stress est compris entre 3 et 8 pour la moitié des individus, avec une médiane de 5. Les moustaches couvrent l’ensemble des données, sans valeur aberrante.
 
-- Diastolic_BP en fonction du risque cardiaque : 
-Les médianes et les étendues sont très proches entre les deux groupes. Il n’y a pas de différence marquée sur la pression diastolique.Cette variable semble donc peu utile seule dans la prédiction du risque.
+- Sedentary Hours Per Day : Q1 ≈ 3, Médiane ≈ 6, Q3 ≈ 9,	Min ≈ 0, Max ≈ 12 et Pas de valeur extrême
+=> Les heures passées assis par jour sont comprises entre 3 et 9 pour la moitié des individus. La médiane est à 6. Tous les individus restent dans les limites des moustaches.
 
-- Exercise Hours Per Week en fonction du risque cardiaque : 
-Les heures d’exercice sont similaires dans les deux groupes.Les médianes et la variabilité sont très proches.L’exercice hebdomadaire semble donc peu discriminant, et son impact prédictif est limité lorsqu’il est pris seul.
+-  Triglycerides: 	Q1 = 225.5, Médiane = 417, Q3 = 612, Min = 30, Max = 800 et pas de valeur aberrante détectée
+=> Bien que les valeurs varient fortement, la distribution respecte les limites définies par les moustaches. Aucune valeur extrême détectée malgré un écart important.
 
-- Sedentary Hours Per Day en fonction du risque cardiaque :
-La médiane des heures passées assis est très proche dans les deux groupes.Il n’y a pas de différence claire, ni de tendance significative.Cette variable semble donc peu informative seule pour prédire le risque cardiaque.
+- Physical Activity Days Per Week : 	Q1 = 2, Médiane = 3, Q3 = 5,	Min = 0, Max = 7
+et	Aucun point hors des moustaches
+=> 50 % des individus font entre 2 et 5 jours d’activité physique par semaine. La médiane est de 3 jours. Toutes les valeurs sont incluses dans les moustaches, donc aucune valeur extrême n’est présente.
 
--  Stress Level en fonction du risque cardiaque : 
-Le niveau de stress est similaire dans les deux groupes, avec des médianes quasi identiques. La distribution est symétrique et il n’y a aucune séparation nette. Le stress ne semble pas lié directement au risque, du moins dans ce jeu de données.
 
-- Income en fonction du risque cardiaque : 
-La médiane du revenu est presque équivalente dans les deux groupes.
-La variabilité est aussi comparable.Le revenu semble donc ne pas jouer un rôle discriminant, et sa contribution à la prédiction paraît limitée.
+- Sleep Hours Per Day :	Q1 = 5, Médiane = 7, Q3 = 9, Min = 4, Max = 10 et	Aucune valeur hors de l’intervalle attendu
+=> La moitié des individus dorment entre 5 et 9 heures par jour. La médiane est de 7 heures. La distribution est équilibrée, sans valeur aberrante détectée.
 
-- Physical Activity Days Per Week en fonction du risque cardiaque : 
-Les deux groupes ont des distributions très proches, avec une médiane identique. Cela suggère que le nombre de jours d’activité physique ne permet pas de différencier clairement les patients à risque.Cette variable est donc peu pertinente seule.
 
-- Sleep Hours Per Day en fonction du risque cardiaque :
-La durée de sommeil quotidienne est pratiquement la même dans les deux groupes.Aucune différence visible sur la médiane ou l’étendue. Le sommeil semble donc ne pas être un facteur déterminant du risque cardiaque ici.
+
+- Heart Attack Risk :	Variable binaire : Min = 0, Max = 1, Médiane = 0,	Q1 = 0, Q3 = 1 et	Rien à détecter ici car ce n’est pas une variable continue
+=> Cette variable prend uniquement les valeurs 0 ou 1. Le boxplot n’est pas pertinent ici car la variable est catégorique.
+
+
+- systolic_BP :	Q1 = 112, Médiane = 135, Q3 = 158, Min = 90, Max = 180 et Toutes les valeurs sont dans les moustaches
+=> La moitié des pressions systoliques se situent entre 112 et 158 mmHg, avec une médiane de 135. Aucune valeur extrême n’est présente selon la règle de 1,5×IQR.
+
+
+- Diastolic_BP : 	Q1 = 72, Médiane = 85, Q3 = 98, Min = 60, Max = 110 et Pas de point en dehors des moustaches
+=> La pression diastolique est comprise entre 72 et 98 mmHg pour 50 % des individus. La médiane est de 85. Aucun individu ne dépasse les limites définies par les moustaches.
 
 
 
