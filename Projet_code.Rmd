@@ -926,3 +926,63 @@ Conclusion :
 
 Ton modèle prédit quasiment toujours la classe 0, et il a du mal à détecter les vrais patients à risque. Il est biaisé vers la classe majoritaire.
 
+### Classification naive bayensienne
+
+```{r, results='hold', message=FALSE, warning=FALSE}
+# Charger les packages nécessaires
+install.packages("naivebayes") # Si pas déjà installé
+install.packages("caret") # Si pas déjà installé
+library(naivebayes)
+library(caret)
+
+# 2.3 Phase d’apprentissage : Installation et chargement du package Naïve Bayésien
+# Charger le package naïvebayes
+
+# Vérification des dimensions des données et de la cible
+dim(train_data)
+head(target_train)
+
+# Entraînement du modèle Naïve Bayésien
+classif = naive_bayes(x = train_data, y = target_train)
+
+# Retourner le modèle pour vérifier qu'il a bien été créé
+classif
+
+# 2.4 Prédiction des probabilités sur le jeu de test
+# Utilisation de la fonction 'predict' pour obtenir les probabilités pour chaque classe (survivant / décédé)
+pred = predict(classif, test_data, type = "prob")
+
+# Affichage des probabilités prédictes
+head(pred)
+
+# 2.4.1 Prédiction de la catégorie (classe prédite)
+# Prédire directement la classe (0 ou 1) pour chaque observation du jeu de test
+target_pred = predict(classif, test_data, type = "class")
+
+# Vérification de la longueur des prédictions et de la cible de test
+stopifnot(length(target_pred) == length(target_test))
+
+# 2.5 Calcul des performances du modèle
+# Installer et charger le package caret pour le calcul des métriques
+library(caret)
+
+# Affichage de la matrice de confusion
+conf_matrix = confusionMatrix(target_pred, target_test)
+print(conf_matrix)
+
+# Accuracy : vérifier combien de prédictions étaient correctes
+accuracy = mean(target_pred == target_test)
+
+# Convertir les prédictions ajustées et la cible en facteur
+target_pred_adjusted <- factor(target_pred, levels = c("0", "1"))  # Assurez-vous que les niveaux sont "0" et "1"
+target_test <- factor(target_test, levels = c("0", "1"))  # Faites la même chose pour la cible
+
+# Calcul du recall et de la précision pour la classe "survivant"
+recall_adjusted <- recall(target_pred_adjusted, target_test, relevant = "1")  # "1" pour la classe survivant
+precision_adjusted <- precision(target_pred_adjusted, target_test, relevant = "1")  # Même ici pour le survivant
+
+# Affichage des résultats de performance
+print(paste("Accuracy: ", accuracy))
+print(paste("Adjusted Recall (survivant): ", recall_adjusted))
+print(paste("Adjusted Precision (survivant): ", precision_adjusted))
+```
