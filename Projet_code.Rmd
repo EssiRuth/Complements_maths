@@ -926,3 +926,61 @@ Conclusion :
 
 Ton modèle prédit quasiment toujours la classe 0, et il a du mal à détecter les vrais patients à risque. Il est biaisé vers la classe majoritaire.
 
+### Régression logistique et courbe ROC
+
+
+```{r message=FALSE, warning=FALSE, results='hold'}
+# Chargement des packages nécessaires
+library(caret)
+library(naivebayes)
+library(e1071)
+
+# Séparation des données (train/test)
+set.seed(1234)
+train_index <- sample(1:nrow(data_clean), size = 0.8 * nrow(data_clean))
+train_data <- data_clean[train_index, ]
+test_data <- data_clean[-train_index, ]
+
+# Variable cible
+target_train <- as.factor(train_data$Heart.Attack.Risk)
+target_test <- as.factor(test_data$Heart.Attack.Risk)
+
+# Retirer la colonne cible des prédicteurs
+train_data <- subset(train_data, select = -Heart.Attack.Risk)
+test_data <- subset(test_data, select = -Heart.Attack.Risk)
+
+# Convertir les colonnes "character" en "factor"
+train_data[] <- lapply(train_data, function(x) if (is.character(x)) as.factor(x) else x)
+test_data[] <- lapply(test_data, function(x) if (is.character(x)) as.factor(x) else x)
+
+# Entraînement du modèle Naïve Bayes (ou régression logistique, selon ce que vous voulez)
+logit_model <- glm(target_train ~ ., 
+                   data = train_data, 
+                   family = binomial(link = "logit"))
+
+# Prédiction des probabilités avec régression logistique
+target_pred_prob <- predict(logit_model, newdata = test_data, type = "response")
+
+# Ajustement du seuil (ici à 0.3 pour plus de sensibilité à la classe 1)
+target_pred_adjusted <- ifelse(target_pred_prob > 0.3, 1, 0)
+
+# Vérification des prédictions ajustées
+table(target_pred_adjusted)
+
+# Calcul des métriques de performance
+
+# Convertir les prédictions et la cible en facteur
+target_pred_adjusted <- factor(target_pred_adjusted, levels = levels(target_test))
+target_test <- factor(target_test, levels = levels(target_test))
+
+# Matrice de confusion
+conf_matrix <- confusionMatrix(target_pred_adjusted, target_test)
+
+# Afficher la matrice de confusion
+print(conf_matrix)
+
+# Affichage des résultats ajustés
+print(paste("Adjusted Accuracy: ", conf_matrix$overall['Accuracy']))
+print(paste("Adjusted Recall (survivant): ", conf_matrix$byClass['Recall']))
+print(paste("Adjusted Precision (survivant): ", conf_matrix$byClass['Precision']))
+```
