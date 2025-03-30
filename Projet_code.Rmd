@@ -518,27 +518,218 @@ La variable encodée reprend fidèlement la distribution observée pour Diet.
 Aucune différence significative entre les groupes.Comme sa version non encodée, elle semble peu informative seule.
 
 ## 3. Analyse multivariée
-
-
-
 ### 3.1 Gestion des valeurs manquantes
 
+Avant de procéder à l'analyse multivariée, nous avons vérifié la présence de valeurs manquantes dans nos variables quantitatives et qualitatives. Cette étape est essentielle, car les valeurs manquantes peuvent fausser les analyses et nécessitent généralement des méthodes d'imputation ou d'exclusion.  
+
+```{r}
+# verification de valeurs manquantes
+is.na(quantitative_vars[,1])
+ is.na(qualitative_vars)
+
+```
+
+Après vérification, nous avons constaté que notre base de données **ne contient aucune valeur manquante**. Ainsi, aucune action corrective (imputation ou suppression) n’est requise, ce qui simplifie l’analyse à venir et garantit l’intégrité des données. 
+
 ### 3.2 Transformation des variables
+Afin d’améliorer la qualité des données et garantir une meilleure performance des algorithmes d’analyse, nous appliquons plusieurs transformations aux variables quantitatives et qualitatives.
+
+#### Normalisation par la méthode min max
+
+La normalisation est une étape clé pour s'assurer que toutes les variables quantitatives sont comparables et influencent équitablement les analyses. Nous avons choisi la **méthode Min-Max**, qui transforme chaque variable pour qu’elle prenne des valeurs entre **0 et 1**.
+
+
+```{r}
+# Fonction de normalisation Min-Max
+min_max_norm <- function(x) {
+  return((x - min(x, na.rm = TRUE)) / (max(x, na.rm = TRUE) - min(x, na.rm = TRUE)))
+}
+
+# Appliquer la normalisation sur les variables sélectionnées
+quantitative_vars$Sedentary.Hours.Per.Day <- min_max_norm(quantitative_vars$Sedentary.Hours.Per.Day)
+quantitative_vars$Exercise.Hours.Per.Week <- min_max_norm(quantitative_vars$Exercise.Hours.Per.Week)
+quantitative_vars$Sleep.Hours.Per.Day <- min_max_norm(quantitative_vars$Sleep.Hours.Per.Day)
+quantitative_vars$Stress.Level <- min_max_norm(quantitative_vars$Stress.Level)
+quantitative_vars$Physical.Activity.Days.Per.Week <- min_max_norm(quantitative_vars$Physical.Activity.Days.Per.Week)
+
+# Vérifier les résultats
+summary(quantitative_vars)
+```
+
+>>Nous avons appliqué cette transformation aux variables suivantes :  
+- **Sedentary Hours Per Day**  
+- **Exercise Hours Per Week**  
+- **Sleep Hours Per Day**  
+- **Stress Level**  
+- **Physical Activity Days Per Week**  
+
+Après normalisation, nous avons vérifié les résultats à l'aide d'un résumé statistique de ces variables.
 
 #### Encodage de la variable Diet
+La variable Diet représente le type d’alimentation des individus avec trois catégories : 
+-**Unhealthy** (Mauvaise alimentation)
+-**Average** (Alimentation moyenne)
+-**Healthy** (Bonne alimentation)
+Afin d’utiliser cette variable dans des modèles de prédiction, nous devons la convertir en une variable numérique ordinale.
+
+```{r}
+# Transformer Diet en variable numérique ordinale correctement
+qualitative_vars$Diet <- factor(qualitative_vars$Diet, 
+                                levels = c("Unhealthy", "Average", "Healthy"), 
+                                labels = c(0, 1, 2))
+
+# Convertir en numérique
+qualitative_vars$Diet <- as.numeric(as.character(qualitative_vars$Diet))
+
+```
+
+>>La catégorie "Unhealthy" est encodée par 0
+La catégorie "Average" est encodée par 1
+La catégorie "Healthy" est encodée par 2
+
+Cette transformation permet d'intégrer correctement la variable **Diet** dans les analyses tout en conservant l’information sur l'ordre des catégories.  
 
 
+### 3.2 Analyse Graphiques 
+#### a Analyse des variables quantitatives
 
-#### Encodage de la variable Age_cat
+```{r}
 
+library(ggplot2)
+library(reshape2)
+
+# Calcul de la matrice de corrélation
+cor_mat <- cor(quantitative_vars, use = "complete.obs")
+
+# Transformation en format long
+melted_cor_mat <- melt(cor_mat)
+
+# Création du heatmap amélioré
+ggplot(data = melted_cor_mat, aes(x = Var1, y = Var2, fill = value)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "blue", mid = "white", high = "red", limits =c(-1,1)) +
+  labs(title = "Correlation Heatmap", x = "", y = "", fill = "Correlation") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+**Interprétation** **Corrélations positives (rouge)** -Triglycérides & Systolic_BP (0.0051) et Triglycérides & Diastolic_BP (0.0005) : Très faible corrélation positive entre les triglycérides et la pression artérielle. Les valeurs sont proches de 0, donc pas significatives.
+
+-Cholestérol & BMI (0.0173) : Une légère corrélation positive entre l’indice de masse corporelle (BMI) et le taux de cholestérol. une prise de poids peut être associée à une augmentation du cholestérol.
+
+Stress Level & Age (0.0183) : Une légère corrélation montrant que le niveau de stress pourrait légèrement augmenter avec l’âge.
+
+Mais la valeur est faible, donc pas de relation forte.
+
+**Corrélations négatives (en bleu)**
+
+-Stress Level & Physical Activity Days Per Week (-0.0074) : Une légère corrélation indiquant que plus une personne fait de l’activité physique, moins elle ressent de stress. Cependant, la valeur est très proche de 0, donc cette relation est faible.
+
+-Triglycérides & Physical Activity Days Per Week (-0.0075) : Indique que les personnes qui pratiquent plus d’activité physique ont tendance à avoir un taux de triglycérides légèrement plus bas.
+
+**Conclusion Générale** On observe aucune ucune relation forte entre les variables : Toutes les corrélations sont proches de 0, ce qui signifie qu’aucune variable ne semble influencer fortement une autre dans cet ensemble de données. Ce qui suggère que toutes les variables sont essentielles(pas de redondance dans les variables) pour prédire le risque d'infarctus.
+
+#### b Variables qualitatives et target
+
+```{R}
+#library(ggplot2)
+for(i in 1:ncol(qualitative_vars)){
+var1 = as.character(qualitative_vars[,i])
+var1 = as.factor(var1)
+counts = NULL # il nous faut le nombre de passagers dans chacune des catégories
+# définies par la variable quantitative et la target
+for(j in levels(var1)){
+for(k in levels(target)){
+counts = rbind(counts, c(var1 = j, target = k,
+patient_num = sum(target == k & var1 == j)))
+
+}}
+counts = as.data.frame(counts)
+counts$var1 = as.factor(counts$var1)
+counts$target = as.factor(counts$target)
+counts$patient_num = as.numeric(counts$patient_num)
+xlab_i = paste0(colnames(qualitative_vars)[i])
+print(ggplot(data = counts, aes(x = var1, y = patient_num, fill = target)) +
+geom_bar(stat = "identity", color="black") +
+theme_minimal() + labs(x = xlab_i, fill = " Atteinte de risque cardiaque",
+y = "Nombre de patients"))
+}
+
+```
+
+**Interpretation**
+
+#### 
+
+```{r}
+for(i in 1:ncol(qualitative_vars)){
+var1 = as.character(qualitative_vars[,i])
+var1[which(is.na(var1))] = "NA"
+var1 = as.factor(var1)
+counts = NULL   ##  il nous faut le nombre de passagers dans chacune des catégories
+# définies par la variable quantitative et la target
+for(j in levels(var1)){
+for(k in levels(target)){
+counts = rbind(counts, c(var1 = j, target = k,
+patient_num = sum(target == k & var1 == j)))
+}}
+counts = as.data.frame(counts)
+counts$var1 = as.factor(counts$var1)
+counts$target = as.factor(counts$target)
+counts$patient_num = as.numeric(counts$patient_num)
+xlab_i = paste0(colnames(qualitative_vars)[i])
+print(ggplot(data = counts, aes(x = var1, y = patient_num, fill = target)) +
+geom_bar(stat = "identity", color="black", position = "fill") +
+theme_minimal() + labs(x = xlab_i, fill = "Atteintes de risques",
+y = "Proportion de patients"))
+}
+```
 
 #### Création d'un data frame contenant les variables encodés
+```{r}
+write.csv(x = target, file = "attack_heart_pre_processed_target.csv", row.names = FALSE)
+write.csv(x = quantitative_vars, file = "attack_heart_pre_processed_quantitative_vars.csv",
+row.names = FALSE)
+write.csv(x = qualitative_vars, file = "attack_heart_pre_processed_qualitative_vars.csv",
+row.names = FALSE)
+```
+
 
 # III Modèles d'évaluation
+## 1. Methodes des k_plus proches voisins
+### 1.1 Méthode de Holdout
+
+####  Partition du Jeu de Données (Holdout Split)
+
+Dans cette étape, nous réalisons une séparation aléatoire de notre jeu de données en deux sous-ensembles : un ensemble d’apprentissage (Train) et un ensemble de test (Test).
+
+Pour assurer la reproductibilité des résultats, nous commençons par fixer une graine aléatoire avec `set.seed(1500)`. Cela garantit que la sélection des observations reste la même à chaque exécution du code.
+
+Nous déterminons ensuite le nombre total d’observations dans notre jeu de données à l’aide de nrow(predictive_vars). Puis, nous utilisons la fonction sample() pour tirer aléatoirement 80 % des observations qui constitueront l’ensemble d’apprentissage.
+
+Les données sont ensuite partitionnées comme suit :
+
+predictive_vars_train et target_train : contiennent les variables prédictives et la cible pour l’ensemble d’apprentissage (80 % des données).
+
+predictive_vars_test et target_test : contiennent les observations restantes (20 % des données), qui serviront à évaluer la performance du modèle.
+
+Ce découpage est essentiel pour éviter le surajustement et garantir que le modèle apprend sur un ensemble d’entraînement tout en étant évalué sur un jeu de test indépendant.
+
+```{r}
+set.seed(1500)  # Pour la reproductibilité
+nobs <- nrow(predictive_vars)
+inTrain <- sample(1:nobs, size = round(0.8 * nobs), replace = FALSE)
+
+predictive_vars_test    = predictive_vars[-inTrain,]
+target_test             = target[-inTrain]
+predictive_vars_train   = predictive_vars[inTrain,]
+target_train            = target[inTrain]
+```
+
 ## 1. Arbre de classification
 
 ### Variables explicatives
-
 
 ### Partage du jeu de données
 
