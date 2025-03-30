@@ -300,7 +300,7 @@ package `dplyr` :
 library(dplyr)
 quantitative_vars <- select(data, Age, Cholesterol, Heart.Rate, BMI, Triglycerides, 
                             Systolic_BP, Diastolic_BP, Exercise.Hours.Per.Week, Sedentary.Hours.Per.Day, 
-                            Stress.Level, Physical.Activity.Days.Per.Week, Income
+                            Stress.Level, Physical.Activity.Days.Per.Week, Income,
                             Sleep.Hours.Per.Day)
 
 
