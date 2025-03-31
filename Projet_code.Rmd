@@ -641,56 +641,11 @@ Mais la valeur est faible, donc pas de relation forte.
 
 **Conclusion Générale** On observe aucune ucune relation forte entre les variables : Toutes les corrélations sont proches de 0, ce qui signifie qu’aucune variable ne semble influencer fortement une autre dans cet ensemble de données. Ce qui suggère que toutes les variables sont essentielles(pas de redondance dans les variables) pour prédire le risque d'infarctus.
 
-# III. Les méthodes de prédiction
+# III Modèles d'évaluation
+## 1. Methodes des k_plus proches voisins
+### 1.1 Méthode de Holdout
 
-## 1. La méthode des k plus proches voisins avec partage du jeu de données en Holdout
-
-### 1.1. Transformation des variables explicatives
-
-```{r}
-library(caret) # chargement de la librairie caret
-```
-
-#### Variables quantitatives
-
-```{r}
-# Normalisation des variables quantitatives
-Proc = preProcess(quantitative_vars, method = "range")
-
-# On regroupe les nouvelles variables normalisées dans quantitative_vars_mnormed
-quantitative_vars_mmnormed = predict(Proc, quantitative_vars)
-
-# Affiche les premières lignes pour vérifier
-head(quantitative_vars_mmnormed)
-```
-
-#### Variables qualitatives
-
-```{r}
-#  Conversion de toutes les colonnes en facteur (base R)
-#qualitative_vars[] <- lapply(qualitative_vars, as.factor)
-
-# Création du modèle de transformation avec dummyVars de la librairie caret
-dummy_model <- dummyVars(" ~ .", data = qualitative_vars)
-
-# On regroupe les nouvelles variables codées dans qual_dummies
-qual_dummies <- as.data.frame(predict(dummy_model, newdata = qualitative_vars))
-
-# Vérifie si le codage a bien été faite
-str(qual_dummies)
-
-
-```
-
-### 1.2. Les variables explicatives et partage des données
-
-#### Les variables explicatives
-
-Data frame `predictive_vars` contenant les variables transformées
-
-```{r}
-predictive_vars=cbind(quantitative_vars_mmnormed, qual_dummies)
-```
+####  Partition du Jeu de Données (Holdout Split)
 
 Dans cette étape, nous réalisons une séparation aléatoire de notre jeu de données en deux sous-ensembles : un ensemble d’apprentissage (Train) et un ensemble de test (Test).
 
@@ -707,7 +662,7 @@ predictive_vars_test et target_test : contiennent les observations restantes (20
 Ce découpage est essentiel pour éviter le surajustement et garantir que le modèle apprend sur un ensemble d’entraînement tout en étant évalué sur un jeu de test indépendant.
 
 ```{r}
-set.seed(1500) #pour la reproductibilité 
+set.seed(1237) #pour la reproductibilité 
 nobs <- nrow(predictive_vars)
 inTrain <- sample(1:nobs, size = round(0.8 * nobs), replace = FALSE)
 
@@ -716,6 +671,7 @@ target_test             = target[-inTrain]
 predictive_vars_train   = predictive_vars[inTrain,]
 target_train            = target[inTrain]
 ```
+
 
 Afin d’évaluer efficacement la performance du modèle et d’optimiser ses hyperparamètres, nous effectuons une partition du jeu de données en trois sous-ensembles :
 
@@ -729,60 +685,16 @@ Enfin, les variables cibles des ensembles d’apprentissage, de validation et de
 
 Cette séparation en trois ensembles permet d’obtenir une évaluation plus robuste et d’améliorer la généralisation du modèle en évitant un sur-apprentissage.
 
+### 
+
 ```{r}
-set.seed(1500)
+set.seed(1237)
 inTest = sample(1:nobs, size = round(0.1 * nobs), replace = FALSE)
 notinTest = (1:nobs)[-inTest]
 inValidation = sample(notinTest, size = round(0.1 * nobs), replace = FALSE)
-
 c(inTest, inValidation)
-```
 
-#### Partition du Jeu de Données en Train/Validation/Test
-
-Afin d’évaluer efficacement la performance du modèle et d’optimiser ses
-hyperparamètres, nous effectuons une partition du jeu de données en
-trois sous-ensembles :
-
--   **Ensemble d’apprentissage (Train - 80 %)** : utilisé pour entraîner
-    le modèle.\
--   **Ensemble de validation (Validation - 10 %)** : permet d’ajuster
-    les hyperparamètres et d’éviter le surajustement.\
--   **Ensemble de test (Test - 10 %)** : sert à évaluer la performance
-    finale du modèle sur des données totalement indépendantes.
-
-Pour garantir la reproductibilité de la répartition des observations,
-nous fixons une graine aléatoire. Ensuite, nous sélectionnons
-aléatoirement **10 % des observations pour l’ensemble de test** et **10
-% pour l’ensemble de validation**, en veillant à ce que ces ensembles ne
-se chevauchent pas. Le reste des données est attribué à l’ensemble
-d’apprentissage (80 %).
-
-Enfin, les variables cibles des ensembles d’apprentissage, de validation
-et de test sont converties en **facteurs**, ce qui est essentiel pour
-garantir un traitement correct des données catégoriques dans les modèles
-supervisés.
-
-Cette séparation en trois ensembles permet d’obtenir une évaluation plus
-robuste et d’améliorer la généralisation du modèle en évitant un
-sur-apprentissage.
-
-```{r, eval = FALSE}
 # Création des datasets
-set.seed(1500)
-nobs <- nrow(predictive_vars)
-
-# 10% pour le test
-inTest <- sample(1:nobs, size = round(0.1 * nobs), replace = FALSE)
-
-# 10% pour la validation (hors test)
-notinTest <- setdiff(1:nobs, inTest)
-inValidation <- sample(notinTest, size = round(0.1 * nobs), replace = FALSE)
-
-# 80% restant pour train (hors test et validation)
-inTrain <- setdiff(1:nobs, union(inTest, inValidation))
-
-# Datasets
 predictive_vars_test       = predictive_vars[inTest,]
 target_test                = target[inTest]
 
@@ -794,46 +706,27 @@ target_train               = target[inTrain]
 
 ```
 
-### 1.3. Sélection de l’Hyperparamètre k
 
-Dans cette étape, nous cherchons à optimiser le nombre de voisins **k**
-pour la méthode des k plus proches voisins (kNN). L’hyperparamètre **k**
-joue un rôle essentiel dans la performance du modèle :\
-- Un **k trop petit** risque d'entraîner un modèle trop sensible aux
-variations locales des données, pouvant causer du **surajustement**.\
-- Un **k trop grand** peut lisser excessivement les prédictions et
-réduire la capacité du modèle à capturer des motifs locaux dans les
-données.
+#### Sélection de l’Hyperparamètre k
 
-Nous testons donc différentes valeurs de **k** (de 1 à 20) et évaluons
-les performances du modèle sur l’ensemble de validation en utilisant
-plusieurs métriques :\
+Dans cette étape, nous cherchons à optimiser le nombre de voisins **k** pour la méthode des k plus proches voisins (kNN). L’hyperparamètre **k** joue un rôle essentiel dans la performance du modèle :\
+- Un **k trop petit** risque d'entraîner un modèle trop sensible aux variations locales des données, pouvant causer du **surajustement**.\
+- Un **k trop grand** peut lisser excessivement les prédictions et réduire la capacité du modèle à capturer des motifs locaux dans les données.
+
+Nous testons donc différentes valeurs de **k** (de 1 à 20) et évaluons les performances du modèle sur l’ensemble de validation en utilisant plusieurs métriques :\
 - **Accuracy** : mesure globale des prédictions correctes.\
-- **Recall (Sensibilité)** : proportion des instances positives
-correctement identifiées.\
-- **Precision** : proportion des prédictions positives qui sont
-réellement correctes.
+- **Recall (Sensibilité)** : proportion des instances positives correctement identifiées.\
+- **Precision** : proportion des prédictions positives qui sont réellement correctes.
 
-Pour chaque valeur de **k**, nous utilisons l’algorithme **kNN** pour
-prédire les classes des observations dans l’ensemble de validation, puis
-nous évaluons les performances du modèle avec une **matrice de
-confusion**.
+Pour chaque valeur de **k**, nous utilisons l’algorithme **kNN** pour prédire les classes des observations dans l’ensemble de validation, puis nous évaluons les performances du modèle avec une **matrice de confusion**.
 
-Enfin, nous regroupons les résultats sous forme d’un tableau, ce qui
-nous permet d’identifier la valeur optimale de **k** en fonction des
-performances observées.
+Enfin, nous regroupons les résultats sous forme d’un tableau, ce qui nous permet d’identifier la valeur optimale de **k** en fonction des performances observées.
 
 ```{r, results = 'hide'}
-### chargement des librairies nécessaires
-library(Metrics)
-library(class)
-```
+library(class) ## chargement du jeu de donnees
+library(caret) ### pour les metriques d'evaluation 
 
-```{r}
 # Définition de la grille des valeurs de K à tester
-# Convertir en data.frame
-predictive_vars_train <- as.data.frame(predictive_vars_train)
-predictive_vars_validation <- as.data.frame(predictive_vars_validation)
 KGrid         = 1:20
 accuracy_val  = NULL
 recall_val    = NULL
@@ -879,87 +772,235 @@ Le choix optimal de **k** dépend donc de l'importance relative que l'on accorde
 
 > > pour se faire nous avons donc opté pour un k plus élevé, privilégiant ainsi une meilleure stabilité du modèle et une précision accrue, même si cela se fait au prix d’une légère diminution du recall. Ce choix permet d'éviter un modèle trop sensible aux variations locales des données, réduisant ainsi le risque de surajustement.
 
+### Les différentes métriques en fonction des valeurs de K étudiées
 
-### 1.4. Les différentes métriques en fonction des valeurs de K étudiées
-
-Afin de mieux visualiser l'impact du choix de **k** sur les performances
-du modèle, nous avons représenté graphiquement l'évolution des
-différentes métriques(**accuracy**, **recall** et **precision**) en
-fonction des valeurs de **k** testées.
+Afin de mieux visualiser l'impact du choix de **k** sur les performances du modèle, nous avons représenté graphiquement l'évolution des différentes métriques(**accuracy**, **recall** et **precision**) en fonction des valeurs de **k** testées.
 
 ```{r, out.width="50%", fig.align = "center", eval = FALSE}
 plot(KGrid, accuracy_val, type = 'l', xlab = "K, nombre de voisins", ylab = "Accuracy", col="purple")
 plot(KGrid, recall_val, type = 'l', xlab = "K, nombre de voisins", ylab = "Recall", col="red")
 plot(KGrid, precision_val, type = 'l', xlab = "K, nombre de voisins", ylab = "Precision", col="blue")
 ```
-
 #### Interpretation des graphiques
+
 > > -   **Accuracy (précision globale du modèle)** : représentée en violet, elle montre une tendance globale à l'augmentation avec **k**, atteignant un plateau autour de **k = 20**.\
 > > -   **Recall (sensibilité)** : en rouge, cette métrique diminue lorsque **k** augmente. Cela signifie que le modèle détecte de moins en moins de cas positifs à mesure que **k** croît.\
 > > -   **Precision** : en bleu, elle tend à augmenter légèrement avec **k**, ce qui suggère que les prédictions positives deviennent plus fiables.
 
-### 1.5. Performance du classifieur final
+#### Performance du classifieur final
 
-```{r, results = 'hide', eval = FALSE}
-rbind(predictive_vars_train, predictive_vars_validation)
-c(target_train, target_validation)
-```
 
-#### Prédiction de la target et la matrice de confusion
+## 1.2 Méthode de cross-validation
+
 
 ```{r, eval = FALSE}
-target_pred = knn(train = rbind(predictive_vars_train, predictive_vars_validation),
-                  test = predictive_vars_test, 
-                  cl = c(target_train, target_validation), 
-                  k = 5) 
-  
-cm <- confusionMatrix(target_pred, target_test, positive = "1")
+set.seed(1357)
+inTest                  = sample(1:nobs, size = round(0.1 * nobs), replace = FALSE)
+predictive_vars_test    = predictive_vars[inTest,]
+target_test             = target[inTest]
+predictive_vars_remain  = predictive_vars[-inTest,] # ce qu'on partagera en Train 
+# et Validation à chaque CV itération
+target_remain           = target[-inTest]
 
-# Extraire les métriques
-accuracy_test  <- cm$overall["Accuracy"]
-recall_test    <- cm$byClass["Sensitivity"]  # Recall
-precision_test <- cm$byClass["Precision"]
-print(cm)
+nobs_remain = nrow(predictive_vars_remain)
+nfolds      = 10
+KGrid       = 1:20
+  
+folds   = NULL
+for(i in 1:nobs_remain){
+  folds = c(folds, sample(1:nfolds, 1, replace = FALSE))
+}
+
+accuracy_fold = NULL
+recall_fold = NULL
+precision_fold = NULL
+
+for(fold in 1: nfolds){ # pour faire les itérations de la CV
+  inFold                      = which(folds == fold)
+  predictive_vars_train       = predictive_vars_remain[-inFold,]  # pour entrainer le modèle
+  predictive_vars_validation  = predictive_vars_remain[inFold,]   # pour évaluer le modèle
+  target_train                = target_remain[-inFold]
+  target_validation           = target_remain[inFold]
+    
+ 
+  accuracy_k  = NULL
+  recall_k    = NULL
+  precision_k = NULL
+  for(k in KGrid){ # pour chaque valeur de K dans KGrid on a fait "l'apprentissage" du 
+    # classifieur, puis on prédit la réponse des individidus dans la partie Validation, 
+    # et enfin on compare les prédictions aux vraies valeurs de la réponse
+    target_pred = knn(train = predictive_vars_train, test = predictive_vars_validation, 
+                      cl = target_train, k = k) 
+      
+    accuracy_k      = c(accuracy_k, mean(target_pred == target_validation))
+    recall_k        = c(recall_k, 
+                        recall(data = target_pred, target_validation, 
+                               relevant = "0"))
+    precision_k     = c(precision_k, 
+                        precision(target_pred, target_validation, 
+                                  relevant = "0"))
+    }
+    
+    accuracy_fold = rbind(accuracy_fold, accuracy_k)
+    recall_fold = rbind(recall_fold, recall_k)
+    precision_fold = rbind(precision_fold, precision_k)
+  }
+rownames(accuracy_fold) = paste0("fold_",1:nfolds)
+rownames(recall_fold) = paste0("fold_",1:nfolds)
+rownames(precision_fold) = paste0("fold_",1:nfolds)
+  
+colnames(accuracy_fold) = paste0("K_", KGrid)
+colnames(recall_fold) = paste0("K_", KGrid)
+colnames(precision_fold) = paste0("K_", KGrid)
+```
+
+```{r}
+# 10-fold cross validated mean accuracy pour chaque valeur de K
+mean_accuracy_k = colMeans(accuracy_fold)
+
+# 10-fold cross validated mean recall pour chaque valeur de K
+mean_recall_k = colMeans(recall_fold)
+
+# 10-fold cross validated mean precision pour chaque valeur de K
+mean_precision_k = colMeans(precision_fold)
+
+# Affichage des résultats
+mean_accuracy_k
+mean_recall_k
+mean_precision_k
+```
+
+### Graphes 10-fold mean accuracy en fonction des valeurs de K
+```{r, out.width="50%", fig.align = "center"}
+# Charger ggplot2 pour les graphiques
+library(ggplot2)
+
+# Création d'un data.frame pour ggplot
+results = data.frame(
+  K = KGrid,
+  Accuracy = mean_accuracy_k,
+  Recall = mean_recall_k,
+  Precision = mean_precision_k
+)
+
+# Graphique de l'accuracy
+ggplot(results, aes(x = K, y = Accuracy)) +
+  geom_line(color = "blue") +
+  geom_point(color = "blue") +
+  labs(title = "10-Fold Mean Accuracy vs. K", x = "K", y = "Mean Accuracy") +
+  theme_minimal()
+
+# Graphique du recall
+ggplot(results, aes(x = K, y = Recall)) +
+  geom_line(color = "red") +
+  geom_point(color = "red") +
+  labs(title = "10-Fold Mean Recall vs. K", x = "K", y = "Mean Recall") +
+  theme_minimal()
+
+# Graphique de la précision
+ggplot(results, aes(x = K, y = Precision)) +
+  geom_line(color = "green") +
+  geom_point(color = "green") +
+  labs(title = "10-Fold Mean Precision vs. K", x = "K", y = "Mean Precision") +
+  theme_minimal()
+
+
+```
+##3 2.4 Performance du classifieur final
+```{r, eval = FALSE}
+library(caret)
+library(class)
+
+# Application du modèle kNN avec le meilleur K trouvé (ex: K = 3, à ajuster)
+best_k = 20 # Mettre la meilleure valeur de K trouvée
+target_pred = knn(train = predictive_vars_remain,
+                  test = predictive_vars_test, 
+                  cl = target_remain, 
+                  k = best_k)
+
+# Calcul des performances sur le jeu de test
+accuracy_test  = mean(target_pred == target_test)
+recall_test    = recall(data = target_pred, target_test, 
+                        relevant = "0")
+precision_test = precision(target_pred, target_test, 
+                           relevant = "0")
+
+# Affichage des résultats
+accuracy_test
+recall_test 
+precision_test
+
+```
+
+## 3. Arbre de classification
+
+### Variables explicatives
+
+### Partage du jeu de données
+
+### 1.1 Phase d'apprentissage
+
+Installation des packages `rpart`et `rpart.plot`
+
+```{r, eval = FALSE}
+install.packages("rpart")
+install.packages("rpart.plot")
+```
+
+Chargement des librairies
+
+```{r, results = "hide", message = FALSE}
+library(rpart)
+library(rpart.plot)
+?rpart
+?rpart.plot
+```
+
+### 1.2. Phase d'apprentissage
+
+```{r, results = "hide", message = FALSE}
+library(rpart)
+library(rpart.plot)
+?rpart
+?rpart.plot
+```
+```{r, eval = FALSE}
+target_train <- as.factor(target_train)
+#classifTree = rpart(target_train ~ ., data = predictive_vars_train, 
+    #                method = "class")
+predictive_vars_train <- as.data.frame(predictive_vars_train)
+predictive_vars_test <- as.data.frame(predictive_vars_test)
+
+classifTree <- rpart(target_test ~ ., data = predictive_vars_test, 
+                     method = "class",
+                     control = rpart.control(minsplit = 10, cp = 0.001, maxdepth = 5))
+
+```
+
+### 3.3. Tracé de l'arbre de décision
+
+```{r, eval = FALSE}
+rpart.plot(classifTree, type = 3, extra = 2, fallen.leaves = TRUE,  
+           main = "Arbre de prédiction du risque de crise cardiaque") 
+```
+
+### 3.4. Prédiction de la target avec l'arbre de décision sur le jeu de données de test
+```{r, eval = FALSE}
+# Prédiction sur le jeu de test
+target_pred = predict(classifTree, predictive_vars_test, type = "class")
+
+# Calcul des métriques
+cm = confusionMatrix(target_pred, target_test, positive = "1")
+
+# Affichage des résultats
+accuracy_test  = cm$overall["Accuracy"]
+recall_test    = cm$byClass["Sensitivity"]  # Sensitivity = Recall
+precision_test = cm$byClass["Precision"]
+
 accuracy_test
 recall_test
 precision_test
-```
-> Les résultats montrent que l'**accuracy** augmente progressivement avec **k**, atteignant un maximum d'environ **0.6187** pour **k = 20**. Cependant, cette augmentation de l'accuracy s'accompagne d'une baisse du **recall**, suggérant que le modèle devient plus conservateur à mesure que **k** augmente, identifiant moins de cas positifs. En revanche, la **précision** augmente légèrement avec **k**, atteignant **0.3939** pour **k = 20**.
 
-Cela montre qu'il existe un compromis entre **recall** et **precision** :\
-- Pour maximiser le **recall**, c'est-à-dire identifier un maximum de cas positifs, il serait préférable de choisir une valeur plus faible de **k**.\
-- En revanche, pour améliorer la **précision** des prédictions positives, une valeur plus élevée de **k** serait plus appropriée.
-
-Le choix optimal de **k** dépend donc de l'importance relative que l'on accorde à chaque métrique dans le contexte de notre application spécifique.
-
-> > pour se faire nous avons donc opté pour un k plus élevé, privilégiant ainsi une meilleure stabilité du modèle et une précision accrue, même si cela se fait au prix d’une légère diminution du recall. Ce choix permet d'éviter un modèle trop sensible aux variations locales des données, réduisant ainsi le risque de surajustement.
-
-#### Utilisation de la partie Test pour évaluer le classifieur final
-
-```{r}
-
-# Prédiction sur les données vues pendant l’apprentissage
-target_pred = knn(
-  train = rbind(predictive_vars_train, predictive_vars_validation),
-  test  = rbind(predictive_vars_train, predictive_vars_validation),  # ⚠️ test = train ici
-  cl    = c(target_train, target_validation),
-  k     = 5, prob = TRUE
-)
-
-# Matrice de confusion
-cm <- confusionMatrix(target_pred, c(target_train, target_validation), positive = "1")
-
-# Métriques
-accuracy_train  = cm$overall["Accuracy"]
-recall_train    = cm$byClass["Sensitivity"]
-precision_train = cm$byClass["Precision"]
-
-# Affichage
-accuracy_train
-recall_train
-precision_train
-
-```
 
 ## 2. La régression logistique
 
