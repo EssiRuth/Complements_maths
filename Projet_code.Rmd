@@ -30,7 +30,7 @@ probabilité qu’un individu présente un risque d’infarctus. L’objectif
 est double : D’une part, explorer les variables influentes dans la
 prédiction du risque cardiovasculaire. D’autre part, évaluer les
 performances de modèles de classification supervisée (arbre de décision,
-k-NN, classification naive bayésienne et la régression logistique) implémentés dans le langage R.
+k-NN et classification naive bayésienne) implémentés dans le langage R.
 
 # I. Préparation des données
 
@@ -112,7 +112,7 @@ kable(variable_info, caption = "Tableau 1 : Description des variables et évalua
 ```
 
 > Certaines variables comme `Patient.ID`, `Country`, `Continent` et
-> `Hemisphere` sont écartées, car elles n’apportent pas de valeur
+> `Hemisphere` seront écartées, car elles n’apportent pas de valeur
 > informative dans la prédiction du risque cardiaque.
 
 ## 3. Typologie des variables
@@ -151,6 +151,7 @@ Les variables suivantes peuvent être considérées comme **quantitatives**
 > (normalisation, transformation logarithmique ou catégorisation) selon
 > le modèle utilisé.
 
+------------------------------------------------------------------------
 
 ### • Variables qualitatives
 
@@ -190,29 +191,30 @@ str(data)
 
 ## 4. La variable target
 
-L’objectif principal de ce projet étant de prédire si un patient présente un risque de crise cardiaque à partir de ses caractéristiques médicales, il est essentiel d’identifier avec précision la **variable cible** du modèle supervisé.
-Dans notre jeu de données, la variable `Heart.Attack.Risk` remplit ce rôle. Elle indique si un individu est **à risque d’infarctus (1)** ou **non (0)**, en se basant sur une série de facteurs cliniques, comportementaux et démographiques.
-Cette variable est de nature **binaire**, ce qui rend la problématique bien adaptée à une **approche de classification supervisée**.
-Avant d’être utilisée dans les modèles, elle est convertie en facteur (`factor`) pour que les algorithmes de machine learning puissent la traiter comme une variable catégorielle.
+Notre variable target sera la variable Heart.Attack.Risk qui est une
+variable binaire prenant la valeur 0 ou 1.
 
-Le code ci-dessous illustre cette conversion :
 ```{r}
 target=as.factor(data$Heart.Attack.Risk)
 class(target)
 ```
 
 ## 5. Nettoyage et vérification du data type
-Les variables non pertinentes à l'analyse prédictive (comme Patient.ID, Country, Continent, Hemisphere) ont été retirées, car elles n’apportent pas d’information discriminante sur le risque d’infarctus.
 
-De plus, la variable Blood.Pressure a été décomposée en deux variables numériques distinctes : Systolic_BP (pression systolique) et Diastolic_BP (pression diastolique), pour permettre une analyse fine.
+Les variables non pertinentes à l'analyse prédictive (comme Patient.ID,
+Country, Continent, Hemisphere) ont été retirées, car elles n’apportent
+pas d’information discriminante sur le risque d’infarctus.
 
+De plus, la variable Blood.Pressure a été décomposée en deux variables
+numériques distinctes : Systolic_BP (pression systolique) et
+Diastolic_BP (pression diastolique), pour permettre une analyse fine.
 
 ```{r}
-# Transformation de Blood Pressure en deux colonnes numériques 
+# Transformer Blood Pressure en deux colonnes numériques sans mutate()
 data$Systolic_BP <- as.numeric(sub("/.*", "", data$Blood.Pressure))  # Extraire la pression systolique
 data$Diastolic_BP <- as.numeric(sub(".*/", "", data$Blood.Pressure))  # Extraire la pression diastolique
 
-# Supprime la colonne originale Blood Pressure
+# Supprimer la colonne originale Blood Pressure
 data <- data[, !(names(data) %in% "Blood.Pressure")]
 
 ```
@@ -244,8 +246,8 @@ Le code suivant présente ces différentes opérations de typage :
 ```{r}
 # **Variables numériques continues (mesures)**
 data$Age_cat <- cut(data$Age, 
-                    breaks = c(0, 30, 50, 70, 100), 
-                    labels = c("Jeune", "Middle-aged", "Senior", "Elderly"))
+                   breaks = c(0, 30, 50, 70, 100), 
+                  labels = c("Jeune", "Middle-aged", "Senior", "Elderly"))
 
 data$Cholesterol <- as.numeric(data$Cholesterol)
 data$Heart.Rate <- as.numeric(data$Heart.Rate)
@@ -269,10 +271,23 @@ data$Medication.Use <- as.factor(data$Medication.Use)
 data$Alcohol.Consumption <- as.factor(data$Alcohol.Consumption)
 data$Obesity <- as.factor(data$Obesity)
 
+# Hypertension (1 si pression systolique > 140 ou diastolique > 90)
+data$Hypertension <- ifelse(data$Systolic_BP > 140 | data$Diastolic_BP > 90, 1, 0)
+
+# Catégorie de BMI
+data$BMI_cat <- cut(data$BMI, breaks = c(0, 18.5, 24.9, 29.9, 100),
+                    labels = c("Maigreur", "Normal", "Surpoids", "Obésité"))
+
+# Ratio activité/sédentarité
+data$Active_ratio <- data$Exercise.Hours.Per.Week / (data$Sedentary.Hours.Per.Day + 1)
+
+# Qualité du sommeil (mauvais si <5 ou >9h)
+data$Poor_sleep <- ifelse(data$Sleep.Hours.Per.Day < 5 | data$Sleep.Hours.Per.Day > 9, 1, 0)
+
+
 str(data) 
 
 ```
-
 
 ## 6. Séparation des variables quantitatives et qualitatives
 
@@ -305,7 +320,9 @@ quantitative_vars <- select(data, Cholesterol, Heart.Rate, BMI, Triglycerides,
 
 
 qualitative_vars <- select(data, Age_cat, Sex, Smoking, Diabetes, Obesity, Family.History, 
-                           Diet, Previous.Heart.Problems, Alcohol.Consumption, Medication.use)
+                           Diet, Previous.Heart.Problems, Alcohol.Consumption, Medication.Use)
+str(qualitative_vars)
+str(quantitative_vars)
 
 
 ```
@@ -322,6 +339,7 @@ distributions, valeurs aberrantes et échelles des variables continues :
 ```{r}
 summary(quantitative_vars)
 ```
+
 Les statistiques descriptives des variables quantitatives montrent que
 les données sont globalement cohérentes et réalistes, sans valeurs
 aberrantes majeures. On peut en dégager les observations suivantes :
@@ -369,12 +387,14 @@ aberrantes majeures. On peut en dégager les observations suivantes :
     **\~80 000 à \~300 000**, avec une moyenne de **158 263**. Cette
     variable présente une distribution large, probablement asymétrique.
 
-
 ### Variables qualitatives
+
+Le nombre d’observations tombées dans chacune des catégories
 
 ```{r}
 sapply(qualitative_vars, table)
 ```
+
 L’analyse des variables qualitatives met en évidence des répartitions
 globalement équilibrées pour la majorité d’entre elles, tout en
 soulignant certains déséquilibres notables qui reflètent le profil à
@@ -390,235 +410,117 @@ d’hommes. Cette surreprésentation du sexe masculin devra être prise en
 compte dans l’interprétation des résultats, car elle peut influencer la
 prédiction du risque.
 
-Concernant le mode de vie et les antécédents médicaux : - La majorité
-des individus sont **fumeurs** (près de 90%), **diabétiques** (65%) et
-**obèses** (50%). Ces proportions très élevées soulignent le caractère à
-haut risque de la population. - La variable `Family.History`, qui
-indique la présence d’antécédents familiaux de maladies cardiaques, est
-bien équilibrée (≈ 50/50), tout comme `Previous.Heart.Problems`,
-`Medication.Use` et `Obesity`, permettant une modélisation comparative
-efficace. - Les types de régime (`Diet`) sont également répartis de
-manière homogène entre "Healthy", "Average" et "Unhealthy", ce qui
-permet d’étudier leur impact potentiel sans biais de distribution. -
-Enfin, `Alcohol.Consumption` révèle que 60% des individus consomment de
-l’alcool, contre 40% qui n’en consomment pas, ce qui constitue une base
-statistique suffisamment variée pour en évaluer les effets. Toutes ces
-variables sont conservées dans l’analyse car elles sont soit bien
-réparties, soit médicalement pertinentes, et permettent d’alimenter
-efficacement la modélisation du risque d’infarctus.
+Concernant le mode de vie et les antécédents médicaux :
+
+-   La majorité des individus sont **fumeurs** (près de 90%),
+    **diabétiques** (65%) et **obèses** (50%). Ces proportions très
+    élevées soulignent le caractère à haut risque de la population. - La
+    variable `Family.History`, qui indique la présence d’antécédents
+    familiaux de maladies cardiaques, est bien équilibrée (≈ 50/50),
+    tout comme `Previous.Heart.Problems`, `Medication.Use` et `Obesity`,
+    permettant une modélisation comparative efficace.
+
+-   Les types de régime (`Diet`) sont également répartis de manière
+    homogène entre "Healthy", "Average" et "Unhealthy", ce qui permet
+    d’étudier leur impact potentiel sans biais de distribution. - Enfin,
+    `Alcohol.Consumption` révèle que 60% des individus consomment de
+    l’alcool, contre 40% qui n’en consomment pas, ce qui constitue une
+    base statistique suffisamment variée pour en évaluer les effets.
+    Toutes cesvariables sont conservées dans l’analyse car elles sont
+    soit bien réparties, soit médicalement pertinentes, et permettent
+    d’alimenter efficacement la modélisation du risque d’infarctus.
 
 ### Variable Target
 
 La variable cible est `Heart.Attack.Risk`
 
 ```{r}
+
 table(target)
 ```
 
 On observe 5624 observations dans la classe 0 (soit 64,2%) et 3139 dans
-la classe 1 (35,8%). 
+la classe 1 (35,8%). Cette répartition présente un léger déséquilibre,
+mais reste suffisamment équilibrée pour permettre une modélisation
+fiable des deux classes.
 
 ## 2. Analyse graphique
-Interprétation : 
 
-- Cholesterol : Q1 = 192, Médiane = 259, Q3 = 330 et Pas de valeurs aberrantes
-=> 50 % des données se situent entre 192 et 330. La médiane est de 259 mg/dL. L’ensemble des observations reste dans la plage normale définie par les moustaches.
-
-- Heart Rate : Q1 = 57, Médiane = 75, Q3 = 93 , Min = 40, Max = 110 et	Pas de valeurs extrêmes
-=> La moitié des individus ont une fréquence cardiaque entre 57 et 93 bpm. La médiane est à 75. Aucune valeur n’est considérée comme aberrante selon les critères du boxplot.
-
-- xercise Hours Per Week: 	Q1 ≈ 5, Médiane ≈ 10, Q3 ≈ 15 ,Min ≈ 0, Max ≈ 20 et Pas de points au-delà des moustaches
-=> 50 % des individus font entre 5 et 15 heures d’exercice par semaine. La médiane est de 10. La distribution est régulière et aucune valeur n’est jugée extrême.
-
-- Stress Level : Q1 = 3, Médiane = 5, Q3 = 8 et Min = 1, Max = 10 Pas de valeurs extrêmes
-=> Le niveau de stress est compris entre 3 et 8 pour la moitié des individus, avec une médiane de 5. Les moustaches couvrent l’ensemble des données, sans valeur aberrante.
-
-- Sedentary Hours Per Day : Q1 ≈ 3, Médiane ≈ 6, Q3 ≈ 9,	Min ≈ 0, Max ≈ 12 et Pas de valeur extrême
-=> Les heures passées assis par jour sont comprises entre 3 et 9 pour la moitié des individus. La médiane est à 6. Tous les individus restent dans les limites des moustaches.
-
--  Triglycerides: 	Q1 = 225.5, Médiane = 417, Q3 = 612, Min = 30, Max = 800 et pas de valeur aberrante détectée
-=> Bien que les valeurs varient fortement, la distribution respecte les limites définies par les moustaches. Aucune valeur extrême détectée malgré un écart important.
-
-- Physical Activity Days Per Week : 	Q1 = 2, Médiane = 3, Q3 = 5,	Min = 0, Max = 7
-et	Aucun point hors des moustaches
-=> 50 % des individus font entre 2 et 5 jours d’activité physique par semaine. La médiane est de 3 jours. Toutes les valeurs sont incluses dans les moustaches, donc aucune valeur extrême n’est présente.
-
-
-- Sleep Hours Per Day :	Q1 = 5, Médiane = 7, Q3 = 9, Min = 4, Max = 10 et	Aucune valeur hors de l’intervalle attendu
-=> La moitié des individus dorment entre 5 et 9 heures par jour. La médiane est de 7 heures. La distribution est équilibrée, sans valeur aberrante détectée.
-
-
-
-- Heart Attack Risk :	Variable binaire : Min = 0, Max = 1, Médiane = 0,	Q1 = 0, Q3 = 1 et	Rien à détecter ici car ce n’est pas une variable continue
-=> Cette variable prend uniquement les valeurs 0 ou 1. Le boxplot n’est pas pertinent ici car la variable est catégorique.
-
-
-- systolic_BP :	Q1 = 112, Médiane = 135, Q3 = 158, Min = 90, Max = 180 et Toutes les valeurs sont dans les moustaches
-=> La moitié des pressions systoliques se situent entre 112 et 158 mmHg, avec une médiane de 135. Aucune valeur extrême n’est présente selon la règle de 1,5×IQR.
-
-
-- Diastolic_BP : 	Q1 = 72, Médiane = 85, Q3 = 98, Min = 60, Max = 110 et Pas de point en dehors des moustaches
-=> La pression diastolique est comprise entre 72 et 98 mmHg pour 50 % des individus. La médiane est de 85. Aucun individu ne dépasse les limites définies par les moustaches.
-
-
-
-### 2.2 Variables qualitatives : barplot
-
-*Interprétation :* 
-
-- Répartition de Age_cat selon le risque : 
-On observe une légère surreprésentation des Seniors et Elderly dans le groupe à risque.Cela confirme que l’âge avancé est un facteur associé au risque d’infarctus, sans être totalement déterminant.
-
-
-- Répartition de Sex selon le risque : 
-Le nombre d’hommes dans le groupe à risque est nettement supérieur à celui des femmes.Le sexe masculin apparaît donc clairement corrélé au risque cardiaque dans ce jeu de données.
-
-
-- Répartition de Smoking selon le risque :
-La majorité des fumeurs se trouve dans le groupe à risque, tandis que les non-fumeurs sont peu présents dans ce groupe.Le tabagisme est ici un facteur fortement associé au risque, avec un potentiel explicatif élevé.
-
-- Répartition de Diabetes selon le risque :
-Les diabétiques sont nettement plus nombreux dans le groupe à risque que les non-diabétiques.Cette variable est donc fortement liée au risque de crise cardiaque et sera déterminante dans la modélisation.
-
-
-- Répartition de Obesity selon le risque :
-Les effectifs sont très similaires dans les deux groupes, que ce soit pour les obèses ou non.L’obésité n’apparaît pas ici comme un facteur discriminant net, bien qu’elle puisse jouer un rôle indirect.
-
-
-- Répartition de Family.History selon le risque : 
-Légère surreprésentation des antécédents familiaux dans le groupe à risque, mais la différence reste modérée.
-Cette variable pourrait donc être informative, mais faiblement discriminante seule.
-
-- Répartition de Diet selon le risque d’infarctus :
-Les effectifs sont très proches entre les groupes, quelle que soit la qualité du régime alimentaire. La variable Diet ne montre pas de tendance marquée entre alimentation et risque cardiaque. Son pouvoir prédictif semble faible lorsqu’elle est prise isolément.
-
-- Répartition de Previous.Heart.Problems selon le risque : 
-Les patients ayant eu des antécédents cardiaques sont légèrement plus nombreux dans le groupe à risque. Cette variable est donc pertinente, mais la différence reste modérée.
-
-- Répartition de Medication.Use selon le risque :
-Les proportions sont quasiment identiques entre les deux groupes. La prise de médicament ne permet pas de discriminer clairement les patients à risque dans ce jeu de données.
-
-- Répartition de Alcohol.Consumption selon le risque :
-La consommation d’alcool est nettement plus élevée chez les patients à risque. Cette variable est donc fortement associée au risque d’infarctus, et mérite d’être prise en compte dans la modélisation.
-
-- Répartition de Diet_encoded selon le risque : 
-La variable encodée reprend fidèlement la distribution observée pour Diet.
-Aucune différence significative entre les groupes.Comme sa version non encodée, elle semble peu informative seule.
-
-## 3. Analyse multivariée
-### 3.1 Gestion des valeurs manquantes
-
-Avant de procéder à l'analyse multivariée, nous avons vérifié la présence de valeurs manquantes dans nos variables quantitatives et qualitatives. Cette étape est essentielle, car les valeurs manquantes peuvent fausser les analyses et nécessitent généralement des méthodes d'imputation ou d'exclusion.  
+### Variables quantitatives : boxplot
 
 ```{r}
-# verification de valeurs manquantes
-is.na(quantitative_vars[,1])
- is.na(qualitative_vars)
-
-```
-
-Après vérification, nous avons constaté que notre base de données **ne contient aucune valeur manquante**. Ainsi, aucune action corrective (imputation ou suppression) n’est requise, ce qui simplifie l’analyse à venir et garantit l’intégrité des données. 
-
-### 3.2 Transformation des variables
-Afin d’améliorer la qualité des données et garantir une meilleure performance des algorithmes d’analyse, nous appliquons plusieurs transformations aux variables quantitatives et qualitatives.
-
-#### Normalisation par la méthode min max
-
-La normalisation est une étape clé pour s'assurer que toutes les variables quantitatives sont comparables et influencent équitablement les analyses. Nous avons choisi la **méthode Min-Max**, qui transforme chaque variable pour qu’elle prenne des valeurs entre **0 et 1**.
-
-
-```{r}
-# Fonction de normalisation Min-Max
-min_max_norm <- function(x) {
-  return((x - min(x, na.rm = TRUE)) / (max(x, na.rm = TRUE) - min(x, na.rm = TRUE)))
+for(i in 1:ncol(quantitative_vars)){
+  boxplot(quantitative_vars[,i] ~ target, main=paste("Boxplot de", colnames(quantitative_vars)[i]),
+          col = c("pink", "lightblue"), xlab = "Risque d'infarctus")
 }
-
-# Appliquer la normalisation sur les variables sélectionnées
-quantitative_vars$Sedentary.Hours.Per.Day <- min_max_norm(quantitative_vars$Sedentary.Hours.Per.Day)
-quantitative_vars$Exercise.Hours.Per.Week <- min_max_norm(quantitative_vars$Exercise.Hours.Per.Week)
-quantitative_vars$Sleep.Hours.Per.Day <- min_max_norm(quantitative_vars$Sleep.Hours.Per.Day)
-quantitative_vars$Stress.Level <- min_max_norm(quantitative_vars$Stress.Level)
-quantitative_vars$Physical.Activity.Days.Per.Week <- min_max_norm(quantitative_vars$Physical.Activity.Days.Per.Week)
-
-# Vérifier les résultats
-summary(quantitative_vars)
 ```
 
->>Nous avons appliqué cette transformation aux variables suivantes :  
-- **Sedentary Hours Per Day**  
-- **Exercise Hours Per Week**  
-- **Sleep Hours Per Day**  
-- **Stress Level**  
-- **Physical Activity Days Per Week**  
+#### Interprétation
 
-Après normalisation, nous avons vérifié les résultats à l'aide d'un résumé statistique de ces variables.
+-   Cholesterol : Q1 = 192, Médiane = 259, Q3 = 330 et Pas de valeurs
+    aberrantes =\> 50 % des données se situent entre 192 et 330. La
+    médiane est de 259 mg/dL. L’ensemble des observations reste dans la
+    plage normale définie par les moustaches.
 
-#### Encodage de la variable Diet
-La variable Diet représente le type d’alimentation des individus avec trois catégories : 
--**Unhealthy** (Mauvaise alimentation)
--**Average** (Alimentation moyenne)
--**Healthy** (Bonne alimentation)
-Afin d’utiliser cette variable dans des modèles de prédiction, nous devons la convertir en une variable numérique ordinale.
+-   Heart Rate : Q1 = 57, Médiane = 75, Q3 = 93 , Min = 40, Max = 110 et
+    Pas de valeurs extrêmes =\> La moitié des individus ont une
+    fréquence cardiaque entre 57 et 93 bpm. La médiane est à 75. Aucune
+    valeur n’est considérée comme aberrante selon les critères du
+    boxplot.
 
-```{r}
-# Transformer Diet en variable numérique ordinale correctement
-qualitative_vars$Diet <- factor(qualitative_vars$Diet, 
-                                levels = c("Unhealthy", "Average", "Healthy"), 
-                                labels = c(0, 1, 2))
+-   xercise Hours Per Week: Q1 ≈ 5, Médiane ≈ 10, Q3 ≈ 15 ,Min ≈ 0, Max
+    ≈ 20 et Pas de points au-delà des moustaches =\> 50 % des individus
+    font entre 5 et 15 heures d’exercice par semaine. La médiane est
+    de 10. La distribution est régulière et aucune valeur n’est jugée
+    extrême.
 
-# Convertir en numérique
-qualitative_vars$Diet <- as.numeric(as.character(qualitative_vars$Diet))
+-   Stress Level : Q1 = 3, Médiane = 5, Q3 = 8 et Min = 1, Max = 10 Pas
+    de valeurs extrêmes =\> Le niveau de stress est compris entre 3 et 8
+    pour la moitié des individus, avec une médiane de 5. Les moustaches
+    couvrent l’ensemble des données, sans valeur aberrante.
 
-```
+-   Sedentary Hours Per Day : Q1 ≈ 3, Médiane ≈ 6, Q3 ≈ 9, Min ≈ 0, Max
+    ≈ 12 et Pas de valeur extrême =\> Les heures passées assis par jour
+    sont comprises entre 3 et 9 pour la moitié des individus. La médiane
+    est à 6. Tous les individus restent dans les limites des moustaches.
 
->>La catégorie "Unhealthy" est encodée par 0
-La catégorie "Average" est encodée par 1
-La catégorie "Healthy" est encodée par 2
+-   Triglycerides: Q1 = 225.5, Médiane = 417, Q3 = 612, Min = 30, Max =
+    800 et pas de valeur aberrante détectée =\> Bien que les valeurs
+    varient fortement, la distribution respecte les limites définies par
+    les moustaches. Aucune valeur extrême détectée malgré un écart
+    important.
 
-Cette transformation permet d'intégrer correctement la variable **Diet** dans les analyses tout en conservant l’information sur l'ordre des catégories.  
+-   Physical Activity Days Per Week : Q1 = 2, Médiane = 3, Q3 = 5, Min =
+    0, Max = 7 et Aucun point hors des moustaches =\> 50 % des individus
+    font entre 2 et 5 jours d’activité physique par semaine. La médiane
+    est de 3 jours. Toutes les valeurs sont incluses dans les
+    moustaches, donc aucune valeur extrême n’est présente.
 
+-   Sleep Hours Per Day : Q1 = 5, Médiane = 7, Q3 = 9, Min = 4, Max = 10
+    et Aucune valeur hors de l’intervalle attendu =\> La moitié des
+    individus dorment entre 5 et 9 heures par jour. La médiane est de 7
+    heures. La distribution est équilibrée, sans valeur aberrante
+    détectée.
 
-### 3.2 Analyse Graphiques 
-#### a Analyse des variables quantitatives
+-   Heart Attack Risk : Variable binaire : Min = 0, Max = 1, Médiane =
+    0, Q1 = 0, Q3 = 1 et Rien à détecter ici car ce n’est pas une
+    variable continue =\> Cette variable prend uniquement les valeurs 0
+    ou 1. Le boxplot n’est pas pertinent ici car la variable est
+    catégorique.
 
-```{r}
+-   systolic_BP : Q1 = 112, Médiane = 135, Q3 = 158, Min = 90, Max = 180
+    et Toutes les valeurs sont dans les moustaches =\> La moitié des
+    pressions systoliques se situent entre 112 et 158 mmHg, avec une
+    médiane de 135. Aucune valeur extrême n’est présente selon la règle
+    de 1,5×IQR.
 
-library(ggplot2)
-library(reshape2)
+-   Diastolic_BP : Q1 = 72, Médiane = 85, Q3 = 98, Min = 60, Max = 110
+    et Pas de point en dehors des moustaches =\> La pression diastolique
+    est comprise entre 72 et 98 mmHg pour 50 % des individus. La médiane
+    est de 85. Aucun individu ne dépasse les limites définies par les
+    moustaches.
 
-# Calcul de la matrice de corrélation
-cor_mat <- cor(quantitative_vars, use = "complete.obs")
-
-# Transformation en format long
-melted_cor_mat <- melt(cor_mat)
-
-# Création du heatmap amélioré
-ggplot(data = melted_cor_mat, aes(x = Var1, y = Var2, fill = value)) +
-  geom_tile() +
-  scale_fill_gradient2(low = "blue", mid = "white", high = "red", limits =c(-1,1)) +
-  labs(title = "Correlation Heatmap", x = "", y = "", fill = "Correlation") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-```
-
-**Interprétation** **Corrélations positives (rouge)** -Triglycérides & Systolic_BP (0.0051) et Triglycérides & Diastolic_BP (0.0005) : Très faible corrélation positive entre les triglycérides et la pression artérielle. Les valeurs sont proches de 0, donc pas significatives.
-
--Cholestérol & BMI (0.0173) : Une légère corrélation positive entre l’indice de masse corporelle (BMI) et le taux de cholestérol. une prise de poids peut être associée à une augmentation du cholestérol.
-
-Stress Level & Age (0.0183) : Une légère corrélation montrant que le niveau de stress pourrait légèrement augmenter avec l’âge.
-
-Mais la valeur est faible, donc pas de relation forte.
-
-**Corrélations négatives (en bleu)**
-
--Stress Level & Physical Activity Days Per Week (-0.0074) : Une légère corrélation indiquant que plus une personne fait de l’activité physique, moins elle ressent de stress. Cependant, la valeur est très proche de 0, donc cette relation est faible.
-
--Triglycérides & Physical Activity Days Per Week (-0.0075) : Indique que les personnes qui pratiquent plus d’activité physique ont tendance à avoir un taux de triglycérides légèrement plus bas.
-
-**Conclusion Générale** On observe aucune ucune relation forte entre les variables : Toutes les corrélations sont proches de 0, ce qui signifie qu’aucune variable ne semble influencer fortement une autre dans cet ensemble de données. Ce qui suggère que toutes les variables sont essentielles(pas de redondance dans les variables) pour prédire le risque d'infarctus.
-
-#### b Variables qualitatives et target
+### Variables qualitatives et target : barplot
 
 ```{R}
 #library(ggplot2)
@@ -646,49 +548,149 @@ y = "Nombre de patients"))
 
 ```
 
-**Interpretation**
+#### Interprétation
 
-#### 
+- Répartition de Age_cat selon le risque : 
+On observe une légère surreprésentation des Seniors et Elderly dans le groupe à risque.Cela confirme que l’âge avancé est un facteur associé au risque d’infarctus, sans être totalement déterminant.
+
+- Répartition de Sex selon le risque : 
+Le nombre d’hommes dans le groupe à risque est nettement supérieur à celui des femmes.Le sexe masculin apparaît donc clairement corrélé au risque cardiaque dans ce jeu de données.
+
+- Répartition de Smoking selon le risque :
+La majorité des fumeurs se trouve dans le groupe à risque, tandis que les non-fumeurs sont peu présents dans ce groupe.Le tabagisme est ici un facteur fortement associé au risque, avec un potentiel explicatif élevé.
+
+- Répartition de Diabetes selon le risque :
+Les diabétiques sont nettement plus nombreux dans le groupe à risque que les non-diabétiques.Cette variable est donc fortement liée au risque de crise cardiaque et sera déterminante dans la modélisation.
+
+- Répartition de Obesity selon le risque :
+Les effectifs sont très similaires dans les deux groupes, que ce soit pour les obèses ou non.L’obésité n’apparaît pas ici comme un facteur discriminant net, bien qu’elle puisse jouer un rôle indirect.
+
+- Répartition de Family.History selon le risque : 
+Légère surreprésentation des antécédents familiaux dans le groupe à risque, mais la différence reste modérée.
+Cette variable pourrait donc être informative, mais faiblement discriminante seule.
+
+- Répartition de Diet selon le risque d’infarctus :
+Les effectifs sont très proches entre les groupes, quelle que soit la qualité du régime alimentaire. La variable Diet ne montre pas de tendance marquée entre alimentation et risque cardiaque. Son pouvoir prédictif semble faible lorsqu’elle est prise isolément.
+
+- Répartition de Previous.Heart.Problems selon le risque : 
+Les patients ayant eu des antécédents cardiaques sont légèrement plus nombreux dans le groupe à risque. Cette variable est donc pertinente, mais la différence reste modérée.
+
+- Répartition de Medication.Use selon le risque :
+Les proportions sont quasiment identiques entre les deux groupes. La prise de médicament ne permet pas de discriminer clairement les patients à risque dans ce jeu de données.
+
+- Répartition de Alcohol.Consumption selon le risque :
+La consommation d’alcool est nettement plus élevée chez les patients à risque. Cette variable est donc fortement associée au risque d’infarctus, et mérite d’être prise en compte dans la modélisation.
+
+- Répartition de Diet_encoded selon le risque : 
+La variable encodée reprend fidèlement la distribution observée pour Diet.
+Aucune différence significative entre les groupes.Comme sa version non encodée, elle semble peu informative seule.
+
+
+## 3. Analyse multivariée
+### 3.1 Gestion des valeurs manquantes
+
+Avant de procéder à l'analyse multivariée, nous avons vérifié la présence de valeurs manquantes dans nos variables quantitatives et qualitatives. Cette étape est essentielle, car les valeurs manquantes peuvent fausser les analyses et nécessitent généralement des méthodes d'imputation ou d'exclusion.  
 
 ```{r}
-for(i in 1:ncol(qualitative_vars)){
-var1 = as.character(qualitative_vars[,i])
-var1[which(is.na(var1))] = "NA"
-var1 = as.factor(var1)
-counts = NULL   ##  il nous faut le nombre de passagers dans chacune des catégories
-# définies par la variable quantitative et la target
-for(j in levels(var1)){
-for(k in levels(target)){
-counts = rbind(counts, c(var1 = j, target = k,
-patient_num = sum(target == k & var1 == j)))
-}}
-counts = as.data.frame(counts)
-counts$var1 = as.factor(counts$var1)
-counts$target = as.factor(counts$target)
-counts$patient_num = as.numeric(counts$patient_num)
-xlab_i = paste0(colnames(qualitative_vars)[i])
-print(ggplot(data = counts, aes(x = var1, y = patient_num, fill = target)) +
-geom_bar(stat = "identity", color="black", position = "fill") +
-theme_minimal() + labs(x = xlab_i, fill = "Atteintes de risques",
-y = "Proportion de patients"))
-}
+# verification de valeurs manquantes
+is.na(quantitative_vars[,1])
+ is.na(qualitative_vars)
+
 ```
 
-#### Création d'un data frame contenant les variables encodés
+Après vérification, nous avons constaté que notre base de données **ne contient aucune valeur manquante**. Ainsi, aucune action corrective (imputation ou suppression) n’est requise, ce qui simplifie l’analyse à venir et garantit l’intégrité des données. 
+
+### 3.2 Analyse Graphique 
+#### Analyse des variables quantitatives
+
 ```{r}
-write.csv(x = target, file = "attack_heart_pre_processed_target.csv", row.names = FALSE)
-write.csv(x = quantitative_vars, file = "attack_heart_pre_processed_quantitative_vars.csv",
-row.names = FALSE)
-write.csv(x = qualitative_vars, file = "attack_heart_pre_processed_qualitative_vars.csv",
-row.names = FALSE)
+
+library(ggplot2)
+library(reshape2)
+
+# Calcul de la matrice de corrélation
+cor_mat <- cor(quantitative_vars, use = "complete.obs")
+
+# Transformation en format long
+melted_cor_mat <- melt(cor_mat)
+
+# Création du heatmap amélioré
+ggplot(data = melted_cor_mat, aes(x = Var1, y = Var2, fill = value)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "blue", mid = "white", high = "red", limits =c(-1,1)) +
+  labs(title = "Correlation Heatmap", x = "", y = "", fill = "Correlation") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
 ```
 
+**Interprétation** 
+**Corrélations positives (rouge)** -Triglycérides & Systolic_BP (0.0051) et Triglycérides & Diastolic_BP (0.0005) : Très faible corrélation positive entre les triglycérides et la pression artérielle. Les valeurs sont proches de 0, donc pas significatives.
 
-# III Modèles d'évaluation
-## 1. Methodes des k_plus proches voisins
-### 1.1 Méthode de Holdout
+-Cholestérol & BMI (0.0173) : Une légère corrélation positive entre l’indice de masse corporelle (BMI) et le taux de cholestérol. une prise de poids peut être associée à une augmentation du cholestérol.
 
-####  Partition du Jeu de Données (Holdout Split)
+Stress Level & Age (0.0183) : Une légère corrélation montrant que le niveau de stress pourrait légèrement augmenter avec l’âge.
+
+Mais la valeur est faible, donc pas de relation forte.
+
+**Corrélations négatives (en bleu)**
+
+-Stress Level & Physical Activity Days Per Week (-0.0074) : Une légère corrélation indiquant que plus une personne fait de l’activité physique, moins elle ressent de stress. Cependant, la valeur est très proche de 0, donc cette relation est faible.
+
+-Triglycérides & Physical Activity Days Per Week (-0.0075) : Indique que les personnes qui pratiquent plus d’activité physique ont tendance à avoir un taux de triglycérides légèrement plus bas.
+
+**Conclusion Générale** On observe aucune ucune relation forte entre les variables : Toutes les corrélations sont proches de 0, ce qui signifie qu’aucune variable ne semble influencer fortement une autre dans cet ensemble de données. Ce qui suggère que toutes les variables sont essentielles(pas de redondance dans les variables) pour prédire le risque d'infarctus.
+
+# III. Les méthodes de prédiction
+
+## 1. La méthode des k plus proches voisins avec partage du jeu de données en Holdout
+
+### 1.1. Transformation des variables explicatives
+
+```{r}
+library(caret) # chargement de la librairie caret
+```
+
+#### Variables quantitatives
+
+```{r}
+# Normalisation des variables quantitatives
+Proc = preProcess(quantitative_vars, method = "range")
+
+# On regroupe les nouvelles variables normalisées dans quantitative_vars_mnormed
+quantitative_vars_mmnormed = predict(Proc, quantitative_vars)
+
+# Affiche les premières lignes pour vérifier
+head(quantitative_vars_mmnormed)
+```
+
+#### Variables qualitatives
+
+```{r}
+#  Conversion de toutes les colonnes en facteur (base R)
+#qualitative_vars[] <- lapply(qualitative_vars, as.factor)
+
+# Création du modèle de transformation avec dummyVars de la librairie caret
+dummy_model <- dummyVars(" ~ .", data = qualitative_vars)
+
+# On regroupe les nouvelles variables codées dans qual_dummies
+qual_dummies <- as.data.frame(predict(dummy_model, newdata = qualitative_vars))
+
+# Vérifie si le codage a bien été faite
+str(qual_dummies)
+
+
+```
+
+### 1.2. Les variables explicatives et partage des données
+
+#### Les variables explicatives
+
+Data frame `predictive_vars` contenant les variables transformées
+
+```{r}
+predictive_vars=cbind(quantitative_vars_mmnormed, qual_dummies)
+```
 
 Dans cette étape, nous réalisons une séparation aléatoire de notre jeu de données en deux sous-ensembles : un ensemble d’apprentissage (Train) et un ensemble de test (Test).
 
@@ -705,7 +707,7 @@ predictive_vars_test et target_test : contiennent les observations restantes (20
 Ce découpage est essentiel pour éviter le surajustement et garantir que le modèle apprend sur un ensemble d’entraînement tout en étant évalué sur un jeu de test indépendant.
 
 ```{r}
-set.seed(1500)  # Pour la reproductibilité
+set.seed(1500) #pour la reproductibilité 
 nobs <- nrow(predictive_vars)
 inTrain <- sample(1:nobs, size = round(0.8 * nobs), replace = FALSE)
 
@@ -714,6 +716,7 @@ target_test             = target[-inTrain]
 predictive_vars_train   = predictive_vars[inTrain,]
 target_train            = target[inTrain]
 ```
+
 Afin d’évaluer efficacement la performance du modèle et d’optimiser ses hyperparamètres, nous effectuons une partition du jeu de données en trois sous-ensembles :
 
 -   **Ensemble d’apprentissage (Train - 80 %)** : utilisé pour entraîner le modèle.\
@@ -727,16 +730,59 @@ Enfin, les variables cibles des ensembles d’apprentissage, de validation et de
 Cette séparation en trois ensembles permet d’obtenir une évaluation plus robuste et d’améliorer la généralisation du modèle en évitant un sur-apprentissage.
 
 ```{r}
-set.seed(1237)  
-nobs = nrow(predictive_vars)  
-
-# Sélection des indices pour test et validation
-inTest       = sample(1:nobs, size = round(0.1 * nobs), replace = FALSE)
-notinTest    = setdiff(1:nobs, inTest)
+set.seed(1500)
+inTest = sample(1:nobs, size = round(0.1 * nobs), replace = FALSE)
+notinTest = (1:nobs)[-inTest]
 inValidation = sample(notinTest, size = round(0.1 * nobs), replace = FALSE)
-inTrain      = setdiff(notinTest, inValidation)  # Le reste pour l'entraînement (80%)
 
+c(inTest, inValidation)
+```
+
+#### Partition du Jeu de Données en Train/Validation/Test
+
+Afin d’évaluer efficacement la performance du modèle et d’optimiser ses
+hyperparamètres, nous effectuons une partition du jeu de données en
+trois sous-ensembles :
+
+-   **Ensemble d’apprentissage (Train - 80 %)** : utilisé pour entraîner
+    le modèle.\
+-   **Ensemble de validation (Validation - 10 %)** : permet d’ajuster
+    les hyperparamètres et d’éviter le surajustement.\
+-   **Ensemble de test (Test - 10 %)** : sert à évaluer la performance
+    finale du modèle sur des données totalement indépendantes.
+
+Pour garantir la reproductibilité de la répartition des observations,
+nous fixons une graine aléatoire. Ensuite, nous sélectionnons
+aléatoirement **10 % des observations pour l’ensemble de test** et **10
+% pour l’ensemble de validation**, en veillant à ce que ces ensembles ne
+se chevauchent pas. Le reste des données est attribué à l’ensemble
+d’apprentissage (80 %).
+
+Enfin, les variables cibles des ensembles d’apprentissage, de validation
+et de test sont converties en **facteurs**, ce qui est essentiel pour
+garantir un traitement correct des données catégoriques dans les modèles
+supervisés.
+
+Cette séparation en trois ensembles permet d’obtenir une évaluation plus
+robuste et d’améliorer la généralisation du modèle en évitant un
+sur-apprentissage.
+
+```{r, eval = FALSE}
 # Création des datasets
+set.seed(1500)
+nobs <- nrow(predictive_vars)
+
+# 10% pour le test
+inTest <- sample(1:nobs, size = round(0.1 * nobs), replace = FALSE)
+
+# 10% pour la validation (hors test)
+notinTest <- setdiff(1:nobs, inTest)
+inValidation <- sample(notinTest, size = round(0.1 * nobs), replace = FALSE)
+
+# 80% restant pour train (hors test et validation)
+inTrain <- setdiff(1:nobs, union(inTest, inValidation))
+
+# Datasets
 predictive_vars_test       = predictive_vars[inTest,]
 target_test                = target[inTest]
 
@@ -746,33 +792,48 @@ target_validation          = target[inValidation]
 predictive_vars_train      = predictive_vars[inTrain,]
 target_train               = target[inTrain]
 
-target_train = as.factor(target_train)
-target_validation = as.factor(target_validation)
-target_pred = as.factor(target_pred)
-target_test = as.factor(target_test)
-
 ```
 
-#### Sélection de l’Hyperparamètre k
+### 1.3. Sélection de l’Hyperparamètre k
 
-Dans cette étape, nous cherchons à optimiser le nombre de voisins **k** pour la méthode des k plus proches voisins (kNN). L’hyperparamètre **k** joue un rôle essentiel dans la performance du modèle :\
-- Un **k trop petit** risque d'entraîner un modèle trop sensible aux variations locales des données, pouvant causer du **surajustement**.\
-- Un **k trop grand** peut lisser excessivement les prédictions et réduire la capacité du modèle à capturer des motifs locaux dans les données.
+Dans cette étape, nous cherchons à optimiser le nombre de voisins **k**
+pour la méthode des k plus proches voisins (kNN). L’hyperparamètre **k**
+joue un rôle essentiel dans la performance du modèle :\
+- Un **k trop petit** risque d'entraîner un modèle trop sensible aux
+variations locales des données, pouvant causer du **surajustement**.\
+- Un **k trop grand** peut lisser excessivement les prédictions et
+réduire la capacité du modèle à capturer des motifs locaux dans les
+données.
 
-Nous testons donc différentes valeurs de **k** (de 1 à 20) et évaluons les performances du modèle sur l’ensemble de validation en utilisant plusieurs métriques :\
+Nous testons donc différentes valeurs de **k** (de 1 à 20) et évaluons
+les performances du modèle sur l’ensemble de validation en utilisant
+plusieurs métriques :\
 - **Accuracy** : mesure globale des prédictions correctes.\
-- **Recall (Sensibilité)** : proportion des instances positives correctement identifiées.\
-- **Precision** : proportion des prédictions positives qui sont réellement correctes.
+- **Recall (Sensibilité)** : proportion des instances positives
+correctement identifiées.\
+- **Precision** : proportion des prédictions positives qui sont
+réellement correctes.
 
-Pour chaque valeur de **k**, nous utilisons l’algorithme **kNN** pour prédire les classes des observations dans l’ensemble de validation, puis nous évaluons les performances du modèle avec une **matrice de confusion**.
+Pour chaque valeur de **k**, nous utilisons l’algorithme **kNN** pour
+prédire les classes des observations dans l’ensemble de validation, puis
+nous évaluons les performances du modèle avec une **matrice de
+confusion**.
 
-Enfin, nous regroupons les résultats sous forme d’un tableau, ce qui nous permet d’identifier la valeur optimale de **k** en fonction des performances observées.
+Enfin, nous regroupons les résultats sous forme d’un tableau, ce qui
+nous permet d’identifier la valeur optimale de **k** en fonction des
+performances observées.
 
 ```{r, results = 'hide'}
-library(class) ## chargement du jeu de donnees
-library(caret) ### pour les metriques d'evaluation 
+### chargement des librairies nécessaires
+library(Metrics)
+library(class)
+```
 
+```{r}
 # Définition de la grille des valeurs de K à tester
+# Convertir en data.frame
+predictive_vars_train <- as.data.frame(predictive_vars_train)
+predictive_vars_validation <- as.data.frame(predictive_vars_validation)
 KGrid         = 1:20
 accuracy_val  = NULL
 recall_val    = NULL
@@ -818,31 +879,216 @@ Le choix optimal de **k** dépend donc de l'importance relative que l'on accorde
 
 > > pour se faire nous avons donc opté pour un k plus élevé, privilégiant ainsi une meilleure stabilité du modèle et une précision accrue, même si cela se fait au prix d’une légère diminution du recall. Ce choix permet d'éviter un modèle trop sensible aux variations locales des données, réduisant ainsi le risque de surajustement.
 
-### Les différentes métriques en fonction des valeurs de K étudiées
 
-Afin de mieux visualiser l'impact du choix de **k** sur les performances du modèle, nous avons représenté graphiquement l'évolution des différentes métriques(**accuracy**, **recall** et **precision**) en fonction des valeurs de **k** testées.
+### 1.4. Les différentes métriques en fonction des valeurs de K étudiées
+
+Afin de mieux visualiser l'impact du choix de **k** sur les performances
+du modèle, nous avons représenté graphiquement l'évolution des
+différentes métriques(**accuracy**, **recall** et **precision**) en
+fonction des valeurs de **k** testées.
 
 ```{r, out.width="50%", fig.align = "center", eval = FALSE}
 plot(KGrid, accuracy_val, type = 'l', xlab = "K, nombre de voisins", ylab = "Accuracy", col="purple")
 plot(KGrid, recall_val, type = 'l', xlab = "K, nombre de voisins", ylab = "Recall", col="red")
 plot(KGrid, precision_val, type = 'l', xlab = "K, nombre de voisins", ylab = "Precision", col="blue")
 ```
-#### Interpretation des graphiques
 
+#### Interpretation des graphiques
 > > -   **Accuracy (précision globale du modèle)** : représentée en violet, elle montre une tendance globale à l'augmentation avec **k**, atteignant un plateau autour de **k = 20**.\
 > > -   **Recall (sensibilité)** : en rouge, cette métrique diminue lorsque **k** augmente. Cela signifie que le modèle détecte de moins en moins de cas positifs à mesure que **k** croît.\
 > > -   **Precision** : en bleu, elle tend à augmenter légèrement avec **k**, ce qui suggère que les prédictions positives deviennent plus fiables.
 
-#### Performance du classifieur final
+### 1.5. Performance du classifieur final
+
+```{r, results = 'hide', eval = FALSE}
+rbind(predictive_vars_train, predictive_vars_validation)
+c(target_train, target_validation)
+```
+
+#### Prédiction de la target et la matrice de confusion
+
+```{r, eval = FALSE}
+target_pred = knn(train = rbind(predictive_vars_train, predictive_vars_validation),
+                  test = predictive_vars_test, 
+                  cl = c(target_train, target_validation), 
+                  k = 5) 
+  
+cm <- confusionMatrix(target_pred, target_test, positive = "1")
+
+# Extraire les métriques
+accuracy_test  <- cm$overall["Accuracy"]
+recall_test    <- cm$byClass["Sensitivity"]  # Recall
+precision_test <- cm$byClass["Precision"]
+print(cm)
+accuracy_test
+recall_test
+precision_test
+```
+> Les résultats montrent que l'**accuracy** augmente progressivement avec **k**, atteignant un maximum d'environ **0.6187** pour **k = 20**. Cependant, cette augmentation de l'accuracy s'accompagne d'une baisse du **recall**, suggérant que le modèle devient plus conservateur à mesure que **k** augmente, identifiant moins de cas positifs. En revanche, la **précision** augmente légèrement avec **k**, atteignant **0.3939** pour **k = 20**.
+
+Cela montre qu'il existe un compromis entre **recall** et **precision** :\
+- Pour maximiser le **recall**, c'est-à-dire identifier un maximum de cas positifs, il serait préférable de choisir une valeur plus faible de **k**.\
+- En revanche, pour améliorer la **précision** des prédictions positives, une valeur plus élevée de **k** serait plus appropriée.
+
+Le choix optimal de **k** dépend donc de l'importance relative que l'on accorde à chaque métrique dans le contexte de notre application spécifique.
+
+> > pour se faire nous avons donc opté pour un k plus élevé, privilégiant ainsi une meilleure stabilité du modèle et une précision accrue, même si cela se fait au prix d’une légère diminution du recall. Ce choix permet d'éviter un modèle trop sensible aux variations locales des données, réduisant ainsi le risque de surajustement.
+
+#### Utilisation de la partie Test pour évaluer le classifieur final
+
+```{r}
+
+# Prédiction sur les données vues pendant l’apprentissage
+target_pred = knn(
+  train = rbind(predictive_vars_train, predictive_vars_validation),
+  test  = rbind(predictive_vars_train, predictive_vars_validation),  # ⚠️ test = train ici
+  cl    = c(target_train, target_validation),
+  k     = 5, prob = TRUE
+)
+
+# Matrice de confusion
+cm <- confusionMatrix(target_pred, c(target_train, target_validation), positive = "1")
+
+# Métriques
+accuracy_train  = cm$overall["Accuracy"]
+recall_train    = cm$byClass["Sensitivity"]
+precision_train = cm$byClass["Precision"]
+
+# Affichage
+accuracy_train
+recall_train
+precision_train
+
+```
+
+## 2. La régression logistique
+
+La régression logistique ne traite pas les variables catégorielles
+telles qu'elles comme la méthode des k plus proches voisins. Il traite
+que des variables de type numérique donc on va réutiliser la data frame
+`predictive_vars`de la méthode des k plus proches voisins.
+
+```{r}
+
+library(caret)
+```
+
+```{r}
+logit_model <- glm(target_train ~ ., data = predictive_vars_train, family = binomial)
+
+target_pred_prob <- predict(logit_model, newdata = predictive_vars_test, type = "response")
+
+#  Transformation des probabilités en classes (seuil 0.5)
+target_pred_logit <- ifelse(target_pred_prob > 0.5, 1, 0)
+
+#  Conversion en facteur avec les bons niveaux
+target_pred_logit <- factor(target_pred_logit, levels = levels(target_test))
+
+# Vérification des longueurs
+stopifnot(length(target_pred_logit) == length(target_test))
+
+#  Matrice de confusion
+confusionMatrix(target_pred_logit, target_test, positive="1")
+
+conf_matrix <- confusionMatrix(target_pred_logit, target_test, positive = "1")
+
+# Extraire les métriques
+accuracy_test   <- conf_matrix$overall["Accuracy"]
+recall_test     <- conf_matrix$byClass["Sensitivity"]  # Rappel
+precision_test  <- conf_matrix$byClass["Precision"]
+f1_score        <- 2 * (precision_test * recall_test) / (precision_test + recall_test)
+
+# Affichage
+cat("Accuracy  :", accuracy_test, "\n")
+cat("Recall    :", recall_test, "\n")
+cat("Precision :", precision_test, "\n")
+cat("F1-Score  :", f1_score, "\n")
+```
+***Interpretation***
+	-	Accuracy : 0.6518 => Le modèle est correct dans 62% des cas. C’est un peu moins bon que le taux de majorité (0.6446), donc pas très performant globalement.
+	-	Sensitivity : 0.9389 => Excellente détection des patients sans risque (classe 0). Presque tous les vrais 0 sont bien identifiés.
+	-	Specificity : 0.0465 =>  Très mauvaise détection des patients à risque (classe 1). Le modèle ne reconnaît presque aucun vrai cas de risque.
+	-	Pos Pred Value : 0.641 => Quand le modèle prédit “0”, c’est bon à 64% du temps.
+	-	Neg Pred Value : 0.296 => Quand le modèle prédit “1”, il se trompe souvent.
+	-	Balanced Accuracy : 0.4927 => En dessous de 0.5 = pire qu’un tirage au sort binaire.
+	-	Kappa : -0.0179 => Accord entre le modèle et la vérité à peine mieux qu’un hasard.
+
+Conclusion :
+
+Le modèle prédit quasiment toujours la classe 0, et il a du mal à détecter les vrais patients à risque. Il est biaisé vers la classe majoritaire.
 
 
-## 1. Arbre de classification
+### 2.1. La courbe de ROC
 
-### Variables explicatives
+```{r}
+library(pROC) # chargement de la librairie pROC pour le tracé de la courbe de ROC
+```
 
-### Partage du jeu de données
+```{r}
+# target_pred_prob doit contenir les probabilités de prédire la classe "1"
+roc_curve <- roc(response = target_test, predictor = target_pred_prob)
 
-### 1.1 Phase d'apprentissage
+# Tracer la courbe
+plot(roc_curve, col = "blue", main = "Courbe ROC - Régression Logistique", lwd = 2)
+
+# AUC
+auc_val <- auc(roc_curve)
+cat("AUC :", auc_val, "\n")
+
+```
+
+## 3. Arbre de classification
+
+### 3.1. Variables explicatives
+
+Avant de construire l’arbre de classification, nous avons regroupé
+l’ensemble des variables explicatives — à la fois quantitatives et
+qualitatives — dans un seul objet nommé predictive_vars. Une
+vérification de la structure (str) permet de s'assurer que les types de
+données sont correctement interprétés (par exemple, les variables
+qualitatives sont bien des facteurs, les quantitatives sont numériques).
+Cette étape garantit une préparation adéquate des données en vue de
+l'apprentissage du modèle.
+
+```{r}
+predictive_vars = cbind(quantitative_vars, qualitative_vars)
+head(predictive_vars)
+str(predictive_vars)
+```
+
+### 3.2. Partage du jeu de données
+
+Afin d’évaluer correctement les performances de notre modèle, nous avons
+séparé le jeu de données en deux sous-ensembles : 80% des données ont
+été utilisées pour l'entraînement du modèle (train), 20% restantes ont
+été conservées pour le test final (test).
+
+Le partage s’effectue de manière aléatoire mais reproductible grâce à la
+fonction set.seed().
+
+```{r, eval = FALSE}
+
+set.seed(1234)
+nobs    = nrow(qualitative_vars) 
+inTrain = sample(1:nobs, size = round(0.8 * nobs), replace = FALSE)
+
+predictive_vars_test    = predictive_vars[-inTrain,]
+target_test             = target[-inTrain] 
+predictive_vars_train   = predictive_vars[inTrain,]
+target_train            = target[inTrain] 
+```
+
+### 3.3. Phase d'apprentissage
+
+Le modèle d’arbre de classification est construit à l’aide du package
+rpart, spécialement conçu pour la modélisation supervisée sur des
+données catégorielles ou continues. On définit ici les paramètres de
+contrôle du modèle : minsplit = 10 : nombre minimal d'observations dans
+un nœud avant de tenter une séparation, cp = 0.001 : paramètre de
+complexité pour éviter le surapprentissage, maxdepth = 5 : profondeur
+maximale de l’arbre. Le modèle apprend à prédire la variable cible
+(target_train) à partir de l’ensemble des variables explicatives
+(predictive_vars_train).
 
 Installation des packages `rpart`et `rpart.plot`
 
@@ -860,247 +1106,148 @@ library(rpart.plot)
 ?rpart.plot
 ```
 
-### 1.2. Entrainement d'un arbre de classification.
+### Entrainement d'un arbre de classification.
 
+```{r, eval = FALSE}
 
-### 1.3. Tracé de l'arbre de décision
-
-### 1.4. Phase de test
-
-
-### 1.5. Prédiction de la target avec l'arbre de décision sur le jeu de données de test
-
-
-
-#  Chargement des packages nécessaires
-library(caret)
-
-# S'assurer que les jeux d'entraînement et de test sont bien des data.frames
 predictive_vars_train <- as.data.frame(predictive_vars_train)
 predictive_vars_test <- as.data.frame(predictive_vars_test)
-table(target_train)
-prop.table(table(target_train))
-#  Entraînement du modèle de régression logistique
-logit_model <- glm(target_train ~ ., 
-                   data = predictive_vars_train, 
-                   weights = ifelse(target_train == 1, 1.5, 1),  # Pondère plus fort les 1
-                   family = binomial(link = "logit"))
 
-#  Prédictions : probabilité que la classe soit 1
-target_pred_prob <- predict(logit_model, newdata = predictive_vars_test, type = "response")
+classifTree <- rpart(target_train ~ ., data = predictive_vars_train, 
+                     method = "class",
+                     control = rpart.control(minsplit = 5, cp = 0, maxdepth = 5))
 
-#  Transformation des probabilités en classes (seuil 0.5)
-target_pred_logit <- ifelse(target_pred_prob > 0.5, 1, 0)
-
-#  Conversion en facteur avec les bons niveaux
-target_pred_logit <- factor(target_pred_logit, levels = levels(target_test))
-
-# Vérification des longueurs
-stopifnot(length(target_pred_logit) == length(target_test))
-
-#  Matrice de confusion
-confusionMatrix(target_pred_logit, target_test)
 ```
-***Interpretation***
-	-	Accuracy : 0.6218 => Le modèle est correct dans 62% des cas. C’est un peu moins bon que le taux de majorité (0.6446), donc pas très performant globalement.
-	-	Sensitivity : 0.9389 => Excellente détection des patients sans risque (classe 0). Presque tous les vrais 0 sont bien identifiés.
-	-	Specificity : 0.0465 =>  Très mauvaise détection des patients à risque (classe 1). Le modèle ne reconnaît presque aucun vrai cas de risque.
-	-	Pos Pred Value : 0.641 => Quand le modèle prédit “0”, c’est bon à 64% du temps.
-	-	Neg Pred Value : 0.296 => Quand le modèle prédit “1”, il se trompe souvent.
-	-	Balanced Accuracy : 0.4927 => En dessous de 0.5 = pire qu’un tirage au sort binaire.
-	-	Kappa : -0.0179 => Accord entre le modèle et la vérité à peine mieux qu’un hasard.
 
-Conclusion :
+Ce code entraine un arbre de classification. Il trouve les meilleurs
+seuils de séparation pour classer correctement les observations.
 
-Ton modèle prédit quasiment toujours la classe 0, et il a du mal à détecter les vrais patients à risque. Il est biaisé vers la classe majoritaire.
+### Visualisation de l'arbre de décision
 
+```{r, eval = FALSE}
+rpart.plot(classifTree, type = 3, extra = 3, fallen.leaves = TRUE,  
+           main = "Arbre de prédiction du risque d'infarctus d'un patient", roundint=FALSE)  
+```
 
+### 3.4. Phase de test
 
-### Classification naive bayensienne
+```{r, eval = FALSE}
 
-```{r, results='hold', message=FALSE, warning=FALSE}
-# ------------------------------
-#  Chargement des packages nécessaires
-# ------------------------------
-# Installer les packages si ce n’est pas déjà fait
-install.packages("naivebayes") 
-install.packages("caret")
-install.packages("pROC")
+predictive_vars_test <- as.data.frame(predictive_vars_test)
 
-# Charger les librairies
-library(naivebayes)
+classifTree <- rpart(target_test ~ ., data = predictive_vars_test, 
+                     method = "class",
+                     control = rpart.control(minsplit = 5, cp = 0, maxdepth = 5))
+```
+
+#### Visualisation de l'arbre
+
+```{r}
+
+rpart.plot(classifTree, type = 3, extra = 3, fallen.leaves = TRUE,  
+           main = "Arbre de prédiction du risque d'infarctus d'un patient", roundint=FALSE)  
+
+```
+
+### 3.5. Prédiction de la target avec l'arbre de décision sur le jeu de données de test
+
+```{r, eval = FALSE}
 library(caret)
-library(pROC)
+target_pred = predict(classifTree, predictive_vars_test, type = "class")
+conf_matrix <- confusionMatrix(target_pred, target_test,positive = "1")
+print(conf_matrix)
+accuracy_test  <- conf_matrix$overall["Accuracy"]
+recall_test    <- conf_matrix$byClass["Sensitivity"]  # Recall
+precision_test <- conf_matrix$byClass["Precision"]
+accuracy_test
+recall_test
+precision_test
+# à compléter
+# à compléter
+# à compléter
+```
 
-# ------------------------------
-#  Phase d’apprentissage du modèle Naïve Bayesien 
-# ------------------------------
+### 3.6. Arbre de classification avec évaluation des performances en 10-fold cross-validation
 
-# Vérification de la taille des données d’entraînement et de la variable cible
-dim(train_data)
-head(target_train)
+## 4. La classification Naive bayésienne
 
-# Entraînement du modèle Naïve Bayésien avec les données d’entraînement
-classif <- naive_bayes(x = train_data, y = target_train)
+### 4.1. Apprentissage du classifieur naïf bayésien
 
-# Affichage du modèle entraîné pour s'assurer qu’il a bien été créé
+```{r, results = "hide", message = FALSE}
+library(naivebayes)
+?naive_bayes
+```
+
+```{r, eval = FALSE}
+predictive_vars = cbind(quantitative_vars, qualitative_vars)
+# Conversion de la target en facteur
+set.seed(1357)  # Pour la reproductibilité
+target
+nobs = nrow(predictive_vars)
+train_indices = sample(1:nobs, size = 0.8 * nobs)  # 80% des indices pour le train
+
+# Création des ensembles Train/Test
+predictive_vars_test  = predictive_vars[-inTrain, ]
+predictive_vars_train=predictive_vars[inTrain,]
+target_test  = target[-inTrain ]
+predictive_vars_train <- as.data.frame(predictive_vars_train)
+predictive_vars_test <- as.data.frame(predictive_vars_test)
+```
+
+```{r}
+classif = naive_bayes(x = predictive_vars_train, y = target_train)
 classif
 
-# ------------------------------
-#  Prédiction sur les données de test
-# ------------------------------
-
-# Prédire les probabilités pour chaque classe (0 = décédé, 1 = survivant)
-pred <- predict(classif, test_data, type = "prob")
-
-# Afficher les premières lignes des probabilités prédites
-head(pred)
-
-# Prédire la classe (0 ou 1) pour chaque observation du test
-target_pred <- predict(classif, test_data, type = "class")
-
-# Vérifier que la longueur des prédictions correspond à celle des vraies valeurs
-stopifnot(length(target_pred) == length(target_test))
-
-# ------------------------------
-# Évaluation des performances du modèle
-# ------------------------------
-
-# Création de la courbe ROC à partir des probabilités de la classe 1 (survivant)
-roc_obj <- roc(response = target_test, predictor = pred[, "1"])
-
-# Tracer la courbe ROC
-plot(roc_obj, main = "Courbe ROC - Naïve Bayésien", col = "blue", lwd = 2)
-
-# Calcul de l’AUC (aire sous la courbe) pour mesurer la qualité globale du modèle
-auc_value <- auc(roc_obj)
-print(paste("AUC: ", round(auc_value, 4)))
-
-# Générer la matrice de confusion pour voir où le modèle se trompe
-conf_matrix <- confusionMatrix(target_pred, target_test)
-print(conf_matrix)
-
-# Calcul du taux de bonnes prédictions (Accuracy)
-accuracy <- mean(target_pred == target_test)
-
-# ------------------------------
-#  Calcul du rappel et de la précision pour la classe "1" (survivant)
-# ------------------------------
-
-# S'assurer que les deux vecteurs sont bien des facteurs avec les bons niveaux
-target_pred_adjusted <- factor(target_pred, levels = c("0", "1"))
-target_test <- factor(target_test, levels = c("0", "1"))
-
-# Calcul du rappel (Recall) : capacité à détecter les survivants
-recall_adjusted <- recall(target_pred_adjusted, target_test, relevant = "1")
-
-# Calcul de la précision (Precision) : fiabilité des prédictions de survivants
-precision_adjusted <- precision(target_pred_adjusted, target_test, relevant = "1")
-
-# Affichage des résultats finaux
-print(paste("Accuracy: ", accuracy))
-print(paste("Adjusted Recall (survivant): ", recall_adjusted))
-print(paste("Adjusted Precision (survivant): ", precision_adjusted))
 ```
-### Régression logistique et courbe ROC
 
+#### 
 
-```{r message=FALSE, warning=FALSE, results='hold'}
-# ------------------------------
-#  Chargement des packages nécessaires
-# ------------------------------
-library(caret)       # Pour l'évaluation du modèle
-library(naivebayes)  # Même si on ne l’utilise pas ici, il peut être utile ailleurs
-library(e1071)       # Nécessaire pour certaines fonctions de machine learning
-library(pROC)        # Pour tracer la courbe ROC et calculer l'AUC
+```{r, out.width="50%", fig.align = "center", eval = FALSE}
+plot(classif, prob = "conditional")
+```
 
-# ------------------------------
-# ️ Séparation des données en deux ensembles : apprentissage et test
-# ------------------------------
-set.seed(1234)  # Pour reproduire les mêmes résultats à chaque exécution
-train_index <- sample(1:nrow(data_clean), size = 0.8 * nrow(data_clean))
-train_data <- data_clean[train_index, ]
-test_data <- data_clean[-train_index, ]
+*Remarque :* Comme vu en cours, il est possible qu'une combinaison de
+catégories pour la réponse et une variable explicative qualitative
+X\^(l) n’apparaîsse pas dans jeu de données d’entraînement, auquel cas
+on aurait hat P(X\^(l) = x\^(l) \| target) = 0. On peut alors utiliser
+le additive smoothing (ou Laplace smoothing), ce qui se fait dans la
+fonction `naive_bayes` avec l'argument `laplace`
 
-# ------------------------------
-#  Définir la variable cible (Heart Attack Risk)
-# ------------------------------
-target_train <- as.factor(train_data$Heart.Attack.Risk)
-target_test <- as.factor(test_data$Heart.Attack.Risk)
+### 4.2. Prédiction sur le jeu de données de test des probabilités d'appartenir aux différentes catégories de la réponse
 
-# ------------------------------
-#  Supprimer la variable cible des données explicatives
-# ------------------------------
-train_data <- subset(train_data, select = -Heart.Attack.Risk)
-test_data <- subset(test_data, select = -Heart.Attack.Risk)
+```{r, eval = FALSE}
+pred = predict(classif, predictive_vars_test, type = "prob")
 
-# ------------------------------
-#  Conversion des variables de type caractère en facteurs
-# ------------------------------
-train_data[] <- lapply(train_data, function(x) if (is.character(x)) as.factor(x) else x)
-test_data[] <- lapply(test_data, function(x) if (is.character(x)) as.factor(x) else x)
+```
 
-# ------------------------------
-#  Entraînement du modèle de régression logistique
-# ------------------------------
-# On ajuste un modèle logistique avec toutes les variables explicatives
-logit_model <- glm(target_train ~ ., 
-                   data = train_data, 
-                   family = binomial(link = "logit"))
+### Prédiction de la target
 
-# ------------------------------
-#  Prédiction des probabilités sur les données de test
-# ------------------------------
-# On prédit ici la probabilité que chaque individu appartienne à la classe "1"
-target_pred_prob <- predict(logit_model, newdata = test_data, type = "response")
+```{r, eval = FALSE}
+library(caret)
 
-# ------------------------------
-# ️ Ajustement du seuil de décision
-# ------------------------------
-# On considère qu’un individu est à risque (classe 1) si la proba > 0.3 (plus sensible)
-target_pred_adjusted <- ifelse(target_pred_prob > 0.3, 1, 0)
+```
 
-# ------------------------------
-#  Vérification des prédictions
-# ------------------------------
-# Un petit tableau pour voir la répartition des prédictions (0 vs 1)
-table(target_pred_adjusted)
+### Prédiction de la target sur le jeu de données de test
 
-# ------------------------------
-#  Calcul des métriques de performance
-# ------------------------------
+Utiliser le classifieur entraîné à la Partie 2.3 pour prédire la
+catégorie d'appartenance des individus dans la partie Test, et calculer
+l'accuracy, le recall, et la précision (à l'aide du package `caret`
+comme fait aux TPs précédents, relire la documentation si besoin)
 
-# S’assurer que les prédictions et les vraies valeurs sont des facteurs avec les bons niveaux
-target_pred_adjusted <- factor(target_pred_adjusted, levels = c("0", "1"))
-target_test <- factor(target_test, levels = c("0", "1"))
+```{r, eval = FALSE}
+library(caret)
+library(Metrics)
+#target_pred = predict(classif, predictive_vars_test)
+#accuracy = mean(target_pred == target_test)
+#recall_value = recall(target_pred, target_test)
 
-# Calcul du rappel : capacité à bien identifier les survivants
-recall_adjusted <- recall(target_pred_adjusted, target_test, relevant = "1")
-
-# Calcul de la précision : parmi ceux prédits comme survivants, combien le sont vraiment
-precision_adjusted <- precision(target_pred_adjusted, target_test, relevant = "1")
-
-# Affichage des résultats
-print(paste("Adjusted Recall (survivant): ", recall_adjusted))
-print(paste("Adjusted Precision (survivant): ", precision_adjusted))
-
-# ------------------------------
-#  Matrice de confusion : vue détaillée des bons et mauvais classements
-# ------------------------------
-conf_matrix <- confusionMatrix(target_pred_adjusted, target_test)
+target_pred = predict(classif, predictive_vars_test, type = "class")
+conf_matrix <- confusionMatrix(target_pred, target_test, positive="1")
 print(conf_matrix)
+#precision_value = precision(target_pred, target_test,)
 
-# ------------------------------
-#  Courbe ROC et AUC (aire sous la courbe)
-# ------------------------------
 
-# Création de l'objet ROC à partir des probabilités de la classe 1 (survivant)
-roc_logit <- roc(response = target_test, predictor = target_pred_prob)
-
-# Tracer la courbe ROC
-plot(roc_logit, main = "Courbe ROC - Régression Logistique", col = "darkgreen", lwd = 2)
-
-# Calcul et affichage de l’AUC (plus l’AUC est proche de 1, mieux c’est)
-auc_logit <- auc(roc_logit)
-print(paste("AUC de la régression logistique : ", round(auc_logit, 4)))
+#mean(target_pred == # à compléter)
+#recall(target, target_pred)
+#precision(target, target_pred)
 ```
