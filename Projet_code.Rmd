@@ -893,7 +893,20 @@ Pour améliorer la performance globale du modèle et éviter cet effet, plusieur
 -Expérimenter d’autres méthodes de classification comme les arbres de décision,naïve bayesienne pour comparer les résultats.
 
 ## 1.2 Méthode de cross-validation
+Pour pouvoir évaluer la performance du modèle de manière plus robuste et de déterminer la meilleure valeur de k, nous avons utilisé une cross-validation en 10 folds. Avant d’effectuer la cross-validation, nous avons d’abord divisé notre ensemble de données en deux parties comme dans la méthode hold-out en un ensemble de test (10 % des observations), qui ne sera utilisé qu’à la toute fin pour évaluer le modèle. Un ensemble d’apprentissage et de validation (90 % des observations), qui sera utilisé pour la cross-validation.
 
+La cross-validation est réalisée en 10 itérations (folds). À chaque itération :
+
+Les données sont divisées en une partie  d'entraînement(80%) et une partie de validation(10%).
+Le classifieur k-NN est entraîné sur les données d’entraînement pour chaque valeur de k allant de 1 à 20. Les performances sont évaluées sur la partie de validation en utilisant trois métriques :
+
+Accuracy (précision globale)
+
+Recall (sensibilité)
+
+Precision (précision des prédictions positives)
+
+Les performances obtenues pour chaque itération et chaque valeur de k sont stockées dans des matrices.
 
 ```{r, eval = FALSE}
 set.seed(1357)
@@ -956,6 +969,11 @@ colnames(recall_fold) = paste0("K_", KGrid)
 colnames(precision_fold) = paste0("K_", KGrid)
 ```
 
+### Calcul des Moyennes sur les 10 Folds
+
+Moyenne de l’accuracy : reflète la proportion de bonnes classifications.
+Moyenne du recall : indique la capacité du modèle à détecter la classe cible.
+Moyenne de la précision : mesure la fiabilité des prédictions positives.
 ```{r}
 # 10-fold cross validated mean accuracy pour chaque valeur de K
 mean_accuracy_k = colMeans(accuracy_fold)
@@ -971,6 +989,20 @@ mean_accuracy_k
 mean_recall_k
 mean_precision_k
 ```
+
+
+>Analyse des Résultats de la Cross-Validation
+Après avoir effectué la cross-validation, nous avons obtenu les valeurs moyennes des trois métriques (accuracy, recall, et precision) pour chaque valeur de k allant de 1 à 20.
+
+- **Accuracy Moyenne par Valeur de K**
+L’accuracy augmente progressivement avec k, atteignant son maximum pour k = 20 avec 61,10 % de précision. Cela indique que les performances du modèle s’améliorent avec un nombre plus élevé de voisins.
+- **Recall Moyen par Valeur de K**
+Le recall suit une tendance croissante, atteignant 90,84 % pour k = 20. Un recall élevé signifie que le modèle identifie efficacement les instances positives (classe 0), ce qui peut être crucial si nous voulons minimiser les faux négatifs.
+- **Precision Moyenne par Valeur de K**
+La précision varie moins que les autres métriques et reste relativement stable autour de 63,8 %. Cela montre que le modèle ne produit pas trop de faux positifs, mais qu'il n’y a pas de grande amélioration avec l’augmentation de k.
+
+Pour notre base, nous allons choisir un k =15 afin que notre modèle puisse faire une bonne prediction des vrais positifs et dea faux positifs. Ce choix optimise la performance du classifieur tout en minimisant les biais liés aux valeurs extrêmes de k.
+
 
 ### Graphes 10-fold mean accuracy en fonction des valeurs de K
 ```{r, out.width="50%", fig.align = "center"}
