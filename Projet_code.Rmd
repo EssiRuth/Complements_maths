@@ -641,7 +641,7 @@ Mais la valeur est faible, donc pas de relation forte.
 
 **Conclusion Générale** On observe aucune ucune relation forte entre les variables : Toutes les corrélations sont proches de 0, ce qui signifie qu’aucune variable ne semble influencer fortement une autre dans cet ensemble de données. Ce qui suggère que toutes les variables sont essentielles(pas de redondance dans les variables) pour prédire le risque d'infarctus.
 
-#### 
+#### Variables qualitatives et target
 ```{r}
 for(i in 1:ncol(qualitative_vars)){
 var1 = as.character(qualitative_vars[,i])
