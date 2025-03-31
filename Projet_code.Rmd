@@ -1277,7 +1277,7 @@ rpart.plot(classifTree, type = 3, extra = 2, fallen.leaves = TRUE,
 **Interprétation**
 
 ### 3.4. Prédiction de la target avec l'arbre de décision sur le jeu de données de test 
-Nous évaluons la performance de notre arbre de décision sur l’ensemble de test en calculant les métriques de classification.
+Nous évaluons la performance de notre arbre de décision sur l’ensemble de test en calculant les métriques de classification en utilisant une matrice de confusion (confusionMatrix)
 
 ```{r, eval = FALSE}
 # Prédiction sur le jeu de test
@@ -1294,6 +1294,13 @@ precision_test = cm$byClass["Precision"]
 accuracy_test
 recall_test
 precision_test
+```
+**interprétation des résultats**
+Les performances de l’arbre de décision sur le jeu de test sont les suivantes :
+
+- Accuracy : 62,10 %,  Cela signifie que le modèle effectue correctement environ 62 % des prédictions sur l’ensemble de test.
+- Sensitivity (Recall) : 15,61 %, Ce faible score indique que le modèle ne détecte qu’une petite partie des cas positifs (patients à risque). Autrement dit, il y a un grand nombre de faux négatifs.
+- Precision : 42,24 %,  Cela signifie qu’environ 42 % des prédictions positives sont correctes.
 
 
 ## 2. La régression logistique
