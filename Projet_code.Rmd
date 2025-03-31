@@ -685,8 +685,6 @@ Enfin, les variables cibles des ensembles d’apprentissage, de validation et de
 
 Cette séparation en trois ensembles permet d’obtenir une évaluation plus robuste et d’améliorer la généralisation du modèle en évitant un sur-apprentissage.
 
-### 
-
 ```{r}
 set.seed(1237)
 inTest = sample(1:nobs, size = round(0.1 * nobs), replace = FALSE)
@@ -762,15 +760,21 @@ print(results)
 
 ```
 
-> Les résultats montrent que l'**accuracy** augmente progressivement avec **k**, atteignant un maximum d'environ **0.6187** pour **k = 20**. Cependant, cette augmentation de l'accuracy s'accompagne d'une baisse du **recall**, suggérant que le modèle devient plus conservateur à mesure que **k** augmente, identifiant moins de cas positifs. En revanche, la **précision** augmente légèrement avec **k**, atteignant **0.3939** pour **k = 20**.
+> Les résultats obtenus montrent que l’accuracy diminue progressivement avec k, atteignant un maximum d’environ 0.8973 pour k = 1. Cependant, cette diminution de l'accuracy s'accompagne d'une baisse du recall, indiquant que le modèle devient plus conservateur à mesure que k augmente, identifiant moins de cas positifs. En revanche, la précision tend à s’améliorer légèrement avec un k plus élevé.
 
-Cela montre qu'il existe un compromis entre **recall** et **precision** :\
-- Pour maximiser le **recall**, c'est-à-dire identifier un maximum de cas positifs, il serait préférable de choisir une valeur plus faible de **k**.\
-- En revanche, pour améliorer la **précision** des prédictions positives, une valeur plus élevée de **k** serait plus appropriée.
+On observe ainsi un compromis entre recall et précision :
 
-Le choix optimal de **k** dépend donc de l'importance relative que l'on accorde à chaque métrique dans le contexte de notre application spécifique.
+Un faible k (ex: k = 1-3) permet d’identifier plus de cas positifs (meilleur recall), mais avec un risque de surajustement aux données d'entraînement.
 
-> > pour se faire nous avons donc opté pour un k plus élevé, privilégiant ainsi une meilleure stabilité du modèle et une précision accrue, même si cela se fait au prix d’une légère diminution du recall. Ce choix permet d'éviter un modèle trop sensible aux variations locales des données, réduisant ainsi le risque de surajustement.
+Un k plus élevé (ex: k > 10) stabilise le modèle et augmente la précision, mais réduit la sensibilité aux cas positifs.
+
+Afin d’obtenir un équilibre entre précision, recall et stabilité du modèle, nous avons opté pour k = 4.
+
+Avec k = 4, nous obtenons une accuracy de 0.6792,
+
+Un recall de 0.4531, assurant une détection correcte d’une bonne partie des cas positifs,
+
+Une précision de 0.5777, permettant de limiter les fausses alertes.
 
 ### Les différentes métriques en fonction des valeurs de K étudiées
 
@@ -783,9 +787,11 @@ plot(KGrid, precision_val, type = 'l', xlab = "K, nombre de voisins", ylab = "Pr
 ```
 #### Interpretation des graphiques
 
-> > -   **Accuracy (précision globale du modèle)** : représentée en violet, elle montre une tendance globale à l'augmentation avec **k**, atteignant un plateau autour de **k = 20**.\
-> > -   **Recall (sensibilité)** : en rouge, cette métrique diminue lorsque **k** augmente. Cela signifie que le modèle détecte de moins en moins de cas positifs à mesure que **k** croît.\
-> > -   **Precision** : en bleu, elle tend à augmenter légèrement avec **k**, ce qui suggère que les prédictions positives deviennent plus fiables.
+> -Accuracy (précision globale du modèle) : représentée en violet, elle atteint son maximum pour k = 1, puis diminue progressivement avant de se stabiliser autour de k = 20. Cela reflète le compromis entre un modèle très flexible (faible k) et un modèle plus stable mais moins précis (grand k).
+
+-Recall (sensibilité) : en rouge, cette métrique décroît avec l’augmentation de k, indiquant que le modèle détecte de moins en moins de cas positifs à mesure que k augmente. Un faible k favorise donc la détection des cas positifs, mais au risque d'une plus grande variabilité des résultats.
+
+-Précision : en bleu, elle tend à s’améliorer légèrement avec k, ce qui signifie que les prédictions positives deviennent plus fiables, bien que cela se fasse au détriment du recall. Un k plus élevé privilégie donc des prédictions plus précises mais moins nombreuses.
 
 #### Performance du classifieur final
 
