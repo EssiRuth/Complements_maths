@@ -298,14 +298,14 @@ package `dplyr` :
 
 ```{r}
 library(dplyr)
-quantitative_vars <- select(data, Age, Cholesterol, Heart.Rate, BMI, Triglycerides, 
+quantitative_vars <- select(data, Cholesterol, Heart.Rate, BMI, Triglycerides, 
                             Systolic_BP, Diastolic_BP, Exercise.Hours.Per.Week, Sedentary.Hours.Per.Day, 
                             Stress.Level, Physical.Activity.Days.Per.Week, Income,
                             Sleep.Hours.Per.Day)
 
 
 qualitative_vars <- select(data, Age_cat, Sex, Smoking, Diabetes, Obesity, Family.History, 
-                           Diet, Previous.Heart.Problems, Alcohol.Consumption)
+                           Diet, Previous.Heart.Problems, Alcohol.Consumption, Medication.use)
 
 
 ```
@@ -325,11 +325,6 @@ summary(quantitative_vars)
 Les statistiques descriptives des variables quantitatives montrent que
 les données sont globalement cohérentes et réalistes, sans valeurs
 aberrantes majeures. On peut en dégager les observations suivantes :
-
--   **Âge** : les patients ont entre 18 et 90 ans, avec une moyenne
-    d’environ **54 ans**. La distribution semble centrée sur la
-    population adulte à senior, ce qui est cohérent avec une étude sur
-    les risques cardiovasculaires.
 
 -   **Cholestérol** : les valeurs varient de **120 à 400 mg/dL**, avec
     une moyenne de **260 mg/dL**, indiquant une population globalement
@@ -376,8 +371,6 @@ aberrantes majeures. On peut en dégager les observations suivantes :
 
 
 ### Variables qualitatives
-
-Le nombre d’observations tombées dans chacune des catégories
 
 ```{r}
 sapply(qualitative_vars, table)
@@ -427,14 +420,9 @@ la classe 1 (35,8%).
 
 ## 2. Analyse graphique
 Interprétation : 
-- Age : Q1 = 35, Médiane = 54, Q3 = 72
-=> Les moustaches s’étendent de 18 à 90
-=> Aucune valeur aberrante détectée
-=> 50 % des individus ont un âge compris entre 35 et 72 ans. La médiane est de 54 ans. Toutes les valeurs sont incluses dans les moustaches, donc aucune valeur extrême n’est détectée.
 
 - Cholesterol : Q1 = 192, Médiane = 259, Q3 = 330 et Pas de valeurs aberrantes
 => 50 % des données se situent entre 192 et 330. La médiane est de 259 mg/dL. L’ensemble des observations reste dans la plage normale définie par les moustaches.
-
 
 - Heart Rate : Q1 = 57, Médiane = 75, Q3 = 93 , Min = 40, Max = 110 et	Pas de valeurs extrêmes
 => La moitié des individus ont une fréquence cardiaque entre 57 et 93 bpm. La médiane est à 75. Aucune valeur n’est considérée comme aberrante selon les critères du boxplot.
