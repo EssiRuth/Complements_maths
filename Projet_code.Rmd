@@ -641,6 +641,31 @@ Mais la valeur est faible, donc pas de relation forte.
 
 **Conclusion Générale** On observe aucune ucune relation forte entre les variables : Toutes les corrélations sont proches de 0, ce qui signifie qu’aucune variable ne semble influencer fortement une autre dans cet ensemble de données. Ce qui suggère que toutes les variables sont essentielles(pas de redondance dans les variables) pour prédire le risque d'infarctus.
 
+#### 
+```{r}
+for(i in 1:ncol(qualitative_vars)){
+var1 = as.character(qualitative_vars[,i])
+var1[which(is.na(var1))] = "NA"
+var1 = as.factor(var1)
+counts = NULL   ##  il nous faut le nombre de passagers dans chacune des catégories
+# définies par la variable quantitative et la target
+for(j in levels(var1)){
+for(k in levels(target)){
+counts = rbind(counts, c(var1 = j, target = k,
+patient_num = sum(target == k & var1 == j)))
+}}
+counts = as.data.frame(counts)
+counts$var1 = as.factor(counts$var1)
+counts$target = as.factor(counts$target)
+counts$patient_num = as.numeric(counts$patient_num)
+xlab_i = paste0(colnames(qualitative_vars)[i])
+print(ggplot(data = counts, aes(x = var1, y = patient_num, fill = target)) +
+geom_bar(stat = "identity", color="black", position = "fill") +
+theme_minimal() + labs(x = xlab_i, fill = "Atteintes de risques",
+y = "Proportion de patients"))
+}
+```
+
 # III Modèles d'évaluation
 ## 1. Methodes des k_plus proches voisins
 ### 1.1 Méthode de Holdout
@@ -794,6 +819,7 @@ plot(KGrid, precision_val, type = 'l', xlab = "K, nombre de voisins", ylab = "Pr
 -Précision : en bleu, elle tend à s’améliorer légèrement avec k, ce qui signifie que les prédictions positives deviennent plus fiables, bien que cela se fasse au détriment du recall. Un k plus élevé privilégie donc des prédictions plus précises mais moins nombreuses.
 
 #### Performance du classifieur final
+Pour évaluer la performance de notre modèle, nous avons entraîné un classifieur k-plus proches voisins (k-NN) avec k = 4, valeur choisie pour assurer un bon équilibre entre recall et précision.
 
 ```{r, results = 'hide', eval = FALSE}
 rbind(predictive_vars_train, predictive_vars_validation)
@@ -816,7 +842,20 @@ recall_test
 precision_test
 
 ```
+
+> L'évaluation sur l’ensemble de test donne les résultats suivants :
+
+- Accuracy : 55.62 % → Le modèle classe correctement un peu plus de la moitié des observations. Cette performance reste modérée et indique que des améliorations sont possibles.
+
+- Recall : 71.97 % → Le modèle détecte environ 72 % des cas positifs. Il est donc assez efficace pour identifier les éléments appartenant à la classe cible, mais il peut encore en manquer.
+
+- Précision : 61.84 % → Lorsqu’il prédit un élément comme appartenant à la classe cible, il a environ 62 % de chances d’avoir raison. Cela signifie qu’il reste un certain nombre de fausses alertes.
+
+Ces résultats traduisent le compromis réalisé lors du choix de k. En optant pour une valeur modérée, nous avons limité la sensibilité du modèle aux fluctuations locales des données, tout en évitant un surajustement. Toutefois, l’accuracy relativement faible indique que le modèle pourrait être amélioré.
+
 ### Utisation de la partie Test pour évaluer le classifieur final
+
+```{r}
 target_pred_train = knn(train = rbind(predictive_vars_train, predictive_vars_validation),
                          test = rbind(predictive_vars_train, predictive_vars_validation),
                          cl = c(target_train, target_validation),
