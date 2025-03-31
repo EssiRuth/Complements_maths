@@ -795,6 +795,44 @@ plot(KGrid, precision_val, type = 'l', xlab = "K, nombre de voisins", ylab = "Pr
 
 #### Performance du classifieur final
 
+```{r, results = 'hide', eval = FALSE}
+rbind(predictive_vars_train, predictive_vars_validation)
+c(target_train, target_validation)
+```
+
+```{r, eval = FALSE}
+target_pred = knn(train = rbind(predictive_vars_train, predictive_vars_validation),
+test = predictive_vars_test,
+cl = c(target_train, target_validation),
+k = 4)
+accuracy_test = mean(target_pred == target_test)
+recall_test = recall(data = target_pred, target_test,
+relevant = "0")
+precision_test = precision(target_pred, target_test,
+relevant = "0")
+confusionMatrix(target_pred, target_test)$table
+accuracy_test
+recall_test
+precision_test
+
+```
+### Utisation de la partie Test pour évaluer le classifieur final
+target_pred_train = knn(train = rbind(predictive_vars_train, predictive_vars_validation),
+                         test = rbind(predictive_vars_train, predictive_vars_validation),
+                         cl = c(target_train, target_validation),
+                         k = 4)
+
+accuracy_train = mean(target_pred_train == c(target_train, target_validation))
+recall_train = recall(data = target_pred_train, c(target_train, target_validation), relevant = "0")
+precision_train = precision(target_pred_train, c(target_train, target_validation), relevant = "0")
+
+confusionMatrix(target_pred_train, c(target_train, target_validation))$table
+accuracy_train
+recall_train
+precision_train
+
+```
+
 
 ## 1.2 Méthode de cross-validation
 
