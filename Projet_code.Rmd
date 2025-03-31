@@ -1235,58 +1235,50 @@ precision_test
 ```
 
 ## 3. Arbre de classification
+Dans cette section, nous implémentons un arbre de décision pour prédire le risque de crise cardiaque. L’algorithme est entraîné sur l’ensemble d’entraînement (predictive_vars_train)
 
-### Variables explicatives
+### 3.1 Installation des packages et Chargement des librairies `rpart`et `rpart.plot`
+Nous utilisons les bibliothèques rpart et rpart.plot pour la création et la visualisation de l’arbre de décision.
 
-### Partage du jeu de données
-
-### 1.1 Phase d'apprentissage
-
-Installation des packages `rpart`et `rpart.plot`
-
-```{r, eval = FALSE}
+```{r, results = "hide", message = FALSE}
 install.packages("rpart")
 install.packages("rpart.plot")
-```
-
-Chargement des librairies
-
-```{r, results = "hide", message = FALSE}
 library(rpart)
 library(rpart.plot)
-?rpart
-?rpart.plot
 ```
+### 3.2 Préparation des données
+Nous convertissons la variable cible en facteur, car rpart attend une variable catégorielle pour la classification. De plus, les ensembles de données d'entraînement et de test sont transformés en data frames pour assurer leur compatibilité avec l'algorithme.
 
-### 1.2. Phase d'apprentissage
-
-```{r, results = "hide", message = FALSE}
-library(rpart)
-library(rpart.plot)
-?rpart
-?rpart.plot
-```
 ```{r, eval = FALSE}
 target_train <- as.factor(target_train)
 #classifTree = rpart(target_train ~ ., data = predictive_vars_train, 
     #                method = "class")
 predictive_vars_train <- as.data.frame(predictive_vars_train)
 predictive_vars_test <- as.data.frame(predictive_vars_test)
+```
+### 3.3. Phase d'apprentissage
+L’arbre est entraîné avec une profondeur maximale de 5 niveaux, un critère de division minimal de 10 observations par nœud, et un paramètre de complexité (cp) de 0.001 pour éviter un sur-ajustement excessif.
 
+```{r, eval = FALSE}
 classifTree <- rpart(target_test ~ ., data = predictive_vars_test, 
                      method = "class",
                      control = rpart.control(minsplit = 10, cp = 0.001, maxdepth = 5))
 
 ```
 
-### 3.3. Tracé de l'arbre de décision
+### 3.3. Visualisation de l’arbre de décision
+Une fois l’arbre entraîné, nous utilisons rpart.plot pour afficher sa structure, en mettant en évidence les probabilités et les règles de classification.
 
 ```{r, eval = FALSE}
 rpart.plot(classifTree, type = 3, extra = 2, fallen.leaves = TRUE,  
            main = "Arbre de prédiction du risque de crise cardiaque") 
 ```
 
-### 3.4. Prédiction de la target avec l'arbre de décision sur le jeu de données de test
+**Interprétation**
+
+### 3.4. Prédiction de la target avec l'arbre de décision sur le jeu de données de test 
+Nous évaluons la performance de notre arbre de décision sur l’ensemble de test en calculant les métriques de classification.
+
 ```{r, eval = FALSE}
 # Prédiction sur le jeu de test
 target_pred = predict(classifTree, predictive_vars_test, type = "class")
