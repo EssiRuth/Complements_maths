@@ -855,6 +855,8 @@ Ces résultats traduisent le compromis réalisé lors du choix de k. En optant p
 
 ### Utisation de la partie Test pour évaluer le classifieur final
 
+Afin d’évaluer la robustesse du modèle, nous avons appliqué notre classifieur k-NN (k = 4) sur l’ensemble d’entraînement et de validation regroupés. Cette approche permet de vérifier dans quelle mesure le modèle s’adapte aux données sur lesquelles il a été appris.
+
 ```{r}
 target_pred_train = knn(train = rbind(predictive_vars_train, predictive_vars_validation),
                          test = rbind(predictive_vars_train, predictive_vars_validation),
@@ -871,7 +873,24 @@ recall_train
 precision_train
 
 ```
+Les performances obtenues sont les suivantes :
 
+- Accuracy : 72.34 % : Le modèle classe correctement environ 72 % des observations. Cette performance est nettement meilleure que celle obtenue sur l’ensemble de test, ce qui suggère un possible surajustement du modèle aux données d'entraînement.
+
+- Recall : 84.31 % : Le modèle détecte plus de 84 % des cas positifs. Il a donc une forte capacité à identifier la classe cible, ce qui est un bon point si l’objectif est de minimiser les faux négatifs.
+
+- Précision : 75.75 % : Lorsqu’il prédit un élément comme appartenant à la classe cible, il a environ 76 % de chances d’avoir raison. Cette valeur est plus élevée que celle obtenue sur l’ensemble de test, ce qui indique que le modèle fonctionne bien sur les données connues mais peut avoir plus de mal à généraliser.
+
+**Analyse des résultats**
+La différence notable entre les performances sur l’ensemble d’entraînement et celles obtenues sur l’ensemble de test indique que le modèle pourrait souffrir d’un légèr surajustement : il s’adapte bien aux données d’apprentissage mais perd en généralisation sur de nouvelles données et cela peut être aussi  dû probablement à notre base de données qui presente moins de personnes aynat de risques..
+
+Pour améliorer la performance globale du modèle et éviter cet effet, plusieurs pistes peuvent être envisagées :
+
+-Tester d’autres valeurs de k pour identifier un meilleur compromis entre recall et précision.
+
+-Introduire une validation croisée afin d’avoir une évaluation plus fiable des performances du modèle.
+
+-Expérimenter d’autres méthodes de classification comme les arbres de décision,naïve bayesienne pour comparer les résultats.
 
 ## 1.2 Méthode de cross-validation
 
