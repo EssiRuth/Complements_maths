@@ -1426,3 +1426,119 @@ print(conf_matrix)
 #recall(target, target_pred)
 #precision(target, target_pred)
 ```
+### Régression logistique et courbe ROC
+
+
+```{r message=FALSE, warning=FALSE, results='hold'}
+# ------------------------------
+#  Chargement des packages nécessaires
+# ------------------------------
+library(caret)       # Pour l'évaluation du modèle
+library(naivebayes)  # Même si on ne l’utilise pas ici, il peut être utile ailleurs
+library(e1071)       # Nécessaire pour certaines fonctions de machine learning
+library(pROC)        # Pour tracer la courbe ROC et calculer l'AUC
+
+# ------------------------------
+# ️ Séparation des données en deux ensembles : apprentissage et test
+# ------------------------------
+set.seed(1234)  # Pour reproduire les mêmes résultats à chaque exécution
+train_index <- sample(1:nrow(data_clean), size = 0.8 * nrow(data_clean))
+train_data <- data_clean[train_index, ]
+test_data <- data_clean[-train_index, ]
+
+# ------------------------------
+#  Définir la variable cible (Heart Attack Risk)
+# ------------------------------
+target_train <- as.factor(train_data$Heart.Attack.Risk)
+target_test <- as.factor(test_data$Heart.Attack.Risk)
+
+# ------------------------------
+#  Supprimer la variable cible des données explicatives
+# ------------------------------
+train_data <- subset(train_data, select = -Heart.Attack.Risk)
+test_data <- subset(test_data, select = -Heart.Attack.Risk)
+
+# ------------------------------
+#  Conversion des variables de type caractère en facteurs
+# ------------------------------
+train_data[] <- lapply(train_data, function(x) if (is.character(x)) as.factor(x) else x)
+test_data[] <- lapply(test_data, function(x) if (is.character(x)) as.factor(x) else x)
+
+# ------------------------------
+#  Entraînement du modèle de régression logistique
+# ------------------------------
+# On ajuste un modèle logistique avec toutes les variables explicatives
+logit_model <- glm(target_train ~ ., 
+                   data = train_data, 
+                   family = binomial(link = "logit"))
+
+# ------------------------------
+#  Prédiction des probabilités sur les données de test
+# ------------------------------
+# On prédit ici la probabilité que chaque individu appartienne à la classe "1"
+target_pred_prob <- predict(logit_model, newdata = test_data, type = "response")
+
+# ------------------------------
+# ️ Ajustement du seuil de décision
+# ------------------------------
+# On considère qu’un individu est à risque (classe 1) si la proba > 0.3 (plus sensible)
+target_pred_adjusted <- ifelse(target_pred_prob > 0.3, 1, 0)
+
+# ------------------------------
+#  Vérification des prédictions
+# ------------------------------
+# Un petit tableau pour voir la répartition des prédictions (0 vs 1)
+table(target_pred_adjusted)
+
+# ------------------------------
+#  Calcul des métriques de performance
+# ------------------------------
+
+# S’assurer que les prédictions et les vraies valeurs sont des facteurs avec les bons niveaux
+target_pred_adjusted <- factor(target_pred_adjusted, levels = c("0", "1"))
+target_test <- factor(target_test, levels = c("0", "1"))
+
+# Calcul du rappel : capacité à bien identifier les survivants
+recall_adjusted <- recall(target_pred_adjusted, target_test, relevant = "1")
+
+# Calcul de la précision : parmi ceux prédits comme survivants, combien le sont vraiment
+precision_adjusted <- precision(target_pred_adjusted, target_test, relevant = "1")
+
+# Affichage des résultats
+print(paste("Adjusted Recall (survivant): ", recall_adjusted))
+print(paste("Adjusted Precision (survivant): ", precision_adjusted))
+
+# ------------------------------
+#  Matrice de confusion : vue détaillée des bons et mauvais classements
+# ------------------------------
+conf_matrix <- confusionMatrix(target_pred_adjusted, target_test)
+print(conf_matrix)
+
+# ------------------------------
+#  Courbe ROC et AUC (aire sous la courbe)
+# ------------------------------
+
+# Création de l'objet ROC à partir des probabilités de la classe 1 (survivant)
+roc_logit <- roc(response = target_test, predictor = target_pred_prob)
+
+# Tracer la courbe ROC
+plot(roc_logit, main = "Courbe ROC - Régression Logistique", col = "darkgreen", lwd = 2)
+
+# Calcul et affichage de l’AUC (plus l’AUC est proche de 1, mieux c’est)
+auc_logit <- auc(roc_logit)
+print(paste("AUC de la régression logistique : ", round(auc_logit, 4)))
+```
+***Interpretation***
+	- le modèle atteint une précision globale (accuracy) de 35.5 %, ce qui est faible
+	-	la no information rate est de 64 %, donc un modèle qui prédit toujours la majorité aurait fait mieux
+	-	le rappel (sensitivity) est de 0.7 %, ce qui veut dire que le modèle ne détecte quasiment jamais les individus à risque
+	-	la spécificité est de 98.5 %, donc il prédit bien les individus non à risque
+	-	la balanced accuracy est proche de 0.5, ce qui montre que le modèle est très déséquilibré
+	-	le kappa est négatif (-0.0053), ce qui confirme que les performances sont proches du hasard
+	-	la courbe ROC suit presque la diagonale, ce qui signifie que le modèle ne fait pas mieux qu’un tirage au sort
+	-	l’AUC est de 0.52, ce qui est très faible (valeur idéale : proche de 1)
+	
+	Concluison : 
+	-	le modèle de régression logistique ne parvient pas à identifier correctement les personnes à risque
+	-	malgré un seuil de 0.3 censé être plus sensible, les résultats restent très mauvais
+	-	ce modèle est donc inefficace pour cette tâche de classification dans ton jeu de données
