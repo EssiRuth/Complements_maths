@@ -885,6 +885,7 @@ c(target_train, target_validation)
 ```
 
 ```{r, eval = FALSE}
+set.seed(1237)
 target_pred = knn(train = rbind(predictive_vars_train, predictive_vars_validation),
 test = predictive_vars_test,
 cl = c(target_train, target_validation),
@@ -916,6 +917,7 @@ Ces résultats traduisent le compromis réalisé lors du choix de k. En optant p
 Afin d’évaluer la robustesse du modèle, nous avons appliqué notre classifieur k-NN (k = 4) sur l’ensemble d’entraînement et de validation regroupés. Cette approche permet de vérifier dans quelle mesure le modèle s’adapte aux données sur lesquelles il a été appris.
 
 ```{r}
+set.seed(1237)
 target_pred_train = knn(train = rbind(predictive_vars_train, predictive_vars_validation),
                          test = rbind(predictive_vars_train, predictive_vars_validation),
                          cl = c(target_train, target_validation),
