@@ -684,6 +684,48 @@ risque d'infarctus.
 
 # III Modèles d'évaluation
 ## 1. Methodes des k_plus proches voisins
+#### Transformation des variables explicatives
+
+```{r}
+library(caret) # chargement de la librairie caret
+```
+
+- Variables quantitatives
+
+```{r}
+# Normalisation des variables quantitatives
+Proc = preProcess(quantitative_vars, method = "range")
+
+# On regroupe les nouvelles variables normalisées dans quantitative_vars_mnormed
+quantitative_vars_mmnormed = predict(Proc, quantitative_vars)
+
+# Affiche les premières lignes pour vérifier
+head(quantitative_vars_mmnormed)
+```
+- Variables qualitatives
+
+```{r}
+#  Conversion de toutes les colonnes en facteur (base R)
+#qualitative_vars[] <- lapply(qualitative_vars, as.factor)
+
+# Création du modèle de transformation avec dummyVars de la librairie caret
+dummy_model <- dummyVars(" ~ .", data = qualitative_vars)
+
+# On regroupe les nouvelles variables codées dans qual_dummies
+qual_dummies <- as.data.frame(predict(dummy_model, newdata = qualitative_vars))
+
+# Vérifie si le codage a bien été faite
+str(qual_dummies)
+```
+
+#### Les variables explicatives
+
+Data frame `predictive_vars` contenant les variables transformées
+
+```{r}
+predictive_vars=cbind(quantitative_vars_mmnormed, qual_dummies)
+```
+
 ### 1.1 Méthode de Holdout
 
 ####  Partition du Jeu de Données (Holdout Split)
