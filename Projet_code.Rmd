@@ -1579,7 +1579,8 @@ Le graphique suivant présente les courbes de densité estimées pour les diffé
 
 ```{r, out.width="50%", fig.align = "center", eval = FALSE}
 plot(classif, prob = "conditional")
-`
+```
+
 **Interprétation**
 
 - Income : Les courbes sont quasi identiques pour les deux classes, ce qui suggère que cette variable n’est pas discriminante dans le cadre du modèle naïf bayésien. Il en va de même pour BMI et Sedentary.Hours.Per.Day.
