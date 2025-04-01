@@ -317,7 +317,7 @@ str(quantitative_vars)
 
 ## 1. Analyse univariée
 
-### Variables quantitatives 
+### Variables quantitatives
 
 Un résumé statistique a été effectué afin d’identifier les
 distributions, valeurs aberrantes et échelles des variables continues :
@@ -431,46 +431,75 @@ mais reste suffisamment équilibrée pour permettre une modélisation
 fiable des deux classes.
 
 ## 2. Analyse graphique
-### 2.1. Analyse des variables quantitatives
+
+### 2.1 Analyse des variables quantitatives
 
 ```{r, out.width="50%", fig.align = "center"}
 for (col in colnames(quantitative_vars)){
   boxplot(quantitative_vars[[col]], main=paste("Boxplot", col), col="lightblue", breaks=30)
 }
 ```
-***Interprétation ***
 
-- Cholesterol : Q1 = 192, Médiane = 259, Q3 = 330 et Pas de valeurs aberrantes
-=> 50 % des données se situent entre 192 et 330. La médiane est de 259 mg/dL. L’ensemble des observations reste dans la plage normale définie par les moustaches.
+***Interprétation***
 
-- Heart Rate : Q1 = 57, Médiane = 75, Q3 = 93 , Min = 40, Max = 110 et	Pas de valeurs extrêmes
-=> La moitié des individus ont une fréquence cardiaque entre 57 et 93 bpm. La médiane est à 75. Aucune valeur n’est considérée comme aberrante selon les critères du boxplot.
+-   Cholesterol : Q1 = 192, Médiane = 259, Q3 = 330 et Pas de valeurs
+    aberrantes =\> 50 % des données se situent entre 192 et 330. La
+    médiane est de 259 mg/dL. L’ensemble des observations reste dans la
+    plage normale définie par les moustaches.
 
-- Exercise Hours Per Week: Q1 ≈ 5, Médiane ≈ 10, Q3 ≈ 15 ,Min ≈ 0, Max ≈ 20 et Pas de points au-delà des moustaches
-=> 50 % des individus font entre 5 et 15 heures d’exercice par semaine. La médiane est de 10. La distribution est régulière et aucune valeur n’est jugée extrême.
+-   Heart Rate : Q1 = 57, Médiane = 75, Q3 = 93 , Min = 40, Max = 110 et
+    Pas de valeurs extrêmes =\> La moitié des individus ont une
+    fréquence cardiaque entre 57 et 93 bpm. La médiane est à 75. Aucune
+    valeur n’est considérée comme aberrante selon les critères du
+    boxplot.
 
-- Stress Level : Q1 = 3, Médiane = 5, Q3 = 8 et Min = 1, Max = 10 Pas de valeurs extrêmes
-=> Le niveau de stress est compris entre 3 et 8 pour la moitié des individus, avec une médiane de 5. Les moustaches couvrent l’ensemble des données, sans valeur aberrante.
+-   Exercise Hours Per Week: Q1 ≈ 5, Médiane ≈ 10, Q3 ≈ 15 ,Min ≈ 0, Max
+    ≈ 20 et Pas de points au-delà des moustaches =\> 50 % des individus
+    font entre 5 et 15 heures d’exercice par semaine. La médiane est
+    de 10. La distribution est régulière et aucune valeur n’est jugée
+    extrême.
 
-- Sedentary Hours Per Day : Q1 ≈ 3, Médiane ≈ 6, Q3 ≈ 9,Min ≈ 0, Max ≈ 12 et Pas de valeur extrême
-=> Les heures passées assis par jour sont comprises entre 3 et 9 pour la moitié des individus. La médiane est à 6. Tous les individus restent dans les limites des moustaches.
+-   Stress Level : Q1 = 3, Médiane = 5, Q3 = 8 et Min = 1, Max = 10 Pas
+    de valeurs extrêmes =\> Le niveau de stress est compris entre 3 et 8
+    pour la moitié des individus, avec une médiane de 5. Les moustaches
+    couvrent l’ensemble des données, sans valeur aberrante.
 
--  Triglycerides: Q1 = 225.5, Médiane = 417, Q3 = 612, Min = 30, Max = 800 et pas de valeur aberrante détectée
-=> Bien que les valeurs varient fortement, la distribution respecte les limites définies par les moustaches. Aucune valeur extrême détectée malgré un écart important.
+-   Sedentary Hours Per Day : Q1 ≈ 3, Médiane ≈ 6, Q3 ≈ 9,Min ≈ 0, Max ≈
+    12 et Pas de valeur extrême =\> Les heures passées assis par jour
+    sont comprises entre 3 et 9 pour la moitié des individus. La médiane
+    est à 6. Tous les individus restent dans les limites des moustaches.
 
-- Physical Activity Days Per Week : Q1 = 2, Médiane = 3, Q3 = 5,Min = 0, Max = 7 et aucun point hors des moustaches
-=> 50 % des individus font entre 2 et 5 jours d’activité physique par semaine. La médiane est de 3 jours. Toutes les valeurs sont incluses dans les moustaches, donc aucune valeur extrême n’est présente.
+-   Triglycerides: Q1 = 225.5, Médiane = 417, Q3 = 612, Min = 30, Max =
+    800 et pas de valeur aberrante détectée =\> Bien que les valeurs
+    varient fortement, la distribution respecte les limites définies par
+    les moustaches. Aucune valeur extrême détectée malgré un écart
+    important.
 
-- Sleep Hours Per Day :	Q1 = 5, Médiane = 7, Q3 = 9, Min = 4, Max = 10 et Aucune valeur hors de l’intervalle attendu
-=> La moitié des individus dorment entre 5 et 9 heures par jour. La médiane est de 7 heures. La distribution est équilibrée, sans valeur aberrante détectée.
+-   Physical Activity Days Per Week : Q1 = 2, Médiane = 3, Q3 = 5,Min =
+    0, Max = 7 et aucun point hors des moustaches =\> 50 % des individus
+    font entre 2 et 5 jours d’activité physique par semaine. La médiane
+    est de 3 jours. Toutes les valeurs sont incluses dans les
+    moustaches, donc aucune valeur extrême n’est présente.
 
-- Heart Attack Risk : Variable binaire : Min = 0, Max = 1, Médiane = 0,	Q1 = 0, Q3 = 1 et Rien à détecter ici car ce n’est pas une variable continue
-=> Cette variable prend uniquement les valeurs 0 ou 1. Le boxplot n’est pas pertinent ici car la variable est catégorique.
+-   Sleep Hours Per Day : Q1 = 5, Médiane = 7, Q3 = 9, Min = 4, Max = 10
+    et Aucune valeur hors de l’intervalle attendu =\> La moitié des
+    individus dorment entre 5 et 9 heures par jour. La médiane est de 7
+    heures. La distribution est équilibrée, sans valeur aberrante
+    détectée.
 
-- systolic_BP :	Q1 = 112, Médiane = 135, Q3 = 158, Min = 90, Max = 180 et Toutes les valeurs sont dans les moustaches
-=> La moitié des pressions systoliques se situent entre 112 et 158 mmHg, avec une médiane de 135. Aucune valeur extrême n’est présente selon la règle de 1,5×IQR.
+-   Heart Attack Risk : Variable binaire : Min = 0, Max = 1, Médiane =
+    0, Q1 = 0, Q3 = 1 et Rien à détecter ici car ce n’est pas une
+    variable continue =\> Cette variable prend uniquement les valeurs 0
+    ou 1. Le boxplot n’est pas pertinent ici car la variable est
+    catégorique.
 
-### 2.2. Variables qualitatives: barplot
+-   systolic_BP : Q1 = 112, Médiane = 135, Q3 = 158, Min = 90, Max = 180
+    et Toutes les valeurs sont dans les moustaches =\> La moitié des
+    pressions systoliques se situent entre 112 et 158 mmHg, avec une
+    médiane de 135. Aucune valeur extrême n’est présente selon la règle
+    de 1,5×IQR.
+
+### 2.2 Variables qualitatives: barplot
 
 ```{r, out.width="50%", fig.align = "center"}
 for (col in colnames(qualitative_vars)){
@@ -484,26 +513,49 @@ for (col in colnames(qualitative_vars)) {
 }
 ```
 
-***Interprétation***
-- Age_cat : La majorité de l’échantillon est composée de personnes d’âge moyen à élevé : 2441 Middle-aged, 2346 Senior et 2361 Elderly. La catégorie Jeune est sous-représentée (1615), ce qui montre un biais vers les tranches d’âge supérieures.
+**Interprétation**
 
-- Sex : L’échantillon est fortement déséquilibré : 6111 hommes contre 2652 femmes. Ce déséquilibre de genre devra être pris en compte dans l’analyse.
+-   Age_cat : La majorité de l’échantillon est composée de personnes
+    d’âge moyen à élevé : 2441 Middle-aged, 2346 Senior et 2361 Elderly.
+    La catégorie Jeune est sous-représentée (1615), ce qui montre un
+    biais vers les tranches d’âge supérieures.
 
-- Smoking : 7859 individus déclarent fumer contre seulement 904 non-fumeurs. Cela montre une très forte proportion de fumeurs dans la base.
+-   Sex : L’échantillon est fortement déséquilibré : 6111 hommes contre
+    2652 femmes. Ce déséquilibre de genre devra être pris en compte dans
+    l’analyse.
 
-- Diabetes : 5716 individus sont atteints de diabète, contre 3047 non-diabétiques. Le diabète est donc très présent dans cette population.
+-   Smoking : 7859 individus déclarent fumer contre seulement 904
+    non-fumeurs. Cela montre une très forte proportion de fumeurs dans
+    la base.
 
-- Obesity : La répartition est équilibrée : 4394 personnes sont en situation d’obésité contre 4369 qui ne le sont pas. Cette variable permet une analyse comparative directe.
+-   Diabetes : 5716 individus sont atteints de diabète, contre 3047
+    non-diabétiques. Le diabète est donc très présent dans cette
+    population.
 
-- Family.History : Les antécédents familiaux de maladies cardiaques concernent 4320 personnes, tandis que 4443 n’en ont pas. La distribution est globalement équilibrée.
+-   Obesity : La répartition est équilibrée : 4394 personnes sont en
+    situation d’obésité contre 4369 qui ne le sont pas. Cette variable
+    permet une analyse comparative directe.
 
-- Previous.Heart.Problems : 4345 individus présentent des antécédents de problèmes cardiaques, contre 4418 qui n’en ont pas. La répartition est presque équilibrée, ce qui permettra d’étudier correctement l’impact de ces antécédents sur le risque d’infarctus.
+-   Family.History : Les antécédents familiaux de maladies cardiaques
+    concernent 4320 personnes, tandis que 4443 n’en ont pas. La
+    distribution est globalement équilibrée.
 
--  Medication.Use : 4367 personnes déclarent prendre un traitement médicamenteux, contre 4396 qui n’en prennent pas. Cette variable est également équilibrée, ce qui facilite les comparaisons entre les deux groupes.
+-   Previous.Heart.Problems : 4345 individus présentent des antécédents
+    de problèmes cardiaques, contre 4418 qui n’en ont pas. La
+    répartition est presque équilibrée, ce qui permettra d’étudier
+    correctement l’impact de ces antécédents sur le risque d’infarctus.
 
-- Alcohol.Consumption : 5241 individus consomment de l’alcool, tandis que 3522 n’en consomment pas. Une majorité est donc consommatrice, ce qui peut représenter un facteur de risque comportemental important à analyser.
+-   Medication.Use : 4367 personnes déclarent prendre un traitement
+    médicamenteux, contre 4396 qui n’en prennent pas. Cette variable est
+    également équilibrée, ce qui facilite les comparaisons entre les
+    deux groupes.
 
-### 2.3. Variables quantitatives et target
+-   Alcohol.Consumption : 5241 individus consomment de l’alcool, tandis
+    que 3522 n’en consomment pas. Une majorité est donc consommatrice,
+    ce qui peut représenter un facteur de risque comportemental
+    important à analyser.
+
+### 2.3 Variables quantitatives et target
 
 ```{r}
 for(i in 1:ncol(quantitative_vars)){
@@ -513,29 +565,57 @@ for(i in 1:ncol(quantitative_vars)){
 ```
 
 #### Interprétation
--   Cholesterol : La médiane et la dispersion sont très proches entre les deux groupes. Il n’y a pas de valeur aberrante visible. Le cholestérol seul ne semble pas un bon discriminateur du risque.
 
--   Heart.Rate : Les médianes sont similaires (autour de 75-80) et la dispersion est équivalente. Aucune différence notable n’apparaît visuellement entre les deux groupes.
+-   Cholesterol : La médiane et la dispersion sont très proches entre
+    les deux groupes. Il n’y a pas de valeur aberrante visible. Le
+    cholestérol seul ne semble pas un bon discriminateur du risque.
 
--   BMI : La distribution de l’IMC est très proche entre les deux groupes, avec une médiane légèrement supérieure chez les individus à risque. Cela pourrait indiquer un lien modéré entre surpoids et risque cardiaque, à confirmer statistiquement.
+-   Heart.Rate : Les médianes sont similaires (autour de 75-80) et la
+    dispersion est équivalente. Aucune différence notable n’apparaît
+    visuellement entre les deux groupes.
 
--   Triglycerides : Les médianes sont un peu plus élevées dans le groupe à risque, mais les distributions restent très proches. Aucun écart important ou valeur extrême n’est détecté.
+-   BMI : La distribution de l’IMC est très proche entre les deux
+    groupes, avec une médiane légèrement supérieure chez les individus à
+    risque. Cela pourrait indiquer un lien modéré entre surpoids et
+    risque cardiaque, à confirmer statistiquement.
 
--   Systolic_BP et Diastolic_BP : Les distributions sont presque identiques entre les groupes. Cela suggère que la pression artérielle n’est pas significativement différente selon le risque, du moins visuellement.
+-   Triglycerides : Les médianes sont un peu plus élevées dans le groupe
+    à risque, mais les distributions restent très proches. Aucun écart
+    important ou valeur extrême n’est détecté.
 
--   Exercise.Hours.Per.Week : Aucune différence visuelle marquée n’est observée. La médiane est proche, et les étendues sont équivalentes. Le niveau d’exercice hebdomadaire n’apparaît pas comme un facteur discriminant clair ici.
+-   Systolic_BP et Diastolic_BP : Les distributions sont presque
+    identiques entre les groupes. Cela suggère que la pression
+    artérielle n’est pas significativement différente selon le risque,
+    du moins visuellement.
 
--   Stress.Level : Les deux groupes ont des distributions similaires. Bien que le stress soit souvent évoqué comme un facteur de risque, il ne ressort pas ici de manière nette.
+-   Exercise.Hours.Per.Week : Aucune différence visuelle marquée n’est
+    observée. La médiane est proche, et les étendues sont équivalentes.
+    Le niveau d’exercice hebdomadaire n’apparaît pas comme un facteur
+    discriminant clair ici.
 
--   Sedentary.Hours.Per.Day : Les individus à risque semblent avoir une légère tendance à passer un peu plus de temps assis, mais la différence reste faible.
+-   Stress.Level : Les deux groupes ont des distributions similaires.
+    Bien que le stress soit souvent évoqué comme un facteur de risque,
+    il ne ressort pas ici de manière nette.
 
--   Physical.Activity.Days.Per.Week : On observe une distribution légèrement plus étendue dans le groupe à risque, avec une médiane équivalente. Il n’y a pas de signe fort de différence ici non plus.
+-   Sedentary.Hours.Per.Day : Les individus à risque semblent avoir une
+    légère tendance à passer un peu plus de temps assis, mais la
+    différence reste faible.
 
--   Income : Les revenus semblent globalement similaires entre les groupes. La médiane et la dispersion sont quasi identiques, suggérant peu ou pas d’effet du revenu sur le risque dans ce jeu de données.
+-   Physical.Activity.Days.Per.Week : On observe une distribution
+    légèrement plus étendue dans le groupe à risque, avec une médiane
+    équivalente. Il n’y a pas de signe fort de différence ici non plus.
 
--   Sleep.Hours.Per.Day : La médiane est identique entre les deux groupes (environ 7 heures). Les distributions sont semblables et symétriques, sans valeurs extrêmes détectées. Le sommeil ne semble donc pas différencier clairement les individus à risque des autres.
+-   Income : Les revenus semblent globalement similaires entre les
+    groupes. La médiane et la dispersion sont quasi identiques,
+    suggérant peu ou pas d’effet du revenu sur le risque dans ce jeu de
+    données.
 
-### 2.4. Variables qualitatives et target 
+-   Sleep.Hours.Per.Day : La médiane est identique entre les deux
+    groupes (environ 7 heures). Les distributions sont semblables et
+    symétriques, sans valeurs extrêmes détectées. Le sommeil ne semble
+    donc pas différencier clairement les individus à risque des autres.
+
+### 2.4. Variables qualitatives et target
 
 ```{r}
 #library(ggplot2)
@@ -565,9 +645,15 @@ y = "Nombre de patients"))
 
 #### Interprétation
 
--   La variable catégorisée Age_cat montre que le nombre de patients à risque d’infarctus varie selon l’âge.
-Bien que les groupes "Middle-aged", "Senior" et "Elderly" soient proches en taille, le groupe "Jeune" présente une proportion relativement élevée de cas à risque, ce qui peut surprendre.
-Cela pourrait refléter d'autres facteurs aggravants chez les jeunes (mode de vie, hérédité...) et suggère que l’âge seul ne suffit pas à prédire le risque, d’où l’intérêt de combiner cette variable avec d'autres dans la modélisation.
+-   La variable catégorisée Age_cat montre que le nombre de patients à
+    risque d’infarctus varie selon l’âge. Bien que les groupes
+    "Middle-aged", "Senior" et "Elderly" soient proches en taille, le
+    groupe "Jeune" présente une proportion relativement élevée de cas à
+    risque, ce qui peut surprendre. Cela pourrait refléter d'autres
+    facteurs aggravants chez les jeunes (mode de vie, hérédité...) et
+    suggère que l’âge seul ne suffit pas à prédire le risque, d’où
+    l’intérêt de combiner cette variable avec d'autres dans la
+    modélisation.
 
 -   Répartition de Sex selon le risque : Le nombre d’hommes dans le
     groupe à risque est nettement supérieur à celui des femmes.Le sexe
@@ -616,9 +702,14 @@ Cela pourrait refléter d'autres facteurs aggravants chez les jeunes (mode de vi
     mérite d’être prise en compte dans la modélisation.
 
 ## 3. Analyse multivariée
+
 ### 3.1 Gestion des valeurs manquantes
 
-Avant de procéder à l'analyse multivariée, nous avons vérifié la présence de valeurs manquantes dans nos variables quantitatives et qualitatives. Cette étape est essentielle, car les valeurs manquantes peuvent fausser les analyses et nécessitent généralement des méthodes d'imputation ou d'exclusion.  
+Avant de procéder à l'analyse multivariée, nous avons vérifié la
+présence de valeurs manquantes dans nos variables quantitatives et
+qualitatives. Cette étape est essentielle, car les valeurs manquantes
+peuvent fausser les analyses et nécessitent généralement des méthodes
+d'imputation ou d'exclusion.
 
 ```{r}
 # verification de valeurs manquantes
@@ -627,9 +718,13 @@ colSums(is.na(quantitative_vars))
 
 ```
 
-Après vérification, nous avons constaté que notre base de données **ne contient aucune valeur manquante**. Ainsi, aucune action corrective (imputation ou suppression) n’est requise, ce qui simplifie l’analyse à venir et garantit l’intégrité des données. 
+Après vérification, nous avons constaté que notre base de données **ne
+contient aucune valeur manquante**. Ainsi, aucune action corrective
+(imputation ou suppression) n’est requise, ce qui simplifie l’analyse à
+venir et garantit l’intégrité des données.
 
-### 3.2 Analyse Graphique 
+### 3.2 Analyse Graphique
+
 #### Analyse des variables quantitatives
 
 ```{r}
@@ -653,6 +748,7 @@ ggplot(data = melted_cor_mat, aes(x = Var1, y = Var2, fill = value)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 ```
+
 **Interprétation** **Corrélations positives**
 
 -   Triglycérides & Systolic_BP (0.0051) et Triglycérides & Diastolic_BP
@@ -683,14 +779,16 @@ essentielles(pas de redondance dans les variables) pour prédire le
 risque d'infarctus.
 
 # III Modèles d'évaluation
+
 ## 1. Methodes des k_plus proches voisins
+
 #### Transformation des variables explicatives
 
 ```{r}
 library(caret) # chargement de la librairie caret
 ```
 
-- Variables quantitatives
+-   Variables quantitatives
 
 ```{r}
 # Normalisation des variables quantitatives
@@ -703,7 +801,7 @@ quantitative_vars_mmnormed = predict(Proc, quantitative_vars)
 head(quantitative_vars_mmnormed)
 ```
 
-- Variables qualitatives
+-   Variables qualitatives
 
 ```{r}
 #  Conversion de toutes les colonnes en facteur (base R)
@@ -729,21 +827,34 @@ predictive_vars=cbind(quantitative_vars_mmnormed, qual_dummies)
 
 ### 1.1 Méthode de Holdout
 
-####  Partition du Jeu de Données (Holdout Split)
+#### Partition du Jeu de Données (Holdout Split)
 
-Dans cette étape, nous réalisons une séparation aléatoire de notre jeu de données en deux sous-ensembles : un ensemble d’apprentissage (Train) et un ensemble de test (Test).
+Dans cette étape, nous réalisons une séparation aléatoire de notre jeu
+de données en deux sous-ensembles : un ensemble d’apprentissage (Train)
+et un ensemble de test (Test).
 
-Pour assurer la reproductibilité des résultats, nous commençons par fixer une graine aléatoire avec `set.seed(1237)`. Cela garantit que la sélection des observations reste la même à chaque exécution du code.
+Pour assurer la reproductibilité des résultats, nous commençons par
+fixer une graine aléatoire avec `set.seed(1237)`. Cela garantit que la
+sélection des observations reste la même à chaque exécution du code.
 
-Nous déterminons ensuite le nombre total d’observations dans notre jeu de données à l’aide de nrow(predictive_vars). Puis, nous utilisons la fonction sample() pour tirer aléatoirement 80 % des observations qui constitueront l’ensemble d’apprentissage.
+Nous déterminons ensuite le nombre total d’observations dans notre jeu
+de données à l’aide de nrow(predictive_vars). Puis, nous utilisons la
+fonction sample() pour tirer aléatoirement 80 % des observations qui
+constitueront l’ensemble d’apprentissage.
 
 Les données sont ensuite partitionnées comme suit :
 
-predictive_vars_train et target_train : contiennent les variables prédictives et la cible pour l’ensemble d’apprentissage (80 % des données).
+predictive_vars_train et target_train : contiennent les variables
+prédictives et la cible pour l’ensemble d’apprentissage (80 % des
+données).
 
-predictive_vars_test et target_test : contiennent les observations restantes (20 % des données), qui serviront à évaluer la performance du modèle.
+predictive_vars_test et target_test : contiennent les observations
+restantes (20 % des données), qui serviront à évaluer la performance du
+modèle.
 
-Ce découpage est essentiel pour éviter le surajustement et garantir que le modèle apprend sur un ensemble d’entraînement tout en étant évalué sur un jeu de test indépendant.
+Ce découpage est essentiel pour éviter le surajustement et garantir que
+le modèle apprend sur un ensemble d’entraînement tout en étant évalué
+sur un jeu de test indépendant.
 
 ```{r}
 set.seed(1237) #pour la reproductibilité 
@@ -756,18 +867,32 @@ predictive_vars_train   = predictive_vars[inTrain,]
 target_train            = target[inTrain]
 ```
 
+Afin d’évaluer efficacement la performance du modèle et d’optimiser ses
+hyperparamètres, nous effectuons une partition du jeu de données en
+trois sous-ensembles :
 
-Afin d’évaluer efficacement la performance du modèle et d’optimiser ses hyperparamètres, nous effectuons une partition du jeu de données en trois sous-ensembles :
+-   **Ensemble d’apprentissage (Train - 80 %)** : utilisé pour entraîner
+    le modèle.\
+-   **Ensemble de validation (Validation - 10 %)** : permet d’ajuster
+    les hyperparamètres et d’éviter le surajustement.\
+-   **Ensemble de test (Test - 10 %)** : sert à évaluer la performance
+    finale du modèle sur des données totalement indépendantes.
 
--   **Ensemble d’apprentissage (Train - 80 %)** : utilisé pour entraîner le modèle.\
--   **Ensemble de validation (Validation - 10 %)** : permet d’ajuster les hyperparamètres et d’éviter le surajustement.\
--   **Ensemble de test (Test - 10 %)** : sert à évaluer la performance finale du modèle sur des données totalement indépendantes.
+Pour garantir la reproductibilité de la répartition des observations,
+nous fixons une graine aléatoire. Ensuite, nous sélectionnons
+aléatoirement **10 % des observations pour l’ensemble de test** et **10
+% pour l’ensemble de validation**, en veillant à ce que ces ensembles ne
+se chevauchent pas. Le reste des données est attribué à l’ensemble
+d’apprentissage (80 %).
 
-Pour garantir la reproductibilité de la répartition des observations, nous fixons une graine aléatoire. Ensuite, nous sélectionnons aléatoirement **10 % des observations pour l’ensemble de test** et **10 % pour l’ensemble de validation**, en veillant à ce que ces ensembles ne se chevauchent pas. Le reste des données est attribué à l’ensemble d’apprentissage (80 %).
+Enfin, les variables cibles des ensembles d’apprentissage, de validation
+et de test sont converties en **facteurs**, ce qui est essentiel pour
+garantir un traitement correct des données catégoriques dans les modèles
+supervisés.
 
-Enfin, les variables cibles des ensembles d’apprentissage, de validation et de test sont converties en **facteurs**, ce qui est essentiel pour garantir un traitement correct des données catégoriques dans les modèles supervisés.
-
-Cette séparation en trois ensembles permet d’obtenir une évaluation plus robuste et d’améliorer la généralisation du modèle en évitant un sur-apprentissage.
+Cette séparation en trois ensembles permet d’obtenir une évaluation plus
+robuste et d’améliorer la généralisation du modèle en évitant un
+sur-apprentissage.
 
 ```{r}
 set.seed(1237)
@@ -788,36 +913,63 @@ target_train               = target[inTrain]
 
 ```
 
+#### Sélection de l’Hyperparamètre k
+
+Dans cette étape, nous cherchons à optimiser le nombre de voisins **k**
+pour la méthode des k plus proches voisins (kNN). L’hyperparamètre **k**
+joue un rôle essentiel dans la performance du modèle :\
+- Un **k trop petit** risque d'entraîner un modèle trop sensible aux
+variations locales des données, pouvant causer du **surajustement**.\
+- Un **k trop grand** peut lisser excessivement les prédictions et
+réduire la capacité du modèle à capturer des motifs locaux dans les
+données.
+
+Nous testons donc différentes valeurs de **k** (de 1 à 20) et évaluons
+les performances du modèle sur l’ensemble de validation en utilisant
+plusieurs métriques :\
+- **Accuracy** : mesure globale des prédictions correctes.\
+- **Recall (Sensibilité)** : proportion des instances positives
+correctement identifiées.\
+- **Precision** : proportion des prédictions positives qui sont
+réellement correctes.
+
+Pour chaque valeur de **k**, nous utilisons l’algorithme **kNN** pour
+prédire les classes des observations dans l’ensemble de validation, puis
+nous évaluons les performances du modèle avec une **matrice de
+confusion**.
+
+Enfin, nous regroupons les résultats sous forme d’un tableau, ce qui
+nous permet d’identifier la valeur optimale de **k** en fonction des
+performances observées.
 
 #### Sélection de l’Hyperparamètre k
 
-Dans cette étape, nous cherchons à optimiser le nombre de voisins **k** pour la méthode des k plus proches voisins (kNN). L’hyperparamètre **k** joue un rôle essentiel dans la performance du modèle :\
-- Un **k trop petit** risque d'entraîner un modèle trop sensible aux variations locales des données, pouvant causer du **surajustement**.\
-- Un **k trop grand** peut lisser excessivement les prédictions et réduire la capacité du modèle à capturer des motifs locaux dans les données.
+Dans cette étape, nous cherchons à optimiser le nombre de voisins **k**
+pour la méthode des k plus proches voisins (kNN). L’hyperparamètre **k**
+joue un rôle essentiel dans la performance du modèle :\
+- Un **k trop petit** risque d'entraîner un modèle trop sensible aux
+variations locales des données, pouvant causer du **surajustement**.\
+- Un **k trop grand** peut lisser excessivement les prédictions et
+réduire la capacité du modèle à capturer des motifs locaux dans les
+données.
 
-Nous testons donc différentes valeurs de **k** (de 1 à 20) et évaluons les performances du modèle sur l’ensemble de validation en utilisant plusieurs métriques :\
+Nous testons donc différentes valeurs de **k** (de 1 à 20) et évaluons
+les performances du modèle sur l’ensemble de validation en utilisant
+plusieurs métriques :\
 - **Accuracy** : mesure globale des prédictions correctes.\
-- **Recall (Sensibilité)** : proportion des instances positives correctement identifiées.\
-- **Precision** : proportion des prédictions positives qui sont réellement correctes.
+- **Recall (Sensibilité)** : proportion des instances positives
+correctement identifiées.\
+- **Precision** : proportion des prédictions positives qui sont
+réellement correctes.
 
-Pour chaque valeur de **k**, nous utilisons l’algorithme **kNN** pour prédire les classes des observations dans l’ensemble de validation, puis nous évaluons les performances du modèle avec une **matrice de confusion**.
+Pour chaque valeur de **k**, nous utilisons l’algorithme **kNN** pour
+prédire les classes des observations dans l’ensemble de validation, puis
+nous évaluons les performances du modèle avec une **matrice de
+confusion**.
 
-Enfin, nous regroupons les résultats sous forme d’un tableau, ce qui nous permet d’identifier la valeur optimale de **k** en fonction des performances observées.
-
-#### Sélection de l’Hyperparamètre k
-
-Dans cette étape, nous cherchons à optimiser le nombre de voisins **k** pour la méthode des k plus proches voisins (kNN). L’hyperparamètre **k** joue un rôle essentiel dans la performance du modèle :\
-- Un **k trop petit** risque d'entraîner un modèle trop sensible aux variations locales des données, pouvant causer du **surajustement**.\
-- Un **k trop grand** peut lisser excessivement les prédictions et réduire la capacité du modèle à capturer des motifs locaux dans les données.
-
-Nous testons donc différentes valeurs de **k** (de 1 à 20) et évaluons les performances du modèle sur l’ensemble de validation en utilisant plusieurs métriques :\
-- **Accuracy** : mesure globale des prédictions correctes.\
-- **Recall (Sensibilité)** : proportion des instances positives correctement identifiées.\
-- **Precision** : proportion des prédictions positives qui sont réellement correctes.
-
-Pour chaque valeur de **k**, nous utilisons l’algorithme **kNN** pour prédire les classes des observations dans l’ensemble de validation, puis nous évaluons les performances du modèle avec une **matrice de confusion**.
-
-Enfin, nous regroupons les résultats sous forme d’un tableau, ce qui nous permet d’identifier la valeur optimale de **k** en fonction des performances observées.
+Enfin, nous regroupons les résultats sous forme d’un tableau, ce qui
+nous permet d’identifier la valeur optimale de **k** en fonction des
+performances observées.
 
 ```{r, results = 'hide'}
 
@@ -866,42 +1018,69 @@ print(results)
 
 ```
 
-
-> Les résultats obtenus montrent que l’accuracy diminue progressivement avec k, atteignant un maximum d’environ 0.90 pour k = 1. Cependant, cette diminution de l'accuracy s'accompagne d'une baisse du recall, indiquant que le modèle devient plus conservateur à mesure que k augmente, identifiant moins de cas positifs. En revanche, la précision tend à s’améliorer légèrement avec un k plus élevé.
+> Les résultats obtenus montrent que l’accuracy diminue progressivement
+> avec k, atteignant un maximum d’environ 0.90 pour k = 1. Cependant,
+> cette diminution de l'accuracy s'accompagne d'une baisse du recall,
+> indiquant que le modèle devient plus conservateur à mesure que k
+> augmente, identifiant moins de cas positifs. En revanche, la précision
+> tend à s’améliorer légèrement avec un k plus élevé.
 
 On observe ainsi un compromis entre recall et précision :
 
-Un faible k (ex: k = 1-3) permet d’identifier plus de cas positifs (meilleur recall), mais avec un risque de surajustement aux données d'entraînement.
+Un faible k (ex: k = 1-3) permet d’identifier plus de cas positifs
+(meilleur recall), mais avec un risque de surajustement aux données
+d'entraînement.
 
-Un k plus élevé (ex: k > 10) stabilise le modèle et augmente la précision, mais réduit la sensibilité aux cas positifs.
+Un k plus élevé (ex: k \> 10) stabilise le modèle et augmente la
+précision, mais réduit la sensibilité aux cas positifs.
 
-Afin d’obtenir un équilibre entre précision, recall et stabilité du modèle, nous avons opté pour k = 4.
+Afin d’obtenir un équilibre entre précision, recall et stabilité du
+modèle, nous avons opté pour k = 4.
 
 Avec k = 4, nous obtenons une accuracy de 0.68,
 
-Un recall de 0.39, assurant une détection correcte d’une bonne partie des cas positifs,
+Un recall de 0.39, assurant une détection correcte d’une bonne partie
+des cas positifs,
 
 Une précision de 0.595, permettant de limiter les fausses alertes.
 
 ### Les différentes métriques en fonction des valeurs de K étudiées
 
-Afin de mieux visualiser l'impact du choix de **k** sur les performances du modèle, nous avons représenté graphiquement l'évolution des différentes métriques(**accuracy**, **recall** et **precision**) en fonction des valeurs de **k** testées.
+Afin de mieux visualiser l'impact du choix de **k** sur les performances
+du modèle, nous avons représenté graphiquement l'évolution des
+différentes métriques(**accuracy**, **recall** et **precision**) en
+fonction des valeurs de **k** testées.
 
 ```{r, out.width="50%", fig.align = "center", eval = FALSE}
 plot(KGrid, accuracy_val, type = 'l', xlab = "K, nombre de voisins", ylab = "Accuracy", col="purple")
 plot(KGrid, recall_val, type = 'l', xlab = "K, nombre de voisins", ylab = "Recall", col="red")
 plot(KGrid, precision_val, type = 'l', xlab = "K, nombre de voisins", ylab = "Precision", col="blue")
 ```
+
 #### Interpretation des graphiques
 
-> -Accuracy (précision globale du modèle) : représentée en violet, elle atteint son maximum pour k = 1, puis diminue progressivement avant de se stabiliser autour de k = 20. Cela reflète le compromis entre un modèle très flexible (faible k) et un modèle plus stable mais moins précis (grand k).
+-   Accuracy (précision globale du modèle) : représentée en violet, elle
+    atteint son maximum pour k = 1, puis diminue progressivement avant
+    de se stabiliser autour de k = 20. Cela reflète le compromis entre
+    un modèle très flexible (faible k) et un modèle plus stable mais
+    moins précis (grand k).
 
--Recall (sensibilité) : en rouge, cette métrique décroît avec l’augmentation de k, indiquant que le modèle détecte de moins en moins de cas positifs à mesure que k augmente. Un faible k favorise donc la détection des cas positifs, mais au risque d'une plus grande variabilité des résultats.
+-   Recall (sensibilité) : en rouge, cette métrique décroît avec
+    l’augmentation de k, indiquant que le modèle détecte de moins en
+    moins de cas positifs à mesure que k augmente. Un faible k favorise
+    donc la détection des cas positifs, mais au risque d'une plus grande
+    variabilité des résultats.
 
--Précision : en bleu, elle tend à s’améliorer légèrement avec k, ce qui signifie que les prédictions positives deviennent plus fiables, bien que cela se fasse au détriment du recall. Un k plus élevé privilégie donc des prédictions plus précises mais moins nombreuses.
+-   Précision : en bleu, elle tend à s’améliorer légèrement avec k, ce
+    qui signifie que les prédictions positives deviennent plus fiables,
+    bien que cela se fasse au détriment du recall. Un k plus élevé
+    privilégie donc des prédictions plus précises mais moins nombreuses.
 
 #### Performance du classifieur final
-Pour évaluer la performance de notre modèle, nous avons entraîné un classifieur k-plus proches voisins (k-NN) avec k = 4, valeur choisie pour assurer un bon équilibre entre recall et précision.
+
+Pour évaluer la performance de notre modèle, nous avons entraîné un
+classifieur k-plus proches voisins (k-NN) avec k = 4, valeur choisie
+pour assurer un bon équilibre entre recall et précision.
 
 ```{r, results = 'hide', eval = FALSE}
 rbind(predictive_vars_train, predictive_vars_validation)
@@ -928,17 +1107,36 @@ precision_test
 
 > L'évaluation sur l’ensemble de test donne les résultats suivants :
 
-- Accuracy : 69.40 % :Le modèle classe correctement un peu plus de la moitié des observations. Cette performance reste modérée et indique que des améliorations sont possibles.
+-   Accuracy : 69.40 % :Le modèle a correctement prédit le risque chez
+    environ 7 patients sur 10. Bien que ce score soit supérieur au taux
+    de hasard (64,2 % correspondant à la classe majoritaire), il reste
+    modeste pour une application médicale, où la fiabilité doit être
+    maximale.
 
-- Recall : 46.17 % : Le modèle détecte environ 46 % des cas positifs. Il n'est pas assez efficace pour identifier les éléments appartenant à la classe cible, mais il peut encore en manquer.
+-   Recall : 46.17 % : Parmi tous les patients effectivement à risque
+    d’infarctus, le modèle en a correctement identifié moins d’un sur
+    deux. Cela signifie qu’il laisse passer plus de 50 % des patients à
+    risque, ce qui est problématique dans un contexte de santé publique,
+    car le coût d’un faux négatif (non détecté) peut être critique.
 
-- Précision : 59.42 % : Lorsqu’il prédit un élément comme appartenant à la classe cible, il a environ 59 % de chances d’avoir raison. Cela signifie qu’il reste un certain nombre de fausses alertes.
+-   Précision : 59.42 % : Sur tous les patients prédit comme étant à
+    risque, seulement 59 % le sont réellement. Cela reflète une présence
+    non négligeable de faux positifs, c’est-à-dire des patients
+    faussement signalés comme à risque, ce qui pourrait entraîner des
+    examens inutiles ou inquiéter à tort.
 
-Ces résultats traduisent le compromis réalisé lors du choix de k. En optant pour une valeur modérée, nous avons limité la sensibilité du modèle aux fluctuations locales des données, tout en évitant un surajustement. Toutefois, l’accuracy relativement faible indique que le modèle pourrait être amélioré.
+Ces résultats traduisent le compromis réalisé lors du choix de k. En
+optant pour une valeur modérée, nous avons limité la sensibilité du
+modèle aux fluctuations locales des données, tout en évitant un
+surajustement. Toutefois, l’accuracy relativement faible indique que le
+modèle pourrait être amélioré.
 
 ### Utisation de la partie Test pour évaluer le classifieur final
 
-Afin d’évaluer la robustesse du modèle, nous avons appliqué notre classifieur k-NN (k = 4) sur l’ensemble d’entraînement et de validation regroupés. Cette approche permet de vérifier dans quelle mesure le modèle s’adapte aux données sur lesquelles il a été appris.
+Afin d’évaluer la robustesse du modèle, nous avons appliqué notre
+classifieur k-NN (k = 4) sur l’ensemble d’entraînement et de validation
+regroupés. Cette approche permet de vérifier dans quelle mesure le
+modèle s’adapte aux données sur lesquelles il a été appris.
 
 ```{r}
 set.seed(1237)
@@ -957,32 +1155,63 @@ recall_train
 precision_train
 
 ```
+
 Les performances obtenues sont les suivantes :
 
-- Accuracy : 73.23 % : Le modèle classe correctement environ 72 % des observations. Cette performance est nettement meilleure que celle obtenue sur l’ensemble de test, ce qui suggère un possible surajustement du modèle aux données d'entraînement.
+-   Accuracy : 73.23 % : Le modèle classe correctement environ 72 % des
+    observations. Cette performance est nettement meilleure que celle
+    obtenue sur l’ensemble de test, ce qui suggère un possible
+    surajustement du modèle aux données d'entraînement.
 
-- Recall : 53.12 % : Le modèle détecte plus de 84 % des cas positifs. Il a donc une forte capacité à identifier la classe cible, ce qui est un bon point si l’objectif est de minimiser les faux négatifs.
+-   Recall : 53.12 % : Le modèle parvient à identifier 53.12 % des
+    patients réellement à risque d’infarctus. Autrement dit, il détecte
+    un peu plus d’un patient à risque sur deux, ce qui montre une
+    capacité modérée à repérer correctement les cas positifs.
 
-- Précision : 64.63 % : Lorsqu’il prédit un élément comme appartenant à la classe cible, il a environ 76 % de chances d’avoir raison. Cette valeur est plus élevée que celle obtenue sur l’ensemble de test, ce qui indique que le modèle fonctionne bien sur les données connues mais peut avoir plus de mal à généraliser.
+-   Précision : 64.63 % : Lorsqu’il prédit un élément comme appartenant
+    à la classe cible, il a environ 65 % de chances d’avoir raison.
+    Cette valeur est plus élevée que celle obtenue sur l’ensemble de
+    test, ce qui indique que le modèle fonctionne bien sur les données
+    connues mais peut avoir plus de mal à généraliser.
 
-**Analyse des résultats**
-La différence notable entre les performances sur l’ensemble d’entraînement et celles obtenues sur l’ensemble de test indique que le modèle pourrait souffrir d’un légèr surajustement : il s’adapte bien aux données d’apprentissage mais perd en généralisation sur de nouvelles données et cela peut être aussi  dû probablement à notre base de données qui presente moins de personnes aynat de risques..
+**Analyse des résultats** La différence notable entre les performances
+sur l’ensemble d’entraînement et celles obtenues sur l’ensemble de test
+indique que le modèle pourrait souffrir d’un légèr surajustement : il
+s’adapte bien aux données d’apprentissage mais perd en généralisation
+sur de nouvelles données et cela peut être aussi dû probablement à notre
+base de données qui presente moins de personnes aynat de risques..
 
-Pour améliorer la performance globale du modèle et éviter cet effet, plusieurs pistes peuvent être envisagées :
+Pour améliorer la performance globale du modèle et éviter cet effet,
+plusieurs pistes peuvent être envisagées :
 
--Tester d’autres valeurs de k pour identifier un meilleur compromis entre recall et précision.
+-   Tester d’autres valeurs de k pour identifier un meilleur compromis
+    entre recall et précision.
 
--Introduire une validation croisée afin d’avoir une évaluation plus fiable des performances du modèle.
+-   Introduire une validation croisée afin d’avoir une évaluation plus
+    fiable des performances du modèle.
 
--Expérimenter d’autres méthodes de classification comme les arbres de décision,naïve bayesienne pour comparer les résultats.
+-   Expérimenter d’autres méthodes de classification comme les arbres de
+    décision,naïve bayesienne pour comparer les résultats.
 
 ## 1.2 Méthode de cross-validation
-Pour pouvoir évaluer la performance du modèle de manière plus robuste et de déterminer la meilleure valeur de k, nous avons utilisé une cross-validation en 10 folds. Avant d’effectuer la cross-validation, nous avons d’abord divisé notre ensemble de données en deux parties comme dans la méthode hold-out en un ensemble de test (10 % des observations), qui ne sera utilisé qu’à la toute fin pour évaluer le modèle. Un ensemble d’apprentissage et de validation (90 % des observations), qui sera utilisé pour la cross-validation.
 
-La cross-validation est réalisée en 10 itérations (folds). À chaque itération :
+Pour pouvoir évaluer la performance du modèle de manière plus robuste et
+de déterminer la meilleure valeur de k, nous avons utilisé une
+cross-validation en 10 folds. Avant d’effectuer la cross-validation,
+nous avons d’abord divisé notre ensemble de données en deux parties
+comme dans la méthode hold-out en un ensemble de test (10 % des
+observations), qui ne sera utilisé qu’à la toute fin pour évaluer le
+modèle. Un ensemble d’apprentissage et de validation (90 % des
+observations), qui sera utilisé pour la cross-validation.
 
-Les données sont divisées en une partie  d'entraînement(80%) et une partie de validation(10%).
-Le classifieur k-NN est entraîné sur les données d’entraînement pour chaque valeur de k allant de 1 à 20. Les performances sont évaluées sur la partie de validation en utilisant trois métriques :
+La cross-validation est réalisée en 10 itérations (folds). À chaque
+itération :
+
+Les données sont divisées en une partie d'entraînement(80%) et une
+partie de validation(10%). Le classifieur k-NN est entraîné sur les
+données d’entraînement pour chaque valeur de k allant de 1 à 20. Les
+performances sont évaluées sur la partie de validation en utilisant
+trois métriques :
 
 Accuracy (précision globale)
 
@@ -990,7 +1219,8 @@ Recall (sensibilité)
 
 Precision (précision des prédictions positives)
 
-Les performances obtenues pour chaque itération et chaque valeur de k sont stockées dans des matrices.
+Les performances obtenues pour chaque itération et chaque valeur de k
+sont stockées dans des matrices.
 
 ```{r, eval = FALSE}
 set.seed(1357)
@@ -1056,8 +1286,10 @@ colnames(precision_fold) = paste0("K_", KGrid)
 ### Calcul des Moyennes sur les 10 Folds
 
 Moyenne de l’accuracy : reflète la proportion de bonnes classifications.
-Moyenne du recall : indique la capacité du modèle à détecter la classe cible.
-Moyenne de la précision : mesure la fiabilité des prédictions positives.
+Moyenne du recall : indique la capacité du modèle à détecter la classe
+cible. Moyenne de la précision : mesure la fiabilité des prédictions
+positives.
+
 ```{r}
 # 10-fold cross validated mean accuracy pour chaque valeur de K
 mean_accuracy_k = colMeans(accuracy_fold)
@@ -1074,19 +1306,29 @@ mean_recall_k
 mean_precision_k
 ```
 
+> Analyse des Résultats de la Cross-Validation Après avoir effectué la
+> cross-validation, nous avons obtenu les valeurs moyennes des trois
+> métriques (accuracy, recall, et precision) pour chaque valeur de k
+> allant de 1 à 20.
 
->Analyse des Résultats de la Cross-Validation
-Après avoir effectué la cross-validation, nous avons obtenu les valeurs moyennes des trois métriques (accuracy, recall, et precision) pour chaque valeur de k allant de 1 à 20.
+-   **Accuracy Moyenne par Valeur de K** L’accuracy augmente
+    progressivement avec k, atteignant son maximum pour k = 20 avec
+    61,10 % de précision. Cela indique que les performances du modèle
+    s’améliorent avec un nombre plus élevé de voisins.
+-   **Recall Moyen par Valeur de K** Le recall suit une tendance
+    croissante, atteignant 90,84 % pour k = 20. Un recall élevé signifie
+    que le modèle identifie efficacement les instances positives (classe
+    0), ce qui peut être crucial si nous voulons minimiser les faux
+    négatifs.
+-   **Precision Moyenne par Valeur de K** La précision varie moins que
+    les autres métriques et reste relativement stable autour de 63,8 %.
+    Cela montre que le modèle ne produit pas trop de faux positifs, mais
+    qu'il n’y a pas de grande amélioration avec l’augmentation de k.
 
-- **Accuracy Moyenne par Valeur de K**
-L’accuracy augmente progressivement avec k, atteignant son maximum pour k = 20 avec 61,10 % de précision. Cela indique que les performances du modèle s’améliorent avec un nombre plus élevé de voisins.
-- **Recall Moyen par Valeur de K**
-Le recall suit une tendance croissante, atteignant 90,84 % pour k = 20. Un recall élevé signifie que le modèle identifie efficacement les instances positives (classe 0), ce qui peut être crucial si nous voulons minimiser les faux négatifs.
-- **Precision Moyenne par Valeur de K**
-La précision varie moins que les autres métriques et reste relativement stable autour de 63,8 %. Cela montre que le modèle ne produit pas trop de faux positifs, mais qu'il n’y a pas de grande amélioration avec l’augmentation de k.
-
-Pour notre base, nous allons choisir un k =15 afin que notre modèle puisse faire une bonne prediction des vrais positifs et dea faux positifs. Ce choix optimise la performance du classifieur tout en minimisant les biais liés aux valeurs extrêmes de k.
-
+Pour notre base, nous allons choisir un k =15 afin que notre modèle
+puisse faire une bonne prediction des vrais positifs et dea faux
+positifs. Ce choix optimise la performance du classifieur tout en
+minimisant les biais liés aux valeurs extrêmes de k.
 
 ### Graphes 10-fold mean accuracy en fonction des valeurs de K
 
@@ -1155,12 +1397,22 @@ precision_test
 
 ## 2. La régression logistique
 
-## 2. Régression logistique
-
-La régression logistique est l’un des algorithmes de classification les plus utilisés lorsqu’on souhaite modéliser une variable binaire. Contrairement à la méthode des k plus proches voisins (k-NN) qui peut fonctionner directement avec des variables catégorielles encodées, la régression logistique nécessite que **toutes les variables explicatives soient numériques**.
-Dans ce cadre, nous réutilisons le jeu de données `predictive_vars` déjà transformé dans la phase de prétraitement.
-Le modèle est entraîné sur l’échantillon d’apprentissage (`predictive_vars_train`) en utilisant la variable cible `target_train`. La prédiction est ensuite effectuée sur l’échantillon test (`predictive_vars_test`), et le résultat est exprimé sous forme de **probabilités** d’appartenir à la classe positive (i.e., présence de risque cardiaque).
-Un **seuil de 0.5** est appliqué pour transformer les probabilités en classes (0 ou 1), et une **matrice de confusion** est calculée pour évaluer la performance du modèle (accuracy, recall, précision...).
+La régression logistique est l’un des algorithmes de classification les
+plus utilisés lorsqu’on souhaite modéliser une variable binaire.
+Contrairement à la méthode des k plus proches voisins (k-NN) qui peut
+fonctionner directement avec des variables catégorielles encodées, la
+régression logistique nécessite que **toutes les variables explicatives
+soient numériques**. Dans ce cadre, nous réutilisons le jeu de données
+`predictive_vars` déjà transformé dans la phase de prétraitement. Le
+modèle est entraîné sur l’échantillon d’apprentissage
+(`predictive_vars_train`) en utilisant la variable cible `target_train`.
+La prédiction est ensuite effectuée sur l’échantillon test
+(`predictive_vars_test`), et le résultat est exprimé sous forme de
+**probabilités** d’appartenir à la classe positive (i.e., présence de
+risque cardiaque). Un **seuil de 0.5** est appliqué pour transformer les
+probabilités en classes (0 ou 1), et une **matrice de confusion** est
+calculée pour évaluer la performance du modèle (accuracy, recall,
+précision...).
 
 ```{r}
 
@@ -1189,7 +1441,6 @@ target_test  <- target[-train_index]
 
 ```
 
-
 ```{r}
 
 logit_model <- glm(target_train ~ ., data = X_train, family = binomial)
@@ -1202,32 +1453,44 @@ confusionMatrix(target_pred_class, target_test, positive = "1")
 
 ```
 
-***Interpretation***
-	-	Accuracy : 0.6518 => Le modèle est correct dans 62% des cas. C’est un peu moins bon que le taux de majorité (0.6446), donc pas très performant globalement.
-	-	Sensitivity : 0.9389 => Excellente détection des patients sans risque (classe 0). Presque tous les vrais 0 sont bien identifiés.
-	-	Specificity : 0.0465 =>  Très mauvaise détection des patients à risque (classe 1). Le modèle ne reconnaît presque aucun vrai cas de risque.
-	-	Pos Pred Value : 0.641 => Quand le modèle prédit “0”, c’est bon à 64% du temps.
-	-	Neg Pred Value : 0.296 => Quand le modèle prédit “1”, il se trompe souvent.
-	-	Balanced Accuracy : 0.4927 => En dessous de 0.5 = pire qu’un tirage au sort binaire.
-	-	Kappa : -0.0179 => Accord entre le modèle et la vérité à peine mieux qu’un hasard.
+**Interpretation**
 
-Conclusion :
+-    Accuracy : 0.6419. Le modèle est correct dans 64% des cas. C’est un
+    peu moins bon que le taux de majorité (0.6446), donc pas très
+    performant globalement.
 
-Le modèle prédit quasiment toujours la classe 0, et il a du mal à détecter les vrais patients à risque. Il est biaisé vers la classe majoritaire.
+-    Sensitivity : 0. Le modèle échoue totalement à détecter les
+    patients à risque (classe 1). Aucun des 627 cas réellement à risque
+    n’a été correctement identifié.
+    Ce score est très préoccupant, surtout dans un contexte médical, car
+    il implique un risque élevé de faux négatifs, c’est-à-dire des
+    patients à risque laissés sans prise en charge.
 
+-    Specificity : 1. Tous les patients non à risque (classe 0) ont été
+    correctement prédits.
+
+-   Precision : NA. Le modèle n’a prédit aucun individu comme étant à
+    risque, il est donc impossible de calculer une précision, car le
+    dénominateur est nul (aucune prédiction positive).
+
+Dans un contexte médical, ce modèle est inacceptable, car il laisse
+passer 100 % des cas à risque, ce qui compromet la sécurité des
+patients.
 
 ## 3. Arbre de classification
+
 #### Variables explicatives
 
-Dans cette section, nous implémentons un arbre de décision pour prédire le risque de crise cardiaque. L’algorithme est entraîné sur l’ensemble d’entraînement (predictive_vars_train)
-Avant de construire l’arbre de classification, nous avons regroupé
-l’ensemble des variables explicatives — à la fois quantitatives et
-qualitatives — dans un seul objet nommé predictive_vars. Une
-vérification de la structure (str) permet de s'assurer que les types de
-données sont correctement interprétés (par exemple, les variables
-qualitatives sont bien des facteurs, les quantitatives sont numériques).
-Cette étape garantit une préparation adéquate des données en vue de
-l'apprentissage du modèle.
+Dans cette section, nous implémentons un arbre de décision pour prédire
+le risque de crise cardiaque. L’algorithme est entraîné sur l’ensemble
+d’entraînement (predictive_vars_train) Avant de construire l’arbre de
+classification, nous avons regroupé l’ensemble des variables
+explicatives — à la fois quantitatives et qualitatives — dans un seul
+objet nommé predictive_vars. Une vérification de la structure (str)
+permet de s'assurer que les types de données sont correctement
+interprétés (par exemple, les variables qualitatives sont bien des
+facteurs, les quantitatives sont numériques). Cette étape garantit une
+préparation adéquate des données en vue de l'apprentissage du modèle.
 
 ```{r}
 predictive_vars = cbind(quantitative_vars, qualitative_vars)
@@ -1256,22 +1519,28 @@ target_test             = target[-inTrain]
 predictive_vars_train   = predictive_vars[inTrain,]
 target_train            = target[inTrain] 
 ```
+
 #### Installation des packages et Chargement des librairies `rpart`et `rpart.plot`
 
-Nous utilisons les bibliothèques rpart et rpart.plot pour la création et la visualisation de l’arbre de décision.
+Nous utilisons les bibliothèques rpart et rpart.plot pour la création et
+la visualisation de l’arbre de décision.
 
 ```{r, results = "hide", message = FALSE}
 install.packages("rpart")
 install.packages("rpart.plot")
 ```
 
-
 ```{r}
 library(rpart)
 library(rpart.plot)
 ```
+
 ### 3.1. Préparation des données
-Nous convertissons la variable cible en facteur, car rpart attend une variable catégorielle pour la classification. De plus, les ensembles de données d'entraînement et de test sont transformés en data frames pour assurer leur compatibilité avec l'algorithme.
+
+Nous convertissons la variable cible en facteur, car rpart attend une
+variable catégorielle pour la classification. De plus, les ensembles de
+données d'entraînement et de test sont transformés en data frames pour
+assurer leur compatibilité avec l'algorithme.
 
 ```{r, eval = FALSE}
 predictive_vars_train <- as.data.frame(predictive_vars_train)
@@ -1279,8 +1548,12 @@ predictive_vars_test <- as.data.frame(predictive_vars_test)
 target_train <- as.factor(target_train)
 
 ```
-### 3.3. Phase d'apprentissage
-L’arbre est entraîné avec une profondeur maximale de 5 niveaux, un critère de division minimal de 10 observations par nœud, et un paramètre de complexité (cp) de 0.001 pour éviter un sur-ajustement excessif.
+
+### 3.3 Phase d'apprentissage
+
+L’arbre est entraîné avec une profondeur maximale de 5 niveaux, un
+critère de division minimal de 10 observations par nœud, et un paramètre
+de complexité (cp) de 0.001 pour éviter un sur-ajustement excessif.
 
 ```{r, eval = FALSE}
 classifTree <- rpart(target_train ~ ., data = predictive_vars_train, 
@@ -1289,17 +1562,19 @@ classifTree <- rpart(target_train ~ ., data = predictive_vars_train,
 
 ```
 
-### 3.3. Visualisation de l’arbre de décision
-Une fois l’arbre entraîné, nous utilisons rpart.plot pour afficher sa structure, en mettant en évidence les probabilités et les règles de classification.
+####  Visualisation de l’arbre de décision
+
+Une fois l’arbre entraîné, nous utilisons rpart.plot pour afficher sa
+structure, en mettant en évidence les probabilités et les règles de
+classification.
 
 ```{r, eval = FALSE}
 rpart.plot(classifTree, type = 3, extra = 2, fallen.leaves = TRUE,  
            main = "Arbre de prédiction du risque de crise cardiaque") 
 ```
 
-**Interprétation**
+### 3.4 Prédiction de la target avec l'arbre de décision sur le jeu de données de test
 
-### 3.4. Prédiction de la target avec l'arbre de décision sur le jeu de données de test 
 ### Visualisation de l'arbre en phase de test
 
 ```{r, eval = FALSE}
@@ -1310,7 +1585,10 @@ rpart.plot(classifTree1, type = 3, extra = 2, fallen.leaves = TRUE,
            main = "Arbre de prédiction du risque de crise cardiaque") 
 
 ```
-Nous évaluons la performance de notre arbre de décision sur l’ensemble de test en calculant les métriques de classification en utilisant une matrice de confusion (confusionMatrix)
+
+Nous évaluons la performance de notre arbre de décision sur l’ensemble
+de test en calculant les métriques de classification en utilisant une
+matrice de confusion (confusionMatrix)
 
 ```{r, eval = FALSE}
 # Prédiction sur le jeu de test
@@ -1329,18 +1607,23 @@ accuracy_test
 recall_test
 precision_test
 ```
-**interprétation des résultats**
-Les performances de l’arbre de décision sur le jeu de test sont les suivantes :
 
-- Accuracy : 62,86 %,  Cela signifie que le modèle effectue correctement environ 62 % des prédictions sur l’ensemble de test.
-- Sensitivity (Recall) : 16.2 %, Ce faible score indique que le modèle ne détecte qu’une petite partie des cas positifs (patients à risque). Autrement dit, il y a un grand nombre de faux négatifs.
-- Precision : 57.29 %,  Cela signifie qu’environ 57% des prédictions positives sont correctes.
+**interprétation des résultats** Les performances de l’arbre de décision
+sur le jeu de test sont les suivantes :
 
-### 3.4. Élagage de l'arbre
+-   Accuracy : 62,86 %, Cela signifie que le modèle effectue
+    correctement environ 62 % des prédictions sur l’ensemble de test.
+-   Sensitivity (Recall) : 16.2 %, Ce faible score indique que le modèle
+    ne détecte qu’une petite partie des cas positifs (patients à
+    risque). Autrement dit, il y a un grand nombre de faux négatifs.
+-   Precision : 57.29 %, Cela signifie qu’environ 57% des prédictions
+    positives sont correctes.
+
+####  Élagage de l'arbre
+
 ```{r, eval = FALSE}
 classifTree$cptable
 ```
-
 
 ```{r, eval = FALSE}
 cp = classifTree$cptable[which.min(classifTree$cptable[, "xerror"]), "CP"]
@@ -1350,11 +1633,17 @@ printcp(classifTree)  # Affiche les valeurs de cp
 plotcp(classifTree)   # Graphique de l'erreur en fonction de cp
 
 ```
+
 #### Visualisation de l’arbre élagué
 
-L’arbre de décision obtenu après élagage est visualisé ci-dessous. Cette représentation graphique permet d’identifier les variables les plus importantes dans le processus de classification, ainsi que les règles utilisées pour distinguer les individus à risque d’infarctus.
+L’arbre de décision obtenu après élagage est visualisé ci-dessous. Cette
+représentation graphique permet d’identifier les variables les plus
+importantes dans le processus de classification, ainsi que les règles
+utilisées pour distinguer les individus à risque d’infarctus.
 
-Elle constitue également un outil d’interprétation utile dans un contexte médical, car elle permet de suivre la logique de décision étape par étape.
+Elle constitue également un outil d’interprétation utile dans un
+contexte médical, car elle permet de suivre la logique de décision étape
+par étape.
 
 ```{r, eval = FALSE}
 prunedTree = prune(classifTree, cp*0.8)
@@ -1364,15 +1653,30 @@ rpart.plot(prunedTree, type = 3, extra = 2, fallen.leaves = TRUE,
            main = "Arbre élagué de prédiction du risque de crise cardiaque") 
 
 ```
+
 #### Remarque sur l’arbre élagué
 
-> Il est important de souligner que l’arbre utilisé pour prédire la variable cible sur le jeu de test correspond exactement à l’arbre élagué obtenu lors de l’apprentissage. Ce comportement est **normal et conforme à la méthodologie en apprentissage supervisé** : le modèle est entraîné exclusivement sur l’échantillon d’apprentissage, puis utilisé tel quel pour effectuer des prédictions sur de nouvelles observations.
+> Il est important de souligner que l’arbre utilisé pour prédire la
+> variable cible sur le jeu de test correspond exactement à l’arbre
+> élagué obtenu lors de l’apprentissage. Ce comportement est **normal et
+> conforme à la méthodologie en apprentissage supervisé** : le modèle
+> est entraîné exclusivement sur l’échantillon d’apprentissage, puis
+> utilisé tel quel pour effectuer des prédictions sur de nouvelles
+> observations.
 
-> Ainsi, bien que l’on parle d’"arbre de test", il ne s’agit pas d’un nouvel arbre construit à partir des données de test, mais bien du **même arbre** que celui obtenu après élagage, appliqué cette fois à un **jeu de données indépendant**. Ce procédé garantit une évaluation fidèle de la capacité de généralisation du modèle, sans biais d’apprentissage.
+> Ainsi, bien que l’on parle d’"arbre de test", il ne s’agit pas d’un
+> nouvel arbre construit à partir des données de test, mais bien du
+> **même arbre** que celui obtenu après élagage, appliqué cette fois à
+> un **jeu de données indépendant**. Ce procédé garantit une évaluation
+> fidèle de la capacité de généralisation du modèle, sans biais
+> d’apprentissage.
 
-> La structure de l’arbre (les variables utilisées, les règles de séparation, la profondeur) reste donc **inchangée** entre l'entraînement et le test. Seuls les résultats prédictifs diffèrent.
+> La structure de l’arbre (les variables utilisées, les règles de
+> séparation, la profondeur) reste donc **inchangée** entre
+> l'entraînement et le test. Seuls les résultats prédictifs diffèrent.
 
-Nous utilisons l’arbre élagué pour effectuer des prédictions sur le jeu de test 
+Nous utilisons l’arbre élagué pour effectuer des prédictions sur le jeu
+de test
 
 ```{r}
  # Prédiction avec l'arbre élagué
@@ -1393,22 +1697,45 @@ precision_train_pruned
 
 ### Interprétation des performances sur le jeu d'entraînement
 
-Le modèle d’arbre de décision élagué a été évalué sur l’ensemble d’apprentissage. Les résultats obtenus sont les suivants :
+Le modèle d’arbre de décision élagué a été évalué sur l’ensemble
+d’apprentissage. Les résultats obtenus sont les suivants :
 
-- **Accuracy** : 63.02 %  
-- **Recall (Sensibilité)** : 8.98 %  
-- **Précision** : 38.50 %
+-   **Accuracy** : 63.02 %. Le modèle réalise correctement 63 % des
+    prédictions globales, c’est-à-dire qu’il identifie correctement
+    environ 2 individus sur 3, toutes classes confondues.
 
-> Ces résultats indiquent que **bien que le modèle obtienne une précision globale (accuracy) modérée**, il présente une **très faible sensibilité**, c’est-à-dire qu’il parvient difficilement à **identifier correctement les individus réellement à risque** (classe 1). En d’autres termes, le modèle a tendance à prédire principalement la classe majoritaire (absence de risque), au détriment de la classe minoritaire (présence de risque).
+-   **Recall (Sensibilité)** : 8.98 %. Cela signifie que plus de 91 %
+    des patients réellement à risque ne sont pas identifiés par le
+    modèle. Ce niveau de sensibilité est très insuffisant dans un cadre
+    médical, où la priorité est de limiter les faux négatifs pour éviter
+    que des patients à risque soient ignorés.
 
-La **précision relativement faible (38.5 %)** signifie par ailleurs que **lorsque le modèle prédit un individu à risque, il se trompe plus d'une fois sur deux**. Cela illustre un **déséquilibre dans la performance du modèle entre les deux classes**, qui pourrait être lié :
-- à un **déséquilibre de classes** dans les données d’entraînement,
-- à un **sur-ajustement (overfitting)** avant l’élagage,
-- ou encore à **une complexité insuffisante** du modèle après élagage.
+-   **Précision** : 38.50 %. Lorsqu’un patient est identifié comme étant
+    à risque, il y a seulement 38.5 % de chances qu’il le soit
+    réellement.
 
-Ces éléments justifient l’importance d’une analyse sur le **jeu de test** et d’une comparaison avec d’autres approches (régression logistique, k-NN, Naïf Bayes...) pour évaluer la robustesse du classifieur.
+> Ces résultats indiquent que bien que le modèle obtienne une précision
+> globale (accuracy) modérée, il présente une très faible sensibilité,
+> c’est-à-dire qu’il parvient difficilement à identifier correctement
+> les individus réellement à risque (classe 1). En d’autres termes, le
+> modèle a tendance à prédire principalement la classe majoritaire
+> (absence de risque), au détriment de la classe minoritaire (présence
+> de risque).
 
-### 3.5. Prédiction de la target avec l'arbre élagué sur le jeu de données de test
+La précision relativement faible (38.5 %) signifie par ailleurs que
+lorsque le modèle prédit un individu à risque, il se trompe plus d'une
+fois sur deux. Cela illustre un déséquilibre dans la performance du
+modèle entre les deux classes, qui pourrait être lié : - à un
+déséquilibre de classes dans les données d’entraînement, - à un
+sur-ajustement (overfitting) avant l’élagage, - ou encore à une
+complexité insuffisante du modèle après élagage.
+
+Ces éléments justifient l’importance d’une analyse sur le **jeu de
+test** et d’une comparaison avec d’autres approches (régression
+logistique, k-NN, Naïf Bayes...) pour évaluer la robustesse du
+classifieur.
+
+### 3.5 Prédiction de la target avec l'arbre élagué sur le jeu de données de test
 
 ```{r}
  # Prédiction avec l'arbre élagué
@@ -1428,26 +1755,45 @@ precision_test_pruned
 
 ### 3.6 Interprétation des performances sur le jeu de test
 
-L’arbre élagué a ensuite été appliqué au jeu de données de test, afin d’évaluer sa capacité de généralisation. Les métriques obtenues sont les suivantes :
+L’arbre élagué a ensuite été appliqué au jeu de données de test, afin
+d’évaluer sa capacité de généralisation. Les métriques obtenues sont les
+suivantes :
 
-- **Accuracy** : 62.86 %  
-- **Recall (Sensibilité)** : 16.20 %  
-- **Précision** : 57.92 %
+-   **Accuracy** : 62.86 %\
+-   **Recall (Sensibilité)** : 16.20 %\
+-   **Précision** : 57.92 %
 
-> Ces résultats indiquent une **performance globale modérée**, avec une accuracy relativement stable par rapport au jeu d’apprentissage. Toutefois, on observe que la **sensibilité reste faible** : le modèle ne parvient à détecter qu’environ **16 % des patients réellement à risque**, ce qui est problématique dans un contexte médical où **les faux négatifs doivent être minimisés**.
+> Ces résultats indiquent une **performance globale modérée**, avec une
+> accuracy relativement stable par rapport au jeu d’apprentissage.
+> Toutefois, on observe que la **sensibilité reste faible** : le modèle
+> ne parvient à détecter qu’environ **16 % des patients réellement à
+> risque**, ce qui est problématique dans un contexte médical où **les
+> faux négatifs doivent être minimisés**.
 
-La **précision**, en revanche, est plus élevée : parmi les patients prédits comme étant à risque, **environ 58 % le sont effectivement**. Cela signifie que, bien que le modèle **prédise peu de cas positifs**, il est **plutôt fiable lorsqu’il en identifie un**.
+La **précision**, en revanche, est plus élevée : parmi les patients
+prédits comme étant à risque, **environ 58 % le sont effectivement**.
+Cela signifie que, bien que le modèle **prédise peu de cas positifs**,
+il est **plutôt fiable lorsqu’il en identifie un**.
 
-Ce compromis entre **faible sensibilité et précision raisonnable** peut s’expliquer par :
-- la dominance de la classe "0" (absence de risque) dans les données,
-- le **caractère conservateur de l’arbre élagué**, qui évite les prédictions positives hasardeuses,
-- ou encore une **structure de données complexe**, difficile à séparer avec des règles arborescentes simples.
+Ce compromis entre **faible sensibilité et précision raisonnable** peut
+s’expliquer par : - la dominance de la classe "0" (absence de risque)
+dans les données, - le **caractère conservateur de l’arbre élagué**, qui
+évite les prédictions positives hasardeuses, - ou encore une **structure
+de données complexe**, difficile à séparer avec des règles arborescentes
+simples.
 
-> Dans l’ensemble, bien que ce modèle offre une certaine **robustesse sur le test**, il manque de **puissance pour identifier efficacement les individus à risque**, ce qui limite son utilité en situation clinique sans ajustement ou méthode complémentaire.
+> Dans l’ensemble, bien que ce modèle offre une certaine **robustesse
+> sur le test**, il manque de **puissance pour identifier efficacement
+> les individus à risque**, ce qui limite son utilité en situation
+> clinique sans ajustement ou méthode complémentaire.
 
 ### 3.7 Validation croisée (10-fold) – Arbre sans élagage
 
-Afin d’évaluer la robustesse du modèle d’arbre de décision sans élagage, une **validation croisée à 10 plis** a été réalisée. Cette méthode consiste à diviser le jeu de données en 10 sous-ensembles, à entraîner le modèle sur 9 d’entre eux, et à l’évaluer sur le dixième, de manière itérative.
+Afin d’évaluer la robustesse du modèle d’arbre de décision sans élagage,
+une **validation croisée à 10 plis** a été réalisée. Cette méthode
+consiste à diviser le jeu de données en 10 sous-ensembles, à entraîner
+le modèle sur 9 d’entre eux, et à l’évaluer sur le dixième, de manière
+itérative.
 
 ```{r}
 # Charger les packages nécessaires
@@ -1517,7 +1863,8 @@ rownames(precision_fold) <- paste0("fold_", 1:nfolds)
 
 ```
 
-Calcul de la 10-fold cross validated mean accuracy, la 10-fold cross validated mean recall, et la 10-fold cross validated mean precision
+Calcul de la 10-fold cross validated mean accuracy, la 10-fold cross
+validated mean recall, et la 10-fold cross validated mean precision
 
 ```{r}
 # Calcul des moyennes
@@ -1532,29 +1879,34 @@ cat("Mean Recall :", mean_recall, "\n")
 cat("Mean Precision :", mean_precision, "\n")
 ```
 
-
 Les résultats moyens obtenus sont les suivants :
 
-- **Accuracy moyenne** : 64.27 %  
-- **Recall moyen** : 0.00 %  
-- **Précision moyenne** : indéfinie (`NA`)
+-   **Accuracy moyenne** : 64.27 %\
+-   **Recall moyen** : 0.00 %\
+-   **Précision moyenne** : indéfinie (`NA`)
 
-> Ces résultats révèlent une **limite majeure du modèle** : il ne parvient **jamais à prédire la classe positive (à risque)** sur l’ensemble des folds. Par conséquent :
-> - Le **recall** est nul car aucun individu réellement à risque n’est correctement identifié.
-> - La **précision** est non définie (`NA`) car le modèle ne produit **aucune prédiction positive** (le dénominateur est nul dans le calcul de la précision).
+> Ces résultats révèlent une **limite majeure du modèle** : il ne
+> parvient **jamais à prédire la classe positive (à risque)** sur
+> l’ensemble des folds. Par conséquent : - Le **recall** est nul car
+> aucun individu réellement à risque n’est correctement identifié. - La
+> **précision** est non définie (`NA`) car le modèle ne produit **aucune
+> prédiction positive** (le dénominateur est nul dans le calcul de la
+> précision).
 
-Ce phénomène est souvent observé lorsque :
-- Le modèle est **trop biaisé vers la classe majoritaire**,
-- Le **seuil de décision implicite** (0.5) est trop conservateur,
-- Les données sont **déséquilibrées** et **l’arbre est trop profond**, ce qui renforce la surreprésentation de la classe majoritaire.
+Ce phénomène est souvent observé lorsque : - Le modèle est **trop biaisé
+vers la classe majoritaire**, - Le **seuil de décision implicite** (0.5)
+est trop conservateur, - Les données sont **déséquilibrées** et
+**l’arbre est trop profond**, ce qui renforce la surreprésentation de la
+classe majoritaire.
 
-Ces observations confirment que, **sans élagage ni ajustement**, l’arbre de décision a **une capacité de généralisation très faible pour détecter les individus à risque**. Cela justifie pleinement l’utilisation :
-- de l’élagage,
-- d’un ajustement du seuil de prédiction,
-- voire de **méthodes de rééquilibrage** (SMOTE, suréchantillonnage) pour améliorer les performances sur la classe minoritaire.
+Ces observations confirment que, **sans élagage ni ajustement**, l’arbre
+de décision a **une capacité de généralisation très faible pour détecter
+les individus à risque**. Cela justifie pleinement l’utilisation : - de
+l’élagage, - d’un ajustement du seuil de prédiction, - voire de
+**méthodes de rééquilibrage** (SMOTE, suréchantillonnage) pour améliorer
+les performances sur la classe minoritaire.
 
-
-### 3.2. Avec élagage
+### 3.8 Validation croisée (10-fold) – Arbre avec élagage
 
 ```{r}
 # Matrices pour stocker les métriques après élagage
@@ -1606,8 +1958,9 @@ rownames(precision_fold_pruned) <- paste0("fold_", 1:nfolds)
 
 ```
 
+Calculer la 10-fold cross validated mean accuracy, la 10-fold cross
+validated mean recall, et la 10-fold cross validated mean precision
 
-Calculer la 10-fold cross validated mean accuracy, la 10-fold cross validated mean recall, et la 10-fold cross validated mean precision
 ```{r}
 # Calcul des moyennes
 mean_accuracy_pruned  <- mean(accuracy_fold_pruned)
@@ -1622,40 +1975,67 @@ cat("Mean Precision :", mean_precision_pruned, "\n")
 
 ```
 
-### 3.8 Interprétation des résultats de la cross-validation (avec élagage)
+### 3.9 Interprétation des résultats de la cross-validation (avec élagage)
 
-Une validation croisée à 10 plis a été réalisée en intégrant l'élagage à chaque itération. L’objectif était d’évaluer la performance moyenne d’un arbre élagué, optimisé à l’aide du paramètre de complexité (`cp`) issu de la minimisation de l’erreur de validation croisée (`xerror`).
+Une validation croisée à 10 plis a été réalisée en intégrant l'élagage à
+chaque itération. L’objectif était d’évaluer la performance moyenne d’un
+arbre élagué, optimisé à l’aide du paramètre de complexité (`cp`) issu
+de la minimisation de l’erreur de validation croisée (`xerror`).
 
 Les résultats moyens obtenus sont les suivants :
 
-- **Accuracy moyenne** : 64.28 %  
-- **Recall moyen** : 0.00 %  
-- **Précision moyenne** : NA
+-   **Accuracy moyenne** : 64.28 %\
+-   **Recall moyen** : 0.00 %\
+-   **Précision moyenne** : NA
 
-> Bien que l’accuracy reste correcte, ces résultats soulignent une **grande faiblesse du modèle dans la détection des patients à risque (classe 1)**. En effet, le modèle ne prédit **jamais la classe positive**, ce qui entraîne un **rappel nul** et une **précision non définie** (aucune prédiction positive).
+> Bien que l’accuracy reste correcte, ces résultats soulignent une
+> **grande faiblesse du modèle dans la détection des patients à risque
+> (classe 1)**. En effet, le modèle ne prédit **jamais la classe
+> positive**, ce qui entraîne un **rappel nul** et une **précision non
+> définie** (aucune prédiction positive).
 
-Ce comportement est typique des situations de **déséquilibre des classes**, dans lesquelles le modèle favorise la classe dominante (ici, l'absence de risque) pour maximiser sa performance globale. L'élagage, en simplifiant la structure de l’arbre, **réduit encore plus sa sensibilité** aux cas minoritaires.
+Ce comportement est typique des situations de **déséquilibre des
+classes**, dans lesquelles le modèle favorise la classe dominante (ici,
+l'absence de risque) pour maximiser sa performance globale. L'élagage,
+en simplifiant la structure de l’arbre, **réduit encore plus sa
+sensibilité** aux cas minoritaires.
 
-> Cette situation justifie pleinement le recours à des techniques de **rééquilibrage des classes** (par exemple : sur-échantillonnage, sous-échantillonnage, ou la méthode SMOTE), ainsi qu’à des **modèles plus robustes** pour traiter des problématiques médicales où **minimiser les faux négatifs est crucial**.
-
+> Cette situation justifie pleinement le recours à des techniques de
+> **rééquilibrage des classes** (par exemple : sur-échantillonnage,
+> sous-échantillonnage, ou la méthode SMOTE), ainsi qu’à des **modèles
+> plus robustes** pour traiter des problématiques médicales où
+> **minimiser les faux négatifs est crucial**.
 
 ## 4. Classification Naïve Bayésienne
+
 ### 4.1 Apprentissage du classifieur
 
-La méthode de classification **Naïve Bayésienne** repose sur le **théorème de Bayes**, en faisant l’hypothèse d’indépendance conditionnelle entre les variables explicatives. Bien que cette hypothèse soit souvent irréaliste, ce classifieur reste très utilisé pour sa **simplicité**, sa **vitesse d’apprentissage** et sa **robustesse face aux petits jeux de données**.
+La méthode de classification **Naïve Bayésienne** repose sur le
+**théorème de Bayes**, en faisant l’hypothèse d’indépendance
+conditionnelle entre les variables explicatives. Bien que cette
+hypothèse soit souvent irréaliste, ce classifieur reste très utilisé
+pour sa **simplicité**, sa **vitesse d’apprentissage** et sa
+**robustesse face aux petits jeux de données**.
 
-Le modèle a été entraîné à l’aide du package `naivebayes` sur un jeu de données préalablement divisé en deux ensembles :
-- **80 % pour l'entraînement** (`predictive_vars_train`, `target_train`)
-- **20 % pour le test** (`predictive_vars_test`, `target_test`)
+Le modèle a été entraîné à l’aide du package `naivebayes` sur un jeu de
+données préalablement divisé en deux ensembles :
+
+\- **80 % pour l'entraînement** (`predictive_vars_train`,
+`target_train`)
+
+\- **20 % pour le test** (`predictive_vars_test`, `target_test`)
 
 Le tableau de sortie du classifieur contient :
-- Les **probabilités a priori** (proportions de chaque classe dans l’échantillon d’apprentissage),
-- Les **statistiques conditionnelles** (moyennes et variances des variables continues selon la classe cible).
+
+\- Les **probabilités a priori** (proportions de chaque classe dans
+l’échantillon d’apprentissage)
+
+\- Les **statistiques conditionnelles** (moyennes et variances des
+variables continues selon la classe cible).
 
 ```{r}
 predictive_vars = cbind(quantitative_vars, qualitative_vars)
 ```
-
 
 ```{r}
 set.seed(1234)
@@ -1681,39 +2061,66 @@ classif = naive_bayes(x = predictive_vars_train, y = target_train)
 classif
 ```
 
-
 ### 4.2 Interprétation des résultats
 
 Les probabilités a priori calculées par le modèle sont :
 
-- Classe 0 (patients non à risque) : **64 %**
-- Classe 1 (patients à risque) : **36 %**
+-   Classe 0 (patients non à risque) : **64 %**
+-   Classe 1 (patients à risque) : **36 %**
 
-Cela reflète la répartition observée dans le jeu d'entraînement, sans déséquilibre majeur.
+Cela reflète la répartition observée dans le jeu d'entraînement, sans
+déséquilibre majeur.
 
 Voici quelques observations sur certaines variables conditionnelles :
 
-- **Cholestérol** : La moyenne est légèrement plus élevée chez les patients à risque (`0.506` contre `0.497`), ce qui est cohérent avec les connaissances médicales.  
-   Cela renforce l’idée que le cholestérol est un facteur contributif dans la prédiction du risque cardiaque.
+-   **Cholestérol** : La moyenne est légèrement plus élevée chez les
+    patients à risque (`0.506` contre `0.497`), ce qui est cohérent avec
+    les connaissances médicales.\
+    Cela renforce l’idée que le cholestérol est un facteur contributif
+    dans la prédiction du risque cardiaque.
 
-- **Heart.Rate** : Les moyennes entre les deux classes sont quasiment identiques (`0.500` vs `0.495`), suggérant un **faible pouvoir discriminant** de cette variable dans le cadre de ce modèle.
+-   **Heart.Rate** : Les moyennes entre les deux classes sont quasiment
+    identiques (`0.500` vs `0.495`), suggérant un **faible pouvoir
+    discriminant** de cette variable dans le cadre de ce modèle.
 
-- **BMI (indice de masse corporelle)** : La moyenne est très similaire entre les classes (`0.498` vs `0.497`).  
-   Cette absence de différence statistique marquée limite l’utilité de cette variable pour la classification selon l’approche bayésienne.
-   
-- **Triglycérides** : La moyenne est très similaire entre les classes (`418.76` vs `418.97`).  
-  Les moyennes des triglycérides sont quasiment identiques dans les deux classes. Cela suggère que cette variable **n’a pas de pouvoir discriminant significatif** dans le modèle naïf bayésien. Son impact sur la prédiction du risque d’infarctus est donc très limité dans ce cadre.
+-   **BMI (indice de masse corporelle)** : La moyenne est très similaire
+    entre les classes (`0.498` vs `0.497`).\
+    Cette absence de différence statistique marquée limite l’utilité de
+    cette variable pour la classification selon l’approche bayésienne.
 
-- **Pression artérielle systolique (Systolic_BP)** : La moyenne est très similaire entre les classes (`134.94` vs `135.63`).
-  Là encore, les moyennes sont très proches, avec une légère élévation pour la classe à risque. Toutefois, l’écart est **trop faible pour constituer un facteur discriminant fiable** pour ce modèle. Cette observation met en évidence une limite du modèle naïf bayésien lorsque les distributions des variables sont **fortement superposées** entre les classes.
+-   **Triglycérides** : La moyenne est très similaire entre les classes
+    (`418.76` vs `418.97`).\
+    Les moyennes des triglycérides sont quasiment identiques dans les
+    deux classes. Cela suggère que cette variable **n’a pas de pouvoir
+    discriminant significatif** dans le modèle naïf bayésien. Son impact
+    sur la prédiction du risque d’infarctus est donc très limité dans ce
+    cadre.
 
-> Globalement, ces résultats confirment que certaines variables, bien que médicalement pertinentes, **n’apportent pas d’information significative** dans la classification si leurs distributions sont trop similaires entre les groupes.
+-   **Pression artérielle systolique (Systolic_BP)** : La moyenne est
+    très similaire entre les classes (`134.94` vs `135.63`). Là encore,
+    les moyennes sont très proches, avec une légère élévation pour la
+    classe à risque. Toutefois, l’écart est **trop faible pour
+    constituer un facteur discriminant fiable** pour ce modèle. Cette
+    observation met en évidence une limite du modèle naïf bayésien
+    lorsque les distributions des variables sont **fortement
+    superposées** entre les classes.
 
-### 4.3. Visualisation des densités conditionnelles
+> Globalement, ces résultats confirment que certaines variables, bien
+> que médicalement pertinentes, **n’apportent pas d’information
+> significative** dans la classification si leurs distributions sont
+> trop similaires entre les groupes.
 
-Une des forces du modèle naïf bayésien est sa capacité à représenter, pour chaque variable continue, la **densité conditionnelle** selon la classe cible. Cela permet de **visualiser le pouvoir discriminant** de chaque variable dans la séparation entre les individus à risque et ceux qui ne le sont pas.
+### 4.3 Visualisation des densités conditionnelles
 
-Le graphique suivant présente les courbes de densité estimées pour les différentes variables explicatives, conditionnellement à la classe (0 = non à risque, 1 = à risque).
+Une des forces du modèle naïf bayésien est sa capacité à représenter,
+pour chaque variable continue, la **densité conditionnelle** selon la
+classe cible. Cela permet de **visualiser le pouvoir discriminant** de
+chaque variable dans la séparation entre les individus à risque et ceux
+qui ne le sont pas.
+
+Le graphique suivant présente les courbes de densité estimées pour les
+différentes variables explicatives, conditionnellement à la classe (0 =
+non à risque, 1 = à risque).
 
 ```{r, out.width="50%", fig.align = "center", eval = FALSE}
 plot(classif, prob = "conditional")
@@ -1721,39 +2128,68 @@ plot(classif, prob = "conditional")
 
 **Interprétation de quelques variables**
 
-- Income : Les courbes sont quasi identiques pour les deux classes, ce qui suggère que cette variable n’est pas discriminante dans le cadre du modèle naïf bayésien. Il en va de même pour BMI et Sedentary.Hours.Per.Day.
+-   Income : Les courbes sont quasi identiques pour les deux classes, ce
+    qui suggère que cette variable n’est pas discriminante dans le cadre
+    du modèle naïf bayésien. Il en va de même pour BMI et
+    Sedentary.Hours.Per.Day.
 
-- Cholesterol : Les courbes présentent un décalage significatif entre les classes. Cela laisse penser que le cholestérol est un facteur potentiellement informatif dans la classification.
+-   Cholesterol : Les courbes présentent un décalage significatif entre
+    les classes. Cela laisse penser que le cholestérol est un facteur
+    potentiellement informatif dans la classification.
 
-- Systolic_BP et Exercise.Hours.Per.Week : présentent également des courbes différenciées entre les deux groupes, indiquant un pouvoir prédictif modéré à bon.
+-   Systolic_BP et Exercise.Hours.Per.Week : présentent également des
+    courbes différenciées entre les deux groupes, indiquant un pouvoir
+    prédictif modéré à bon.
 
-- Triglycerides : Les densités sont quasiment superposées, ce qui traduit une faible capacité à différencier les classes sur cette variable.
+-   Triglycerides : Les densités sont quasiment superposées, ce qui
+    traduit une faible capacité à différencier les classes sur cette
+    variable.
 
-- Medication.Use (Utilisation de médicaments) : On observe une répartition très proche pour les deux classes (0 et 1). Les proportions des individus **utilisant des médicaments (1)** sont **similaires** dans les deux groupes (à risque et non à risque), de même pour les individus **n'utilisant pas de médicaments (0)**.
+-   Medication.Use (Utilisation de médicaments) : On observe une
+    répartition très proche pour les deux classes (0 et 1). Les
+    proportions des individus **utilisant des médicaments (1)** sont
+    **similaires** dans les deux groupes (à risque et non à risque), de
+    même pour les individus **n'utilisant pas de médicaments (0)**.
 
-- Smoking (Tabagisme) : 
+-   Smoking (Tabagisme) :
 
-On observe que la distribution des individus selon le statut tabagique est **très similaire** dans les deux classes de la variable cible. La proportion de **fumeurs (1)** est quasiment la même chez les patients à risque et ceux qui ne le sont pas. Il en va de même pour les **non-fumeurs (0)**.
+On observe que la distribution des individus selon le statut tabagique
+est **très similaire** dans les deux classes de la variable cible. La
+proportion de **fumeurs (1)** est quasiment la même chez les patients à
+risque et ceux qui ne le sont pas. Il en va de même pour les
+**non-fumeurs (0)**.
 
-> Cette homogénéité des proportions indique que **le tabagisme n’a pas, dans ce jeu de données, un rôle discriminant majeur** pour la classification entre patients à risque et non à risque, du point de vue du modèle naïf bayésien.
-Dans tous les cas, cette observation confirme que le modèle naïf bayésien **est sensible à la séparation claire des classes dans chaque variable**, ce qui n’est pas le cas ici pour `Smoking`.
+> Cette homogénéité des proportions indique que **le tabagisme n’a pas,
+> dans ce jeu de données, un rôle discriminant majeur** pour la
+> classification entre patients à risque et non à risque, du point de
+> vue du modèle naïf bayésien. Dans tous les cas, cette observation
+> confirme que le modèle naïf bayésien **est sensible à la séparation
+> claire des classes dans chaque variable**, ce qui n’est pas le cas ici
+> pour `Smoking`.
 
-### 4.4. Prédiction finale et évaluation des performances
+### 4.4 Prédiction finale et évaluation des performances
 
-Après l'entraînement du classifieur naïf bayésien, nous appliquons ce modèle à l’échantillon de test afin de prédire la catégorie (à risque ou non) de chaque individu. Cette étape permet de mesurer la **capacité de généralisation** du modèle sur des données nouvelles.
+Après l'entraînement du classifieur naïf bayésien, nous appliquons ce
+modèle à l’échantillon de test afin de prédire la catégorie (à risque ou
+non) de chaque individu. Cette étape permet de mesurer la **capacité de
+généralisation** du modèle sur des données nouvelles.
 
 La performance est évaluée à l’aide des trois métriques suivantes :
 
-- **Accuracy** : proportion de bonnes prédictions sur l’ensemble du test.
-- **Recall (sensibilité)** : capacité du modèle à détecter correctement les individus réellement à risque.
-- **Précision** : proportion de patients prédits comme à risque qui le sont réellement.
+-   **Accuracy** : proportion de bonnes prédictions sur l’ensemble du
+    test.
+-   **Recall (sensibilité)** : capacité du modèle à détecter
+    correctement les individus réellement à risque.
+-   **Précision** : proportion de patients prédits comme à risque qui le
+    sont réellement.
 
-L’ensemble de ces indicateurs permet d’avoir une vision complète de la qualité du modèle, en particulier dans un contexte médical où les faux négatifs peuvent avoir des conséquences graves.
+L’ensemble de ces indicateurs permet d’avoir une vision complète de la
+qualité du modèle, en particulier dans un contexte médical où les faux
+négatifs peuvent avoir des conséquences graves.
 
 ```{r, eval = FALSE}
 pred = predict(classif, predictive_vars_test, type = "prob")
 ```
-
 
 ```{r}
 # Prédiction des classes sur l'ensemble de test
@@ -1777,30 +2213,52 @@ precision_value
 
 ### 4.5 Évaluation du modèle Naïve Bayes sur le jeu de test
 
-Une fois entraîné, le classifieur Naïve Bayes a été appliqué au jeu de test afin d’évaluer ses performances. La matrice de confusion et les indicateurs clés sont présentés ci-dessous :
+Une fois entraîné, le classifieur Naïve Bayes a été appliqué au jeu de
+test afin d’évaluer ses performances. La matrice de confusion et les
+indicateurs clés sont présentés ci-dessous :
 
-- **Accuracy** : 64.46%
-- **Recall (sensibilité)** : 0.00%
-- **Précision** : NA
-- **Spécificité** : 100%
-- **Kappa** : 0
+-   **Accuracy** : 64.46%
+-   **Recall (sensibilité)** : 0.00%
+-   **Précision** : NA
+-   **Spécificité** : 100%
 
-> Ces résultats indiquent que le modèle **ne détecte aucun individu réellement à risque (classe 1)**. Cela se traduit par un **rappel nul** et une **précision non définie**, car aucune prédiction n’a été faite pour la classe positive.
+> Ces résultats indiquent que le modèle **ne détecte aucun individu
+> réellement à risque (classe 1)**. Cela se traduit par un **rappel
+> nul** et une **précision non définie**, car aucune prédiction n’a été
+> faite pour la classe positive.
 
-> Cette situation, bien que conduisant à une accuracy apparemment correcte, révèle un **grave déséquilibre** dans les performances du modèle, qui privilégie fortement la classe majoritaire. Le **Kappa nul** confirme l'inefficacité du modèle à apporter une valeur prédictive réelle au-delà du simple hasard.
+> Cette situation, bien que conduisant à une accuracy apparemment
+> correcte, révèle un **grave déséquilibre** dans les performances du
+> modèle, qui privilégie fortement la classe majoritaire. Le **Kappa
+> nul** confirme l'inefficacité du modèle à apporter une valeur
+> prédictive réelle au-delà du simple hasard.
 
-> En contexte médical, ce type de modèle serait **inutilisable en pratique**, car il **échoue à identifier les cas à risque**, ce qui va à l’encontre de l’objectif principal du projet.
+> En contexte médical, ce type de modèle serait **inutilisable en
+> pratique**, car il **échoue à identifier les cas à risque**, ce qui va
+> à l’encontre de l’objectif principal du projet.
 
 Ces résultats mettent en évidence l’importance :
-- de **rééquilibrer les classes** (via suréchantillonnage, SMOTE, etc.),
-- ou d'utiliser des **modèles plus flexibles** capables de gérer les déséquilibres de manière plus efficace (comme les forêts aléatoires, XGBoost ou des modèles pénalisés).
+
+\- de **rééquilibrer les classes** (via suréchantillonnage, SMOTE,
+etc.),
+
+\- ou d'utiliser des **modèles plus flexibles** capables de gérer les
+déséquilibres de manière plus efficace (comme les forêts aléatoires,
+XGBoost ou des modèles pénalisés).
 
 ### 4.6 Importance des variables explicatives dans la prédiction
 
-Dans cette section, nous explorons l’influence de certaines variables explicatives sur les **probabilités prédictives de risque d’infarctus** estimées par le modèle. Cette approche permet de mieux comprendre comment les caractéristiques des patients influencent la décision du classifieur, en particulier dans un contexte médical où l’interprétabilité est essentielle.
+Dans cette section, nous explorons l’influence de certaines variables
+explicatives sur les **probabilités prédictives de risque d’infarctus**
+estimées par le modèle. Cette approche permet de mieux comprendre
+comment les caractéristiques des patients influencent la décision du
+classifieur, en particulier dans un contexte médical où
+l’interprétabilité est essentielle.
 
-Le graphique suivant présente un **boxplot des probabilités prédites d’être à risque d’infarctus** (classe `1`), selon le sexe du patient (`Sex`). Chaque boîte représente la distribution des scores de risque prédits pour un sous-groupe (femmes vs hommes).
-
+Le graphique suivant présente un **boxplot des probabilités prédites
+d’être à risque d’infarctus** (classe `1`), selon le sexe du patient
+(`Sex`). Chaque boîte représente la distribution des scores de risque
+prédits pour un sous-groupe (femmes vs hommes).
 
 ```{r, out.width="50%", fig.align = "center", eval = FALSE}
 # Liste des variables catégorielles à tester
@@ -1827,27 +2285,58 @@ plot(predictive_vars_test$BMI, pred[,2],
 
 ```
 
-Afin de mieux comprendre comment certaines variables influencent les prédictions du modèle (probabilité d’être à risque d’infarctus), plusieurs visualisations ont été réalisées. Elles permettent de comparer les **probabilités prédictives** de la classe `1` selon différentes variables explicatives.
+Afin de mieux comprendre comment certaines variables influencent les
+prédictions du modèle (probabilité d’être à risque d’infarctus),
+plusieurs visualisations ont été réalisées. Elles permettent de comparer
+les **probabilités prédictives** de la classe `1` selon différentes
+variables explicatives.
 
 #### 🔹 Sexe (`Sex`)
 
-Le boxplot des probabilités prédites selon le sexe montre que les hommes ont une **médiane de risque légèrement plus élevée** que les femmes. Toutefois, la dispersion des valeurs reste globalement similaire entre les deux groupes, avec une distribution relativement homogène.  
-> Cela indique que le sexe **influence modérément la probabilité prédite**, sans être une variable discriminante forte à elle seule. Il peut cependant contribuer au risque lorsqu’il est combiné à d’autres facteurs.
+Le boxplot des probabilités prédites selon le sexe montre que les hommes
+ont une **médiane de risque légèrement plus élevée** que les femmes.
+Toutefois, la dispersion des valeurs reste globalement similaire entre
+les deux groupes, avec une distribution relativement homogène.\
+\> Cela indique que le sexe **influence modérément la probabilité
+prédite**, sans être une variable discriminante forte à elle seule. Il
+peut cependant contribuer au risque lorsqu’il est combiné à d’autres
+facteurs.
 
 #### 🔹 Antécédents cardiaques (`Previous.Heart.Problems`)
 
-La comparaison des probabilités entre les patients avec (`1`) ou sans (`0`) antécédents de problèmes cardiaques révèle **des médianes très proches**.  
-> Fait surprenant, les individus ayant déjà eu des problèmes cardiaques ne présentent pas des probabilités sensiblement plus élevées. Cela peut être dû au fait que cette variable est **corrélée à d’autres variables** ou que le modèle naïf bayésien **n’exploite pas efficacement les interactions entre facteurs**.
+La comparaison des probabilités entre les patients avec (`1`) ou sans
+(`0`) antécédents de problèmes cardiaques révèle **des médianes très
+proches**.\
+\> Fait surprenant, les individus ayant déjà eu des problèmes cardiaques
+ne présentent pas des probabilités sensiblement plus élevées. Cela peut
+être dû au fait que cette variable est **corrélée à d’autres variables**
+ou que le modèle naïf bayésien **n’exploite pas efficacement les
+interactions entre facteurs**.
 
 #### 🔹 Tranches d’âge (`Age_cat`)
 
-Le boxplot des tranches d’âge (`Jeune`, `Middle-aged`, `Senior`, `Elderly`) révèle une **tendance modérée mais non linéaire**. Les groupes Middle-aged et Elderly présentent une **légère élévation des probabilités prédictives** par rapport aux groupes Jeune et Senior.  
-> L'effet de l'âge semble donc présent mais non dominant, probablement **atténué par l’absence de modélisation d’interactions** dans le classifieur utilisé.
+Le boxplot des tranches d’âge (`Jeune`, `Middle-aged`, `Senior`,
+`Elderly`) révèle une **tendance modérée mais non linéaire**. Les
+groupes Middle-aged et Elderly présentent une **légère élévation des
+probabilités prédictives** par rapport aux groupes Jeune et Senior.\
+\> L'effet de l'âge semble donc présent mais non dominant, probablement
+**atténué par l’absence de modélisation d’interactions** dans le
+classifieur utilisé.
 
 #### 🔹 Indice de masse corporelle (`BMI`)
 
-La visualisation des probabilités en fonction du BMI montre une **dispersion uniforme**, sans tendance apparente. Les probabilités prédictives sont concentrées entre 0.33 et 0.39 pour toutes les valeurs de BMI.  
-> Ce résultat suggère que, bien que le BMI soit un facteur de risque reconnu sur le plan médical, il n’apporte **que peu d’information discriminante** dans le cadre du modèle naïf bayésien utilisé ici.
+La visualisation des probabilités en fonction du BMI montre une
+**dispersion uniforme**, sans tendance apparente. Les probabilités
+prédictives sont concentrées entre 0.33 et 0.39 pour toutes les valeurs
+de BMI.\
+Ce résultat suggère que, bien que le BMI soit un facteur de risque
+reconnu sur le plan médical, il n’apporte **que peu d’information
+discriminante** dans le cadre du modèle naïf bayésien utilisé ici.
 
-Dans l’ensemble, ces analyses soulignent que certaines variables (comme le sexe ou l’âge) ont un **effet modéré sur la prédiction du risque**, tandis que d'autres, pourtant cliniquement pertinentes (BMI, antécédents), **n’influencent que faiblement les probabilités prédictives**. Cela met en évidence la **nécessité d’utiliser des modèles plus flexibles** et de considérer des interactions pour améliorer la détection du risque dans ce type de problématique médicale.
-
+Dans l’ensemble, ces analyses soulignent que certaines variables (comme
+le sexe ou l’âge) ont un **effet modéré sur la prédiction du risque**,
+tandis que d'autres, pourtant cliniquement pertinentes (BMI,
+antécédents), **n’influencent que faiblement les probabilités
+prédictives**. Cela met en évidence la **nécessité d’utiliser des
+modèles plus flexibles** et de considérer des interactions pour
+améliorer la détection du risque dans ce type de problématique médicale.
