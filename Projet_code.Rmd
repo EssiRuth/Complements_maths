@@ -1530,14 +1530,36 @@ predictive_vars_test <- as.data.frame(predictive_vars_test)
 ```{r}
 classif = naive_bayes(x = predictive_vars_train, y = target_train)
 classif
-
 ```
+**Interpretation**
+On a trouvé pour les probabilités a priori : 
+0.6422254  # classe 0 (pas à risque)
+0.3577746  # classe 1 (à risque)
+=> Cela signifie que  dans notre jeu de données d’entraînement :
+	-	Environ 64 % des individus ne sont pas à risque (classe 0)
+	-	Et environ 36 % sont à risque d’infarctus (classe 1)
+Puis pour les variables : 
+1- Cholesterol : Moyenne pour les individus non à risque (classe 0) : 0.497
+   et Moyenne pour les individus à risque (classe 1) : 0.506
+   => Les personnes classées à risque d’infarctus ont en moyenne un taux de cholestérol légèrement plus élevé que celles non à risque. Cette différence, bien que modérée, est cohérente avec les connaissances médicales, qui identifient le cholestérol comme un facteur important dans les maladies cardiovasculaires.
+2- Heart.Rate : Moyenne classe 0 : 0.500 et Moyenne classe 1 : 0.495
+   => Les moyennes du rythme cardiaque sont très proches entre les deux classes. Cela suggère que cette variable n’a probablement pas un fort pouvoir discriminant dans la prédiction du risque d’infarctus dans ce jeu de données.
+3- BMI (indice de masse corporelle) : 	Moyenne classe 0 : 0.498 et Moyenne classe 1 : 0.497
+   => L’indice de masse corporelle est quasiment identique entre les deux groupes. Le modèle ne pourra donc pas s’appuyer fortement sur cette variable pour différencier les individus à risque des autres.
 
-#### 
+#### Densité
 
 ```{r, out.width="50%", fig.align = "center", eval = FALSE}
 plot(classif, prob = "conditional")
 ```
+**Interprétation**
+
+- Income : les courbes de densité pour income sont presque identiques entre les classes à risque et non à risque cela montre que cette variable n’est pas discriminante pour le modèle naïve bayes. Pareil pour Sedentary.per.day et BMI.
+
+- Cholesterol : les courbes pour la variable cholesterol sont un peu décalées entre les classes cela indique que le cholestérol pourrait être une variable utile pour différencier les individus à risque des autres.Pareil pour Systolic_BP et Exercise.Hours.Per.Week.
+
+- Triglycérides : les courbes de densité pour les triglycérides sont presque superposées entre les deux classes cela indique que cette variable n’apporte que peu d’information pour différencier les individus à risque des autres
+etc.
 
 
 ### 4.2. Prédiction sur le jeu de données de test des probabilités d'appartenir aux différentes catégories de la réponse
