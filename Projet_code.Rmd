@@ -1124,6 +1124,78 @@ precision_test
 
 ```
 
+## 2. La régression logistique
+
+## 2. Régression logistique
+
+La régression logistique est l’un des algorithmes de classification les plus utilisés lorsqu’on souhaite modéliser une variable binaire. Contrairement à la méthode des k plus proches voisins (k-NN) qui peut fonctionner directement avec des variables catégorielles encodées, la régression logistique nécessite que **toutes les variables explicatives soient numériques**.
+Dans ce cadre, nous réutilisons le jeu de données `predictive_vars` déjà transformé dans la phase de prétraitement.
+Le modèle est entraîné sur l’échantillon d’apprentissage (`predictive_vars_train`) en utilisant la variable cible `target_train`. La prédiction est ensuite effectuée sur l’échantillon test (`predictive_vars_test`), et le résultat est exprimé sous forme de **probabilités** d’appartenir à la classe positive (i.e., présence de risque cardiaque).
+Un **seuil de 0.5** est appliqué pour transformer les probabilités en classes (0 ou 1), et une **matrice de confusion** est calculée pour évaluer la performance du modèle (accuracy, recall, précision...).
+
+```{r}
+
+library(caret)
+```
+
+```{r}
+predictive_vars=cbind(quantitative_vars_mmnormed, qual_dummies)
+set.seed(1237) #pour la reproductibilité 
+nobs <- nrow(predictive_vars)
+inTrain <- sample(1:nobs, size = round(0.8 * nobs), replace = FALSE)
+
+predictive_vars_test    = predictive_vars[-inTrain,]
+target_test             = target[-inTrain]
+predictive_vars_train   = predictive_vars[inTrain,]
+target_train            = target[inTrain]
+
+``
+
+```{r}
+logit_model <- glm(target_train ~ ., data = predictive_vars_train, family = binomial)
+
+target_pred_prob <- predict(logit_model, newdata = predictive_vars_test, type = "response")
+
+#  Transformation des probabilités en classes (seuil 0.5)
+target_pred_logit <- ifelse(target_pred_prob > 0.5, 1, 0)
+
+#  Conversion en facteur avec les bons niveaux
+target_pred_logit <- factor(target_pred_logit, levels = levels(target_test))
+
+# Vérification des longueurs
+stopifnot(length(target_pred_logit) == length(target_test))
+
+#  Matrice de confusion
+confusionMatrix(target_pred_logit, target_test, positive="1")
+
+conf_matrix <- confusionMatrix(target_pred_logit, target_test, positive = "1")
+
+# Extraire les métriques
+accuracy_test   <- conf_matrix$overall["Accuracy"]
+recall_test     <- conf_matrix$byClass["Sensitivity"] 
+precision_test  <- conf_matrix$byClass["Precision"]
+f1_score        <- 2 * (precision_test * recall_test) / (precision_test + recall_test)
+
+# Affichage
+cat("Accuracy  :", accuracy_test, "\n")
+cat("Recall    :", recall_test, "\n")
+cat("Precision :", precision_test, "\n")
+cat("F1-Score  :", f1_score, "\n")
+```
+***Interpretation***
+	-	Accuracy : 0.6518 => Le modèle est correct dans 62% des cas. C’est un peu moins bon que le taux de majorité (0.6446), donc pas très performant globalement.
+	-	Sensitivity : 0.9389 => Excellente détection des patients sans risque (classe 0). Presque tous les vrais 0 sont bien identifiés.
+	-	Specificity : 0.0465 =>  Très mauvaise détection des patients à risque (classe 1). Le modèle ne reconnaît presque aucun vrai cas de risque.
+	-	Pos Pred Value : 0.641 => Quand le modèle prédit “0”, c’est bon à 64% du temps.
+	-	Neg Pred Value : 0.296 => Quand le modèle prédit “1”, il se trompe souvent.
+	-	Balanced Accuracy : 0.4927 => En dessous de 0.5 = pire qu’un tirage au sort binaire.
+	-	Kappa : -0.0179 => Accord entre le modèle et la vérité à peine mieux qu’un hasard.
+
+Conclusion :
+
+Le modèle prédit quasiment toujours la classe 0, et il a du mal à détecter les vrais patients à risque. Il est biaisé vers la classe majoritaire.
+
+
 ## 3. Arbre de classification
 #### Variables explicatives
 
@@ -1441,142 +1513,122 @@ cat("Mean Precision :", mean_precision_pruned, "\n")
 
 ```
 
+## 4. Classification Naïve Bayésienne
+### 4.1 Apprentissage du classifieur
 
-## 2. La régression logistique
+La méthode de classification **Naïve Bayésienne** repose sur le **théorème de Bayes**, en faisant l’hypothèse d’indépendance conditionnelle entre les variables explicatives. Bien que cette hypothèse soit souvent irréaliste, ce classifieur reste très utilisé pour sa **simplicité**, sa **vitesse d’apprentissage** et sa **robustesse face aux petits jeux de données**.
 
-La régression logistique ne traite pas les variables catégorielles
-telles qu'elles comme la méthode des k plus proches voisins. Il traite
-que des variables de type numérique donc on va réutiliser la data frame
-`predictive_vars`de la méthode des k plus proches voisins.
+Le modèle a été entraîné à l’aide du package `naivebayes` sur un jeu de données préalablement divisé en deux ensembles :
+- **80 % pour l'entraînement** (`predictive_vars_train`, `target_train`)
+- **20 % pour le test** (`predictive_vars_test`, `target_test`)
+
+Le tableau de sortie du classifieur contient :
+- Les **probabilités a priori** (proportions de chaque classe dans l’échantillon d’apprentissage),
+- Les **statistiques conditionnelles** (moyennes et variances des variables continues selon la classe cible).
 
 ```{r}
+predictive_vars = cbind(quantitative_vars, qualitative_vars)
+set.seed(1234)
+nobs    = nrow(qualitative_vars) 
+inTrain = sample(1:nobs, size = round(0.8 * nobs), replace = FALSE)
 
-library(caret)
+predictive_vars_test    = predictive_vars[-inTrain,]
+target_test             = target[-inTrain] 
+predictive_vars_train   = predictive_vars[inTrain,]
+target_train            = target[inTrain] 
+target_train <- as.factor(target_train)
+predictive_vars_train <- as.data.frame(predictive_vars_train)
+predictive_vars_test <- as.data.frame(predictive_vars_test)
 ```
-
-```{r}
-logit_model <- glm(target_train ~ ., data = predictive_vars_train, family = binomial)
-
-target_pred_prob <- predict(logit_model, newdata = predictive_vars_test, type = "response")
-
-#  Transformation des probabilités en classes (seuil 0.5)
-target_pred_logit <- ifelse(target_pred_prob > 0.5, 1, 0)
-
-#  Conversion en facteur avec les bons niveaux
-target_pred_logit <- factor(target_pred_logit, levels = levels(target_test))
-
-# Vérification des longueurs
-stopifnot(length(target_pred_logit) == length(target_test))
-
-#  Matrice de confusion
-confusionMatrix(target_pred_logit, target_test, positive="1")
-
-conf_matrix <- confusionMatrix(target_pred_logit, target_test, positive = "1")
-
-# Extraire les métriques
-accuracy_test   <- conf_matrix$overall["Accuracy"]
-recall_test     <- conf_matrix$byClass["Sensitivity"]  # Rappel
-precision_test  <- conf_matrix$byClass["Precision"]
-f1_score        <- 2 * (precision_test * recall_test) / (precision_test + recall_test)
-
-# Affichage
-cat("Accuracy  :", accuracy_test, "\n")
-cat("Recall    :", recall_test, "\n")
-cat("Precision :", precision_test, "\n")
-cat("F1-Score  :", f1_score, "\n")
-```
-***Interpretation***
-	-	Accuracy : 0.6518 => Le modèle est correct dans 62% des cas. C’est un peu moins bon que le taux de majorité (0.6446), donc pas très performant globalement.
-	-	Sensitivity : 0.9389 => Excellente détection des patients sans risque (classe 0). Presque tous les vrais 0 sont bien identifiés.
-	-	Specificity : 0.0465 =>  Très mauvaise détection des patients à risque (classe 1). Le modèle ne reconnaît presque aucun vrai cas de risque.
-	-	Pos Pred Value : 0.641 => Quand le modèle prédit “0”, c’est bon à 64% du temps.
-	-	Neg Pred Value : 0.296 => Quand le modèle prédit “1”, il se trompe souvent.
-	-	Balanced Accuracy : 0.4927 => En dessous de 0.5 = pire qu’un tirage au sort binaire.
-	-	Kappa : -0.0179 => Accord entre le modèle et la vérité à peine mieux qu’un hasard.
-
-Conclusion :
-
-Le modèle prédit quasiment toujours la classe 0, et il a du mal à détecter les vrais patients à risque. Il est biaisé vers la classe majoritaire.
-
-
-
-
-
-## 4. La classification Naive bayésienne
-
-### 4.1. Apprentissage du classifieur naïf bayésien
 
 ```{r, results = "hide", message = FALSE}
 library(naivebayes)
 ?naive_bayes
 ```
 
-```{r, eval = FALSE}
-predictive_vars = cbind(quantitative_vars, qualitative_vars)
-# Conversion de la target en facteur
-set.seed(1357)  # Pour la reproductibilité
-target
-nobs = nrow(predictive_vars)
-train_indices = sample(1:nobs, size = 0.8 * nobs)  # 80% des indices pour le train
-
-# Création des ensembles Train/Test
-predictive_vars_test  = predictive_vars[-inTrain, ]
-predictive_vars_train=predictive_vars[inTrain,]
-target_test  = target[-inTrain ]
-predictive_vars_train <- as.data.frame(predictive_vars_train)
-predictive_vars_test <- as.data.frame(predictive_vars_test)
-```
-
 ```{r}
 classif = naive_bayes(x = predictive_vars_train, y = target_train)
 classif
 ```
-**Interpretation**
-On a trouvé pour les probabilités a priori : 
-0.6422254  # classe 0 (pas à risque)
-0.3577746  # classe 1 (à risque)
-=> Cela signifie que  dans notre jeu de données d’entraînement :
-	-	Environ 64 % des individus ne sont pas à risque (classe 0)
-	-	Et environ 36 % sont à risque d’infarctus (classe 1)
-Puis pour les variables : 
-1- Cholesterol : Moyenne pour les individus non à risque (classe 0) : 0.497
-   et Moyenne pour les individus à risque (classe 1) : 0.506
-   => Les personnes classées à risque d’infarctus ont en moyenne un taux de cholestérol légèrement plus élevé que celles non à risque. Cette différence, bien que modérée, est cohérente avec les connaissances médicales, qui identifient le cholestérol comme un facteur important dans les maladies cardiovasculaires.
-2- Heart.Rate : Moyenne classe 0 : 0.500 et Moyenne classe 1 : 0.495
-   => Les moyennes du rythme cardiaque sont très proches entre les deux classes. Cela suggère que cette variable n’a probablement pas un fort pouvoir discriminant dans la prédiction du risque d’infarctus dans ce jeu de données.
-3- BMI (indice de masse corporelle) : 	Moyenne classe 0 : 0.498 et Moyenne classe 1 : 0.497
-   => L’indice de masse corporelle est quasiment identique entre les deux groupes. Le modèle ne pourra donc pas s’appuyer fortement sur cette variable pour différencier les individus à risque des autres.
+### 4.2 Interprétation des résultats
 
-#### Densité
+Les probabilités a priori calculées par le modèle sont :
+
+- Classe 0 (patients non à risque) : **64 %**
+- Classe 1 (patients à risque) : **36 %**
+
+Cela reflète la répartition observée dans le jeu d'entraînement, sans déséquilibre majeur.
+
+Voici quelques observations sur certaines variables conditionnelles :
+
+- **Cholestérol** : La moyenne est légèrement plus élevée chez les patients à risque (`0.506` contre `0.497`), ce qui est cohérent avec les connaissances médicales.  
+   Cela renforce l’idée que le cholestérol est un facteur contributif dans la prédiction du risque cardiaque.
+
+- **Heart.Rate** : Les moyennes entre les deux classes sont quasiment identiques (`0.500` vs `0.495`), suggérant un **faible pouvoir discriminant** de cette variable dans le cadre de ce modèle.
+
+- **BMI (indice de masse corporelle)** : La moyenne est très similaire entre les classes (`0.498` vs `0.497`).  
+   Cette absence de différence statistique marquée limite l’utilité de cette variable pour la classification selon l’approche bayésienne.
+
+> Ces observations montrent que, bien que certains attributs soient informatifs, le modèle naïf bayésien pourrait avoir une **capacité de séparation limitée**, notamment si les hypothèses d’indépendance ou de distributions normales sont trop éloignées de la réalité des données.
+
+#### 4.2 Visualisation des densités conditionnelles
+
+Une des forces du modèle naïf bayésien est sa capacité à représenter, pour chaque variable continue, la **densité conditionnelle** selon la classe cible. Cela permet de **visualiser le pouvoir discriminant** de chaque variable dans la séparation entre les individus à risque et ceux qui ne le sont pas.
+
+Le graphique suivant présente les courbes de densité estimées pour les différentes variables explicatives, conditionnellement à la classe (0 = non à risque, 1 = à risque).
 
 ```{r, out.width="50%", fig.align = "center", eval = FALSE}
 plot(classif, prob = "conditional")
-```
+`
 **Interprétation**
 
-- Income : les courbes de densité pour income sont presque identiques entre les classes à risque et non à risque cela montre que cette variable n’est pas discriminante pour le modèle naïve bayes. Pareil pour Sedentary.per.day et BMI.
+- Income : Les courbes sont quasi identiques pour les deux classes, ce qui suggère que cette variable n’est pas discriminante dans le cadre du modèle naïf bayésien. Il en va de même pour BMI et Sedentary.Hours.Per.Day.
 
-- Cholesterol : les courbes pour la variable cholesterol sont un peu décalées entre les classes cela indique que le cholestérol pourrait être une variable utile pour différencier les individus à risque des autres.Pareil pour Systolic_BP et Exercise.Hours.Per.Week.
+- Cholesterol : Les courbes présentent un décalage significatif entre les classes. Cela laisse penser que le cholestérol est un facteur potentiellement informatif dans la classification.
 
-- Triglycérides : les courbes de densité pour les triglycérides sont presque superposées entre les deux classes cela indique que cette variable n’apporte que peu d’information pour différencier les individus à risque des autres
-etc.
+- Systolic_BP et Exercise.Hours.Per.Week : présentent également des courbes différenciées entre les deux groupes, indiquant un pouvoir prédictif modéré à bon.
+
+- Triglycerides : Les densités sont quasiment superposées, ce qui traduit une faible capacité à différencier les classes sur cette variable.
+
+#### 4.3 Prédiction finale et évaluation des performances
+
+Après l'entraînement du classifieur naïf bayésien, nous appliquons ce modèle à l’échantillon de test afin de prédire la catégorie (à risque ou non) de chaque individu. Cette étape permet de mesurer la **capacité de généralisation** du modèle sur des données nouvelles.
+
+La performance est évaluée à l’aide des trois métriques suivantes :
+
+- **Accuracy** : proportion de bonnes prédictions sur l’ensemble du test.
+- **Recall (sensibilité)** : capacité du modèle à détecter correctement les individus réellement à risque.
+- **Précision** : proportion de patients prédits comme à risque qui le sont réellement.
+
+L’ensemble de ces indicateurs permet d’avoir une vision complète de la qualité du modèle, en particulier dans un contexte médical où les faux négatifs peuvent avoir des conséquences graves.
 
 
-### 4.2. Prédiction sur le jeu de données de test des probabilités d'appartenir aux différentes catégories de la réponse
+#### 4.2. Prédiction sur le jeu de données de test des probabilités d'appartenir aux différentes catégories de la réponse
 
 ```{r, eval = FALSE}
 pred = predict(classif, predictive_vars_test, type = "prob")
 
 ```
+```{r}
+# Prédiction des classes sur l'ensemble de test
+target_pred <- predict(classif, predictive_vars_test, type = "class")
 
-### Prédiction de la target
-
-```{r, eval = FALSE}
+# Matrice de confusion avec caret
 library(caret)
+conf_matrix_nb <- confusionMatrix(target_pred, target_test, positive = "1")
+conf_matrix_nb
 
-```
+# Calcul des métriques principales
+accuracy <- conf_matrix_nb$overall["Accuracy"]
+recall_value <- conf_matrix_nb$byClass["Sensitivity"]   # Sensibilité = recall
+precision_value <- conf_matrix_nb$byClass["Precision"]
 
-### Prédiction de la target sur le jeu de données de test
+# Affichage
+accuracy
+recall_value
+precision_value
+``
+
 
 
 
