@@ -317,7 +317,7 @@ str(quantitative_vars)
 
 ## 1. Analyse univariée
 
-### Variables quantitatives
+### Variables quantitatives 
 
 Un résumé statistique a été effectué afin d’identifier les
 distributions, valeurs aberrantes et échelles des variables continues :
@@ -431,8 +431,79 @@ mais reste suffisamment équilibrée pour permettre une modélisation
 fiable des deux classes.
 
 ## 2. Analyse graphique
+### 2.1. Analyse des variables quantitatives
 
-### Variables quantitatives : boxplot
+```{r, out.width="50%", fig.align = "center"}
+for (col in colnames(quantitative_vars)){
+  boxplot(quantitative_vars[[col]], main=paste("Boxplot", col), col="lightblue", breaks=30)
+}
+```
+***Interprétation ***
+
+- Cholesterol : Q1 = 192, Médiane = 259, Q3 = 330 et Pas de valeurs aberrantes
+=> 50 % des données se situent entre 192 et 330. La médiane est de 259 mg/dL. L’ensemble des observations reste dans la plage normale définie par les moustaches.
+
+- Heart Rate : Q1 = 57, Médiane = 75, Q3 = 93 , Min = 40, Max = 110 et	Pas de valeurs extrêmes
+=> La moitié des individus ont une fréquence cardiaque entre 57 et 93 bpm. La médiane est à 75. Aucune valeur n’est considérée comme aberrante selon les critères du boxplot.
+
+- Exercise Hours Per Week: Q1 ≈ 5, Médiane ≈ 10, Q3 ≈ 15 ,Min ≈ 0, Max ≈ 20 et Pas de points au-delà des moustaches
+=> 50 % des individus font entre 5 et 15 heures d’exercice par semaine. La médiane est de 10. La distribution est régulière et aucune valeur n’est jugée extrême.
+
+- Stress Level : Q1 = 3, Médiane = 5, Q3 = 8 et Min = 1, Max = 10 Pas de valeurs extrêmes
+=> Le niveau de stress est compris entre 3 et 8 pour la moitié des individus, avec une médiane de 5. Les moustaches couvrent l’ensemble des données, sans valeur aberrante.
+
+- Sedentary Hours Per Day : Q1 ≈ 3, Médiane ≈ 6, Q3 ≈ 9,Min ≈ 0, Max ≈ 12 et Pas de valeur extrême
+=> Les heures passées assis par jour sont comprises entre 3 et 9 pour la moitié des individus. La médiane est à 6. Tous les individus restent dans les limites des moustaches.
+
+-  Triglycerides: Q1 = 225.5, Médiane = 417, Q3 = 612, Min = 30, Max = 800 et pas de valeur aberrante détectée
+=> Bien que les valeurs varient fortement, la distribution respecte les limites définies par les moustaches. Aucune valeur extrême détectée malgré un écart important.
+
+- Physical Activity Days Per Week : Q1 = 2, Médiane = 3, Q3 = 5,Min = 0, Max = 7 et aucun point hors des moustaches
+=> 50 % des individus font entre 2 et 5 jours d’activité physique par semaine. La médiane est de 3 jours. Toutes les valeurs sont incluses dans les moustaches, donc aucune valeur extrême n’est présente.
+
+- Sleep Hours Per Day :	Q1 = 5, Médiane = 7, Q3 = 9, Min = 4, Max = 10 et Aucune valeur hors de l’intervalle attendu
+=> La moitié des individus dorment entre 5 et 9 heures par jour. La médiane est de 7 heures. La distribution est équilibrée, sans valeur aberrante détectée.
+
+- Heart Attack Risk : Variable binaire : Min = 0, Max = 1, Médiane = 0,	Q1 = 0, Q3 = 1 et Rien à détecter ici car ce n’est pas une variable continue
+=> Cette variable prend uniquement les valeurs 0 ou 1. Le boxplot n’est pas pertinent ici car la variable est catégorique.
+
+- systolic_BP :	Q1 = 112, Médiane = 135, Q3 = 158, Min = 90, Max = 180 et Toutes les valeurs sont dans les moustaches
+=> La moitié des pressions systoliques se situent entre 112 et 158 mmHg, avec une médiane de 135. Aucune valeur extrême n’est présente selon la règle de 1,5×IQR.
+
+### 2.2. Variables qualitatives: barplot
+
+```{r, out.width="50%", fig.align = "center"}
+for (col in colnames(qualitative_vars)){
+  barplot(table(qualitative_vars[[col]]), main=paste("Histogramme de", col), col="green")
+}
+# Afficher les effectifs de chaque modalité pour chaque variable qualitative
+for (col in colnames(qualitative_vars)) {
+  cat("====", col, "====\n")
+  print(table(qualitative_vars[[col]]))
+  cat("\n\n")
+}
+```
+
+***Interprétation***
+- Age_cat : La majorité de l’échantillon est composée de personnes d’âge moyen à élevé : 2441 Middle-aged, 2346 Senior et 2361 Elderly. La catégorie Jeune est sous-représentée (1615), ce qui montre un biais vers les tranches d’âge supérieures.
+
+- Sex : L’échantillon est fortement déséquilibré : 6111 hommes contre 2652 femmes. Ce déséquilibre de genre devra être pris en compte dans l’analyse.
+
+- Smoking : 7859 individus déclarent fumer contre seulement 904 non-fumeurs. Cela montre une très forte proportion de fumeurs dans la base.
+
+- Diabetes : 5716 individus sont atteints de diabète, contre 3047 non-diabétiques. Le diabète est donc très présent dans cette population.
+
+- Obesity : La répartition est équilibrée : 4394 personnes sont en situation d’obésité contre 4369 qui ne le sont pas. Cette variable permet une analyse comparative directe.
+
+- Family.History : Les antécédents familiaux de maladies cardiaques concernent 4320 personnes, tandis que 4443 n’en ont pas. La distribution est globalement équilibrée.
+
+- Previous.Heart.Problems : 4345 individus présentent des antécédents de problèmes cardiaques, contre 4418 qui n’en ont pas. La répartition est presque équilibrée, ce qui permettra d’étudier correctement l’impact de ces antécédents sur le risque d’infarctus.
+
+-  Medication.Use : 4367 personnes déclarent prendre un traitement médicamenteux, contre 4396 qui n’en prennent pas. Cette variable est également équilibrée, ce qui facilite les comparaisons entre les deux groupes.
+
+- Alcohol.Consumption : 5241 individus consomment de l’alcool, tandis que 3522 n’en consomment pas. Une majorité est donc consommatrice, ce qui peut représenter un facteur de risque comportemental important à analyser.
+
+### 2.3. Variables quantitatives et target
 
 ```{r}
 for(i in 1:ncol(quantitative_vars)){
@@ -464,7 +535,7 @@ for(i in 1:ncol(quantitative_vars)){
 
 -   Sleep.Hours.Per.Day : La médiane est identique entre les deux groupes (environ 7 heures). Les distributions sont semblables et symétriques, sans valeurs extrêmes détectées. Le sommeil ne semble donc pas différencier clairement les individus à risque des autres.
 
-### Variables qualitatives et target : barplot
+### 2.4. Variables qualitatives et target 
 
 ```{R}
 #library(ggplot2)
@@ -551,8 +622,8 @@ Avant de procéder à l'analyse multivariée, nous avons vérifié la présence 
 
 ```{r}
 # verification de valeurs manquantes
-is.na(quantitative_vars[,1])
- is.na(qualitative_vars)
+colSums(is.na(qualitative_vars))
+colSums(is.na(quantitative_vars))
 
 ```
 
@@ -561,174 +632,6 @@ Après vérification, nous avons constaté que notre base de données **ne conti
 ### 3.2 Analyse Graphique 
 #### Analyse des variables quantitatives
 
-```{r, out.width="50%", fig.align = "center"}
-for (col in colnames(quantitative_vars)){
-  boxplot(quantitative_vars[[col]], main=paste("Boxplot", col), col="lightblue", breaks=30)
-}
-summary(data$Age)
-summary(data$Cholesterol)
-summary(data$Heart.Rate)
-summary(data$Exercise.Hours.Per.Week)
-summary(data$Stress.Level)
-summary(data$Sedentary.Hours.Per.Day)
-summary(data$Income)
-summary(data$BMI)
-summary(data$Triglycerides)
-summary(data$Physical.Activity.Days.Per.Week)
-summary(data$Sleep.Hours.Per.Day)
-summary(data$Heart.Attack.Risk)
-summary(data$Systolic_BP)
-summary(data$Diastolic_BP)
-```
-***Interprétation ***
-- Age : Q1 = 35, Médiane = 54, Q3 = 72
-=> Les moustaches s’étendent de 18 à 90
-=> Aucune valeur aberrante détectée
-=> 50 % des individus ont un âge compris entre 35 et 72 ans. La médiane est de 54 ans. Toutes les valeurs sont incluses dans les moustaches, donc aucune valeur extrême n’est détectée.
-
-- Cholesterol : Q1 = 192, Médiane = 259, Q3 = 330 et Pas de valeurs aberrantes
-=> 50 % des données se situent entre 192 et 330. La médiane est de 259 mg/dL. L’ensemble des observations reste dans la plage normale définie par les moustaches.
-
-
-- Heart Rate : Q1 = 57, Médiane = 75, Q3 = 93 , Min = 40, Max = 110 et	Pas de valeurs extrêmes
-=> La moitié des individus ont une fréquence cardiaque entre 57 et 93 bpm. La médiane est à 75. Aucune valeur n’est considérée comme aberrante selon les critères du boxplot.
-
-- xercise Hours Per Week: Q1 ≈ 5, Médiane ≈ 10, Q3 ≈ 15 ,Min ≈ 0, Max ≈ 20 et Pas de points au-delà des moustaches
-=> 50 % des individus font entre 5 et 15 heures d’exercice par semaine. La médiane est de 10. La distribution est régulière et aucune valeur n’est jugée extrême.
-
-- Stress Level : Q1 = 3, Médiane = 5, Q3 = 8 et Min = 1, Max = 10 Pas de valeurs extrêmes
-=> Le niveau de stress est compris entre 3 et 8 pour la moitié des individus, avec une médiane de 5. Les moustaches couvrent l’ensemble des données, sans valeur aberrante.
-
-- Sedentary Hours Per Day : Q1 ≈ 3, Médiane ≈ 6, Q3 ≈ 9,Min ≈ 0, Max ≈ 12 et Pas de valeur extrême
-=> Les heures passées assis par jour sont comprises entre 3 et 9 pour la moitié des individus. La médiane est à 6. Tous les individus restent dans les limites des moustaches.
-
--  Triglycerides: Q1 = 225.5, Médiane = 417, Q3 = 612, Min = 30, Max = 800 et pas de valeur aberrante détectée
-=> Bien que les valeurs varient fortement, la distribution respecte les limites définies par les moustaches. Aucune valeur extrême détectée malgré un écart important.
-
-- Physical Activity Days Per Week : Q1 = 2, Médiane = 3, Q3 = 5,Min = 0, Max = 7
-etAucun point hors des moustaches
-=> 50 % des individus font entre 2 et 5 jours d’activité physique par semaine. La médiane est de 3 jours. Toutes les valeurs sont incluses dans les moustaches, donc aucune valeur extrême n’est présente.
-
-
-- Sleep Hours Per Day :	Q1 = 5, Médiane = 7, Q3 = 9, Min = 4, Max = 10 et Aucune valeur hors de l’intervalle attendu
-=> La moitié des individus dorment entre 5 et 9 heures par jour. La médiane est de 7 heures. La distribution est équilibrée, sans valeur aberrante détectée.
-
-
-
-- Heart Attack Risk : Variable binaire : Min = 0, Max = 1, Médiane = 0,	Q1 = 0, Q3 = 1 et Rien à détecter ici car ce n’est pas une variable continue
-=> Cette variable prend uniquement les valeurs 0 ou 1. Le boxplot n’est pas pertinent ici car la variable est catégorique.
-
-
-- systolic_BP :	Q1 = 112, Médiane = 135, Q3 = 158, Min = 90, Max = 180 et Toutes les valeurs sont dans les moustaches
-=> La moitié des pressions systoliques se situent entre 112 et 158 mmHg, avec une médiane de 135. Aucune valeur extrême n’est présente selon la règle de 1,5×IQR.
-
-
-- Diastolic_BP : Q1 = 72, Médiane = 85, Q3 = 98, Min = 60, Max = 110 et Pas de point en dehors des moustaches
-=> La pression diastolique est comprise entre 72 et 98 mmHg pour 50 % des individus. La médiane est de 85. Aucun individu ne dépasse les limites définies par les moustaches.
-
-#### Variables qualitatives
-
-```{r, out.width="50%", fig.align = "center"}
-for (col in colnames(qualitative_vars)){
-  barplot(table(qualitative_vars[[col]]), main=paste("Histogramme de", col), col="pink")
-}
-# Afficher les effectifs de chaque modalité pour chaque variable qualitative
-for (col in colnames(qualitative_vars)) {
-  cat("====", col, "====\n")
-  print(table(qualitative_vars[[col]]))
-  cat("\n\n")
-}
-```
-
-***Interprétation***
-- Age_cat : La majorité de l’échantillon est composée de personnes d’âge moyen à élevé : 2441 Middle-aged, 2346 Senior et 2361 Elderly. La catégorie Jeune est sous-représentée (1615), ce qui montre un biais vers les tranches d’âge supérieures.
-
-- Sex : L’échantillon est fortement déséquilibré : 6111 hommes contre 2652 femmes. Ce déséquilibre de genre devra être pris en compte dans l’analyse.
-
-- Smoking : 7859 individus déclarent fumer contre seulement 904 non-fumeurs. Cela montre une très forte proportion de fumeurs dans la base.
-
-- Diabetes : 5716 individus sont atteints de diabète, contre 3047 non-diabétiques. Le diabète est donc très présent dans cette population.
-
-- Obesity : La répartition est équilibrée : 4394 personnes sont en situation d’obésité contre 4369 qui ne le sont pas. Cette variable permet une analyse comparative directe.
-
-- Family.History : Les antécédents familiaux de maladies cardiaques concernent 4320 personnes, tandis que 4443 n’en ont pas. La distribution est globalement équilibrée.
-
-- Previous.Heart.Problems : 4345 individus présentent des antécédents de problèmes cardiaques, contre 4418 qui n’en ont pas. La répartition est presque équilibrée, ce qui permettra d’étudier correctement l’impact de ces antécédents sur le risque d’infarctus.
-
--  Medication.Use : 4367 personnes déclarent prendre un traitement médicamenteux, contre 4396 qui n’en prennent pas. Cette variable est également équilibrée, ce qui facilite les comparaisons entre les deux groupes.
-
-- Alcohol.Consumption : 5241 individus consomment de l’alcool, tandis que 3522 n’en consomment pas. Une majorité est donc consommatrice, ce qui peut représenter un facteur de risque comportemental important à analyser.
-
-``````{r, message=FALSE, warning=FALSE}
-library(tidyverse)
-
-# Préparation des données : fusion avec la cible
-qualitative_with_target <- qualitative_vars %>%
-  mutate(Heart.Attack.Risk = target)
-
-# Boucle pour tracer chaque variable qualitative
-for (var in colnames(qualitative_vars)) {
-  p <- ggplot(qualitative_with_target, aes_string(x = var, fill = "factor(Heart.Attack.Risk)")) +
-    geom_bar(position = "dodge") +
-    scale_fill_manual(values = c("pink", "lightblue"),
-                      name = "Risque d'infarctus",
-                      labels = c("Absence de risque", "Présence de risque")) +
-    labs(title = paste("Répartition de", var, "selon le risque d'infarctus"),
-         x = var, y = "Effectifs") +
-    theme_minimal()
-
-  print(p)
-}
-
-```
-***Interpretation*** 
-- Répartition de Age_cat selon le risque : 
-On observe une légère surreprésentation des Seniors et Elderly dans le groupe à risque.Cela confirme que l’âge avancé est un facteur associé au risque d’infarctus, sans être totalement déterminant.
-
-- Répartition de Sex selon le risque : 
-Le nombre d’hommes dans le groupe à risque est nettement supérieur à celui des femmes.Le sexe masculin apparaît donc clairement corrélé au risque cardiaque dans ce jeu de données.
-
-- Répartition de Smoking selon le risque :
-La majorité des fumeurs se trouve dans le groupe à risque, tandis que les non-fumeurs sont peu présents dans ce groupe.Le tabagisme est ici un facteur fortement associé au risque, avec un potentiel explicatif élevé.
-
-- Répartition de Diabetes selon le risque :
-Les diabétiques sont nettement plus nombreux dans le groupe à risque que les non-diabétiques.Cette variable est donc fortement liée au risque de crise cardiaque et sera déterminante dans la modélisation.
-
-- Répartition de Obesity selon le risque :
-Les effectifs sont très similaires dans les deux groupes, que ce soit pour les obèses ou non.L’obésité n’apparaît pas ici comme un facteur discriminant net, bien qu’elle puisse jouer un rôle indirect.
-
-- Répartition de Family.History selon le risque : 
-Légère surreprésentation des antécédents familiaux dans le groupe à risque, mais la différence reste modérée.
-Cette variable pourrait donc être informative, mais faiblement discriminante seule.
-
-- Répartition de Diet selon le risque d’infarctus :
-Les effectifs sont très proches entre les groupes, quelle que soit la qualité du régime alimentaire. La variable Diet ne montre pas de tendance marquée entre alimentation et risque cardiaque. Son pouvoir prédictif semble faible lorsqu’elle est prise isolément.
-
-- Répartition de Previous.Heart.Problems selon le risque : 
-Les patients ayant eu des antécédents cardiaques sont légèrement plus nombreux dans le groupe à risque. Cette variable est donc pertinente, mais la différence reste modérée.
-
-- Répartition de Medication.Use selon le risque :
-Les proportions sont quasiment identiques entre les deux groupes. La prise de médicament ne permet pas de discriminer clairement les patients à risque dans ce jeu de données.
-
-- Répartition de Alcohol.Consumption selon le risque :
-La consommation d’alcool est nettement plus élevée chez les patients à risque. Cette variable est donc fortement associée au risque d’infarctus, et mérite d’être prise en compte dans la modélisation.
-
-- Répartition de Diet_encoded selon le risque : 
-La variable encodée reprend fidèlement la distribution observée pour Diet.
-Aucune différence significative entre les groupes.Comme sa version non encodée, elle semble peu informative seule.
-
-#### Boxplot de chaque variable quantitative en fonction du risque cardiaque
-
-```{r, out.width="50%", fig.align = "center", eval=TRUE}
-for(i in 1:ncol(quantitative_vars)){
-  main_i = paste0("Boxplot de ",  colnames(quantitative_vars)[i], 
-                  "\n en fonction de heart_risk")
-  ylab_i = paste0(colnames(quantitative_vars)[i])
-  boxplot(quantitative_vars[,i] ~ target, col = c("pink", "lightblue"), 
-          main = main_i, ylab = ylab_i, xlab = "heart_risk")
-}
-```
-***Interpretation ruth***
 ```{r}
 
 library(ggplot2)
@@ -736,6 +639,7 @@ library(reshape2)
 
 # Calcul de la matrice de corrélation
 cor_mat <- cor(quantitative_vars, use = "complete.obs")
+cor_mat
 
 # Transformation en format long
 melted_cor_mat <- melt(cor_mat)
@@ -749,48 +653,34 @@ ggplot(data = melted_cor_mat, aes(x = Var1, y = Var2, fill = value)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 ```
+**Interprétation** **Corrélations positives**
 
-**Interprétation** 
-**Corrélations positives (rouge)** -Triglycérides & Systolic_BP (0.0051) et Triglycérides & Diastolic_BP (0.0005) : Très faible corrélation positive entre les triglycérides et la pression artérielle. Les valeurs sont proches de 0, donc pas significatives.
+-   Triglycérides & Systolic_BP (0.0051) et Triglycérides & Diastolic_BP
+    (0.0005) : Très faible corrélation positive entre les triglycérides
+    et la pression artérielle. Les valeurs sont proches de 0, donc pas
+    significatives.
 
--Cholestérol & BMI (0.0173) : Une légère corrélation positive entre l’indice de masse corporelle (BMI) et le taux de cholestérol. une prise de poids peut être associée à une augmentation du cholestérol.
+-   Cholestérol & BMI (0.0173) : Une légère corrélation positive entre
+    l’indice de masse corporelle (BMI) et le taux de cholestérol. une
+    prise de poids peut être associée à une augmentation du cholestérol.
 
-Stress Level & Age (0.0183) : Une légère corrélation montrant que le niveau de stress pourrait légèrement augmenter avec l’âge.
+**Corrélations négatives**
 
-Mais la valeur est faible, donc pas de relation forte.
+-   Stress Level & Physical Activity Days Per Week (-0.0074) : Une
+    légère corrélation indiquant que plus une personne fait de
+    l’activité physique, moins elle ressent de stress. Cependant, la
+    valeur est très proche de 0, donc cette relation est faible.
 
-**Corrélations négatives (en bleu)**
+-   Triglycérides & Physical Activity Days Per Week (-0.0075) : Indique
+    que les personnes qui pratiquent plus d’activité physique ont
+    tendance à avoir un taux de triglycérides légèrement plus bas.
 
--Stress Level & Physical Activity Days Per Week (-0.0074) : Une légère corrélation indiquant que plus une personne fait de l’activité physique, moins elle ressent de stress. Cependant, la valeur est très proche de 0, donc cette relation est faible.
-
--Triglycérides & Physical Activity Days Per Week (-0.0075) : Indique que les personnes qui pratiquent plus d’activité physique ont tendance à avoir un taux de triglycérides légèrement plus bas.
-
-**Conclusion Générale** On observe aucune ucune relation forte entre les variables : Toutes les corrélations sont proches de 0, ce qui signifie qu’aucune variable ne semble influencer fortement une autre dans cet ensemble de données. Ce qui suggère que toutes les variables sont essentielles(pas de redondance dans les variables) pour prédire le risque d'infarctus.
-
-#### Variables qualitatives et target
-```{r}
-for(i in 1:ncol(qualitative_vars)){
-var1 = as.character(qualitative_vars[,i])
-var1[which(is.na(var1))] = "NA"
-var1 = as.factor(var1)
-counts = NULL   ##  il nous faut le nombre de passagers dans chacune des catégories
-# définies par la variable quantitative et la target
-for(j in levels(var1)){
-for(k in levels(target)){
-counts = rbind(counts, c(var1 = j, target = k,
-patient_num = sum(target == k & var1 == j)))
-}}
-counts = as.data.frame(counts)
-counts$var1 = as.factor(counts$var1)
-counts$target = as.factor(counts$target)
-counts$patient_num = as.numeric(counts$patient_num)
-xlab_i = paste0(colnames(qualitative_vars)[i])
-print(ggplot(data = counts, aes(x = var1, y = patient_num, fill = target)) +
-geom_bar(stat = "identity", color="black", position = "fill") +
-theme_minimal() + labs(x = xlab_i, fill = "Atteintes de risques",
-y = "Proportion de patients"))
-}
-```
+**Conclusion Générale** On observe aucune ucune relation forte entre les
+variables : Toutes les corrélations sont proches de 0, ce qui signifie
+qu’aucune variable ne semble influencer fortement une autre dans cet
+ensemble de données. Ce qui suggère que toutes les variables sont
+essentielles(pas de redondance dans les variables) pour prédire le
+risque d'infarctus.
 
 # III Modèles d'évaluation
 ## 1. Methodes des k_plus proches voisins
