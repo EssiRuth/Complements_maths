@@ -1302,6 +1302,218 @@ Les performances de l’arbre de décision sur le jeu de test sont les suivantes
 - Sensitivity (Recall) : 15,61 %, Ce faible score indique que le modèle ne détecte qu’une petite partie des cas positifs (patients à risque). Autrement dit, il y a un grand nombre de faux négatifs.
 - Precision : 42,24 %,  Cela signifie qu’environ 42 % des prédictions positives sont correctes.
 
+### 3.4. Élagage de l'arbre
+```{r, eval = FALSE}
+classifTree$cptable
+```
+
+
+```{r, eval = FALSE}
+cp = classifTree$cptable[which.min(classifTree$cptable[, "xerror"]), "CP"]
+cp
+
+printcp(classifTree)  # Affiche les valeurs de cp
+plotcp(classifTree)   # Graphique de l'erreur en fonction de cp
+
+```
+
+```{r, eval = FALSE}
+prunedTree = prune(classifTree, cp*0.8)
+
+# Tracer l’arbre élagué
+rpart.plot(prunedTree, type = 3, extra = 2, fallen.leaves = TRUE,  
+           main = "Arbre élagué de prédiction du risque de crise cardiaque") 
+
+```
+Nous utilisons l’arbre élagué pour effectuer des prédictions sur le jeu de test pour calculer les 
+```{r}
+ # Prédiction avec l'arbre élagué
+target_pred_pruned = predict(prunedTree, predictive_vars_train, type = "class")
+
+# Calcul des métriques
+cm_pruned = confusionMatrix(target_pred_pruned, target_train, positive = "1")
+
+accuracy_train_pruned  = cm_pruned$overall["Accuracy"]
+recall_train_pruned    = cm_pruned$byClass["Sensitivity"]
+precision_train_pruned = cm_pruned$byClass["Precision"]
+
+accuracy_train_pruned
+recall_train_pruned
+precision_train_pruned
+
+```
+### 2.6. Prédiction de la target avec l'arbre élagué sur le jeu de données de test
+
+```{r}
+ # Prédiction avec l'arbre élagué
+target_pred_pruned = predict(prunedTree, predictive_vars_test, type = "class")
+
+# Calcul des métriques
+cm_pruned = confusionMatrix(target_pred_pruned, target_test, positive = "1")
+
+accuracy_test_pruned  = cm_pruned$overall["Accuracy"]
+recall_test_pruned    = cm_pruned$byClass["Sensitivity"]
+precision_test_pruned = cm_pruned$byClass["Precision"]
+
+accuracy_test_pruned
+recall_test_pruned
+precision_test_pruned
+```
+## 3. Arbre de classification avec évaluation des performances en 10-fold cross-validation
+
+### 3.1. Sans élagage
+
+
+```{r}
+# Charger les packages nécessaires
+library(caret)
+library(rpart)
+library(rpart.plot)
+
+set.seed(1357)
+
+# Définition des folds
+nobs                  <- nrow(predictive_vars)
+inTest                <- sample(1:nobs, size = round(0.1 * nobs), replace = FALSE)
+predictive_vars_test  <- predictive_vars[inTest,]
+target_test           <- target[inTest]
+predictive_vars_remain <- predictive_vars[-inTest,]
+target_remain         <- target[-inTest]
+
+nobs_remain <- nrow(predictive_vars_remain)
+nfolds      <- 10
+
+# Création des folds manuellement
+folds <- sample(rep(1:nfolds, length.out = nobs_remain))
+
+# Matrices pour stocker les métriques
+accuracy_fold <- NULL
+recall_fold <- NULL
+precision_fold <- NULL
+
+# Boucle sur les folds
+for (fold in 1:nfolds) {
+  # Séparation des données en train et validation
+  inFold                      <- which(folds == fold)
+  predictive_vars_train       <- predictive_vars_remain[-inFold, ]
+  predictive_vars_validation  <- predictive_vars_remain[inFold, ]
+  target_train                <- target_remain[-inFold]
+  target_validation           <- target_remain[inFold]
+    
+  accuracy_k  <- NULL
+  recall_k    <- NULL
+  precision_k <- NULL
+
+  # Entraînement de l'arbre de décision sans élagage
+  tree_model <- rpart(target_train ~ ., data = predictive_vars_train, method = "class")
+  
+  # Prédiction sur la partie validation
+  target_pred <- predict(tree_model, predictive_vars_validation, type = "class")
+
+  # Calcul des métriques avec confusionMatrix()
+  cm <- confusionMatrix(target_pred, target_validation, positive = "1")
+  
+  # Stocker les résultats
+  accuracy_k <- cm$overall["Accuracy"]
+  recall_k   <- cm$byClass["Sensitivity"]
+  precision_k <- cm$byClass["Precision"]
+
+  accuracy_fold <- rbind(accuracy_fold, accuracy_k)
+  recall_fold   <- rbind(recall_fold, recall_k)
+  precision_fold <- rbind(precision_fold, precision_k)
+}
+
+rownames(accuracy_fold) <- paste0("fold_", 1:nfolds)
+rownames(recall_fold)   <- paste0("fold_", 1:nfolds)
+rownames(precision_fold) <- paste0("fold_", 1:nfolds)
+
+```
+
+Calculer la 10-fold cross validated mean accuracy, la 10-fold cross validated mean recall, et la 10-fold cross validated mean precision
+
+```{r}
+# Calcul des moyennes
+mean_accuracy  <- mean(accuracy_fold)
+mean_recall    <- mean(recall_fold)
+mean_precision <- mean(precision_fold)
+
+# Affichage des résultats
+cat("10-fold Cross-Validation - Arbre sans élagage :\n")
+cat("Mean Accuracy :", mean_accuracy, "\n")
+cat("Mean Recall :", mean_recall, "\n")
+cat("Mean Precision :", mean_precision, "\n")
+```
+
+### 3.2. Avec élagage
+
+Recopier puis modifier le chunk de code en Section 3.1. pour incorporer l'élagage
+
+```{r}
+# Matrices pour stocker les métriques après élagage
+accuracy_fold_pruned <- NULL
+recall_fold_pruned <- NULL
+precision_fold_pruned <- NULL
+
+# Boucle sur les folds avec élagage
+for (fold in 1:nfolds) {
+  # Séparation des données en train et validation
+  inFold                      <- which(folds == fold)
+  predictive_vars_train       <- predictive_vars_remain[-inFold, ]
+  predictive_vars_validation  <- predictive_vars_remain[inFold, ]
+  target_train                <- target_remain[-inFold]
+  target_validation           <- target_remain[inFold]
+    
+  accuracy_k  <- NULL
+  recall_k    <- NULL
+  precision_k <- NULL
+
+  # Entraînement de l'arbre de décision sans élagage
+  tree_model <- rpart(target_train ~ ., data = predictive_vars_train, method = "class")
+
+  # Sélection du meilleur cp pour l'élagage
+  best_cp <- tree_model$cptable[which.min(tree_model$cptable[, "xerror"]), "CP"]
+  
+  # Élagage de l'arbre
+  pruned_tree_model <- prune(tree_model, cp = best_cp)
+
+  # Prédiction sur la partie validation
+  target_pred <- predict(pruned_tree_model, predictive_vars_validation, type = "class")
+
+  # Calcul des métriques avec confusionMatrix()
+  cm <- confusionMatrix(target_pred, target_validation, positive = "1")
+  
+  # Stocker les résultats
+  accuracy_k <- cm$overall["Accuracy"]
+  recall_k   <- cm$byClass["Sensitivity"]
+  precision_k <- cm$byClass["Precision"]
+
+  accuracy_fold_pruned <- rbind(accuracy_fold_pruned, accuracy_k)
+  recall_fold_pruned   <- rbind(recall_fold_pruned, recall_k)
+  precision_fold_pruned <- rbind(precision_fold_pruned, precision_k)
+}
+
+rownames(accuracy_fold_pruned) <- paste0("fold_", 1:nfolds)
+rownames(recall_fold_pruned)   <- paste0("fold_", 1:nfolds)
+rownames(precision_fold_pruned) <- paste0("fold_", 1:nfolds)
+
+```
+
+
+Calculer la 10-fold cross validated mean accuracy, la 10-fold cross validated mean recall, et la 10-fold cross validated mean precision
+```{r}
+# Calcul des moyennes
+mean_accuracy_pruned  <- mean(accuracy_fold_pruned)
+mean_recall_pruned    <- mean(recall_fold_pruned)
+mean_precision_pruned <- mean(precision_fold_pruned)
+
+# Affichage des résultats
+cat("10-fold Cross-Validation - Arbre avec élagage :\n")
+cat("Mean Accuracy :", mean_accuracy_pruned, "\n")
+cat("Mean Recall :", mean_recall_pruned, "\n")
+cat("Mean Precision :", mean_precision_pruned, "\n")
+
+```
+
 
 ## 2. La régression logistique
 
