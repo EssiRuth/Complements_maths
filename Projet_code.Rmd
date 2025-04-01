@@ -474,7 +474,7 @@ for (col in colnames(quantitative_vars)){
 
 ```{r, out.width="50%", fig.align = "center"}
 for (col in colnames(qualitative_vars)){
-  barplot(table(qualitative_vars[[col]]), main=paste("Histogramme de", col), col="green")
+  barplot(table(qualitative_vars[[col]]), main=paste("Histogramme de", col), col="lightgreen")
 }
 # Afficher les effectifs de chaque modalité pour chaque variable qualitative
 for (col in colnames(qualitative_vars)) {
