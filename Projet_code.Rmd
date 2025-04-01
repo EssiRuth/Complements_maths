@@ -537,7 +537,7 @@ for(i in 1:ncol(quantitative_vars)){
 
 ### 2.4. Variables qualitatives et target 
 
-```{R}
+```{r}
 #library(ggplot2)
 for(i in 1:ncol(qualitative_vars)){
 var1 = as.character(qualitative_vars[,i])
@@ -732,7 +732,7 @@ predictive_vars=cbind(quantitative_vars_mmnormed, qual_dummies)
 
 Dans cette étape, nous réalisons une séparation aléatoire de notre jeu de données en deux sous-ensembles : un ensemble d’apprentissage (Train) et un ensemble de test (Test).
 
-Pour assurer la reproductibilité des résultats, nous commençons par fixer une graine aléatoire avec `set.seed(1500)`. Cela garantit que la sélection des observations reste la même à chaque exécution du code.
+Pour assurer la reproductibilité des résultats, nous commençons par fixer une graine aléatoire avec `set.seed(1237)`. Cela garantit que la sélection des observations reste la même à chaque exécution du code.
 
 Nous déterminons ensuite le nombre total d’observations dans notre jeu de données à l’aide de nrow(predictive_vars). Puis, nous utilisons la fonction sample() pour tirer aléatoirement 80 % des observations qui constitueront l’ensemble d’apprentissage.
 
@@ -1125,9 +1125,46 @@ precision_test
 ```
 
 ## 3. Arbre de classification
-Dans cette section, nous implémentons un arbre de décision pour prédire le risque de crise cardiaque. L’algorithme est entraîné sur l’ensemble d’entraînement (predictive_vars_train)
+#### Variables explicatives
 
-### 3.1 Installation des packages et Chargement des librairies `rpart`et `rpart.plot`
+Dans cette section, nous implémentons un arbre de décision pour prédire le risque de crise cardiaque. L’algorithme est entraîné sur l’ensemble d’entraînement (predictive_vars_train)
+Avant de construire l’arbre de classification, nous avons regroupé
+l’ensemble des variables explicatives — à la fois quantitatives et
+qualitatives — dans un seul objet nommé predictive_vars. Une
+vérification de la structure (str) permet de s'assurer que les types de
+données sont correctement interprétés (par exemple, les variables
+qualitatives sont bien des facteurs, les quantitatives sont numériques).
+Cette étape garantit une préparation adéquate des données en vue de
+l'apprentissage du modèle.
+```{r}
+predictive_vars = cbind(quantitative_vars, qualitative_vars)
+head(predictive_vars)
+str(predictive_vars)
+```
+
+#### Partage du jeu de données
+
+Afin d’évaluer correctement les performances de notre modèle, nous avons
+séparé le jeu de données en deux sous-ensembles : 80% des données ont
+été utilisées pour l'entraînement du modèle (train), 20% restantes ont
+été conservées pour le test final (test).
+
+Le partage s’effectue de manière aléatoire mais reproductible grâce à la
+fonction set.seed().
+
+```{r, eval = FALSE}
+
+set.seed(1234)
+nobs    = nrow(qualitative_vars) 
+inTrain = sample(1:nobs, size = round(0.8 * nobs), replace = FALSE)
+
+predictive_vars_test    = predictive_vars[-inTrain,]
+target_test             = target[-inTrain] 
+predictive_vars_train   = predictive_vars[inTrain,]
+target_train            = target[inTrain] 
+```
+#### Installation des packages et Chargement des librairies `rpart`et `rpart.plot`
+
 Nous utilisons les bibliothèques rpart et rpart.plot pour la création et la visualisation de l’arbre de décision.
 
 ```{r, results = "hide", message = FALSE}
@@ -1136,7 +1173,7 @@ install.packages("rpart.plot")
 library(rpart)
 library(rpart.plot)
 ```
-### 3.2 Préparation des données
+### 3.1. Préparation des données
 Nous convertissons la variable cible en facteur, car rpart attend une variable catégorielle pour la classification. De plus, les ensembles de données d'entraînement et de test sont transformés en data frames pour assurer leur compatibilité avec l'algorithme.
 
 ```{r, eval = FALSE}
@@ -1232,7 +1269,7 @@ recall_train_pruned
 precision_train_pruned
 
 ```
-### 2.6. Prédiction de la target avec l'arbre élagué sur le jeu de données de test
+### 3.5. Prédiction de la target avec l'arbre élagué sur le jeu de données de test
 
 ```{r}
  # Prédiction avec l'arbre élagué
@@ -1462,156 +1499,8 @@ Conclusion :
 Le modèle prédit quasiment toujours la classe 0, et il a du mal à détecter les vrais patients à risque. Il est biaisé vers la classe majoritaire.
 
 
-### 2.1. La courbe de ROC
 
-```{r}
-library(pROC) # chargement de la librairie pROC pour le tracé de la courbe de ROC
-```
 
-```{r}
-# target_pred_prob doit contenir les probabilités de prédire la classe "1"
-roc_curve <- roc(response = target_test, predictor = target_pred_prob)
-
-# Tracer la courbe
-plot(roc_curve, col = "blue", main = "Courbe ROC - Régression Logistique", lwd = 2)
-
-# AUC
-auc_val <- auc(roc_curve)
-cat("AUC :", auc_val, "\n")
-
-```
-
-## 3. Arbre de classification
-
-### 3.1. Variables explicatives
-
-Avant de construire l’arbre de classification, nous avons regroupé
-l’ensemble des variables explicatives — à la fois quantitatives et
-qualitatives — dans un seul objet nommé predictive_vars. Une
-vérification de la structure (str) permet de s'assurer que les types de
-données sont correctement interprétés (par exemple, les variables
-qualitatives sont bien des facteurs, les quantitatives sont numériques).
-Cette étape garantit une préparation adéquate des données en vue de
-l'apprentissage du modèle.
-
-```{r}
-predictive_vars = cbind(quantitative_vars, qualitative_vars)
-head(predictive_vars)
-str(predictive_vars)
-```
-
-### 3.2. Partage du jeu de données
-
-Afin d’évaluer correctement les performances de notre modèle, nous avons
-séparé le jeu de données en deux sous-ensembles : 80% des données ont
-été utilisées pour l'entraînement du modèle (train), 20% restantes ont
-été conservées pour le test final (test).
-
-Le partage s’effectue de manière aléatoire mais reproductible grâce à la
-fonction set.seed().
-
-```{r, eval = FALSE}
-
-set.seed(1234)
-nobs    = nrow(qualitative_vars) 
-inTrain = sample(1:nobs, size = round(0.8 * nobs), replace = FALSE)
-
-predictive_vars_test    = predictive_vars[-inTrain,]
-target_test             = target[-inTrain] 
-predictive_vars_train   = predictive_vars[inTrain,]
-target_train            = target[inTrain] 
-```
-
-### 3.3. Phase d'apprentissage
-
-Le modèle d’arbre de classification est construit à l’aide du package
-rpart, spécialement conçu pour la modélisation supervisée sur des
-données catégorielles ou continues. On définit ici les paramètres de
-contrôle du modèle : minsplit = 10 : nombre minimal d'observations dans
-un nœud avant de tenter une séparation, cp = 0.001 : paramètre de
-complexité pour éviter le surapprentissage, maxdepth = 5 : profondeur
-maximale de l’arbre. Le modèle apprend à prédire la variable cible
-(target_train) à partir de l’ensemble des variables explicatives
-(predictive_vars_train).
-
-Installation des packages `rpart`et `rpart.plot`
-
-```{r, eval = FALSE}
-install.packages("rpart")
-install.packages("rpart.plot")
-```
-
-Chargement des librairies
-
-```{r, results = "hide", message = FALSE}
-library(rpart)
-library(rpart.plot)
-?rpart
-?rpart.plot
-```
-
-### Entrainement d'un arbre de classification.
-
-```{r, eval = FALSE}
-
-predictive_vars_train <- as.data.frame(predictive_vars_train)
-predictive_vars_test <- as.data.frame(predictive_vars_test)
-
-classifTree <- rpart(target_train ~ ., data = predictive_vars_train, 
-                     method = "class",
-                     control = rpart.control(minsplit = 5, cp = 0, maxdepth = 5))
-
-```
-
-Ce code entraine un arbre de classification. Il trouve les meilleurs
-seuils de séparation pour classer correctement les observations.
-
-### Visualisation de l'arbre de décision
-
-```{r, eval = FALSE}
-rpart.plot(classifTree, type = 3, extra = 3, fallen.leaves = TRUE,  
-           main = "Arbre de prédiction du risque d'infarctus d'un patient", roundint=FALSE)  
-```
-
-### 3.4. Phase de test
-
-```{r, eval = FALSE}
-
-predictive_vars_test <- as.data.frame(predictive_vars_test)
-
-classifTree <- rpart(target_test ~ ., data = predictive_vars_test, 
-                     method = "class",
-                     control = rpart.control(minsplit = 5, cp = 0, maxdepth = 5))
-```
-
-#### Visualisation de l'arbre
-
-```{r}
-
-rpart.plot(classifTree, type = 3, extra = 3, fallen.leaves = TRUE,  
-           main = "Arbre de prédiction du risque d'infarctus d'un patient", roundint=FALSE)  
-
-```
-
-### 3.5. Prédiction de la target avec l'arbre de décision sur le jeu de données de test
-
-```{r, eval = FALSE}
-library(caret)
-target_pred = predict(classifTree, predictive_vars_test, type = "class")
-conf_matrix <- confusionMatrix(target_pred, target_test,positive = "1")
-print(conf_matrix)
-accuracy_test  <- conf_matrix$overall["Accuracy"]
-recall_test    <- conf_matrix$byClass["Sensitivity"]  # Recall
-precision_test <- conf_matrix$byClass["Precision"]
-accuracy_test
-recall_test
-precision_test
-# à compléter
-# à compléter
-# à compléter
-```
-
-### 3.6. Arbre de classification avec évaluation des performances en 10-fold cross-validation
 
 ## 4. La classification Naive bayésienne
 
@@ -1650,12 +1539,6 @@ classif
 plot(classif, prob = "conditional")
 ```
 
-*Remarque :* Comme vu en cours, il est possible qu'une combinaison de
-catégories pour la réponse et une variable explicative qualitative
-X\^(l) n’apparaîsse pas dans jeu de données d’entraînement, auquel cas
-on aurait hat P(X\^(l) = x\^(l) \| target) = 0. On peut alors utiliser
-le additive smoothing (ou Laplace smoothing), ce qui se fait dans la
-fonction `naive_bayes` avec l'argument `laplace`
 
 ### 4.2. Prédiction sur le jeu de données de test des probabilités d'appartenir aux différentes catégories de la réponse
 
@@ -1673,141 +1556,7 @@ library(caret)
 
 ### Prédiction de la target sur le jeu de données de test
 
-Utiliser le classifieur entraîné à la Partie 2.3 pour prédire la
-catégorie d'appartenance des individus dans la partie Test, et calculer
-l'accuracy, le recall, et la précision (à l'aide du package `caret`
-comme fait aux TPs précédents, relire la documentation si besoin)
-
-```{r, eval = FALSE}
-library(caret)
-library(Metrics)
-#target_pred = predict(classif, predictive_vars_test)
-#accuracy = mean(target_pred == target_test)
-#recall_value = recall(target_pred, target_test)
-
-target_pred = predict(classif, predictive_vars_test, type = "class")
-conf_matrix <- confusionMatrix(target_pred, target_test, positive="1")
-print(conf_matrix)
-#precision_value = precision(target_pred, target_test,)
 
 
-#mean(target_pred == # à compléter)
-#recall(target, target_pred)
-#precision(target, target_pred)
-```
-### Régression logistique et courbe ROC
 
 
-```{r message=FALSE, warning=FALSE, results='hold'}
-# ------------------------------
-#  Chargement des packages nécessaires
-# ------------------------------
-library(caret)       # Pour l'évaluation du modèle
-library(naivebayes)  # Même si on ne l’utilise pas ici, il peut être utile ailleurs
-library(e1071)       # Nécessaire pour certaines fonctions de machine learning
-library(pROC)        # Pour tracer la courbe ROC et calculer l'AUC
-
-# ------------------------------
-# ️ Séparation des données en deux ensembles : apprentissage et test
-# ------------------------------
-set.seed(1234)  # Pour reproduire les mêmes résultats à chaque exécution
-train_index <- sample(1:nrow(data_clean), size = 0.8 * nrow(data_clean))
-train_data <- data_clean[train_index, ]
-test_data <- data_clean[-train_index, ]
-
-# ------------------------------
-#  Définir la variable cible (Heart Attack Risk)
-# ------------------------------
-target_train <- as.factor(train_data$Heart.Attack.Risk)
-target_test <- as.factor(test_data$Heart.Attack.Risk)
-
-# ------------------------------
-#  Supprimer la variable cible des données explicatives
-# ------------------------------
-train_data <- subset(train_data, select = -Heart.Attack.Risk)
-test_data <- subset(test_data, select = -Heart.Attack.Risk)
-
-# ------------------------------
-#  Conversion des variables de type caractère en facteurs
-# ------------------------------
-train_data[] <- lapply(train_data, function(x) if (is.character(x)) as.factor(x) else x)
-test_data[] <- lapply(test_data, function(x) if (is.character(x)) as.factor(x) else x)
-
-# ------------------------------
-#  Entraînement du modèle de régression logistique
-# ------------------------------
-# On ajuste un modèle logistique avec toutes les variables explicatives
-logit_model <- glm(target_train ~ ., 
-                   data = train_data, 
-                   family = binomial(link = "logit"))
-
-# ------------------------------
-#  Prédiction des probabilités sur les données de test
-# ------------------------------
-# On prédit ici la probabilité que chaque individu appartienne à la classe "1"
-target_pred_prob <- predict(logit_model, newdata = test_data, type = "response")
-
-# ------------------------------
-# ️ Ajustement du seuil de décision
-# ------------------------------
-# On considère qu’un individu est à risque (classe 1) si la proba > 0.3 (plus sensible)
-target_pred_adjusted <- ifelse(target_pred_prob > 0.3, 1, 0)
-
-# ------------------------------
-#  Vérification des prédictions
-# ------------------------------
-# Un petit tableau pour voir la répartition des prédictions (0 vs 1)
-table(target_pred_adjusted)
-
-# ------------------------------
-#  Calcul des métriques de performance
-# ------------------------------
-
-# S’assurer que les prédictions et les vraies valeurs sont des facteurs avec les bons niveaux
-target_pred_adjusted <- factor(target_pred_adjusted, levels = c("0", "1"))
-target_test <- factor(target_test, levels = c("0", "1"))
-
-# Calcul du rappel : capacité à bien identifier les survivants
-recall_adjusted <- recall(target_pred_adjusted, target_test, relevant = "1")
-
-# Calcul de la précision : parmi ceux prédits comme survivants, combien le sont vraiment
-precision_adjusted <- precision(target_pred_adjusted, target_test, relevant = "1")
-
-# Affichage des résultats
-print(paste("Adjusted Recall (survivant): ", recall_adjusted))
-print(paste("Adjusted Precision (survivant): ", precision_adjusted))
-
-# ------------------------------
-#  Matrice de confusion : vue détaillée des bons et mauvais classements
-# ------------------------------
-conf_matrix <- confusionMatrix(target_pred_adjusted, target_test)
-print(conf_matrix)
-
-# ------------------------------
-#  Courbe ROC et AUC (aire sous la courbe)
-# ------------------------------
-
-# Création de l'objet ROC à partir des probabilités de la classe 1 (survivant)
-roc_logit <- roc(response = target_test, predictor = target_pred_prob)
-
-# Tracer la courbe ROC
-plot(roc_logit, main = "Courbe ROC - Régression Logistique", col = "darkgreen", lwd = 2)
-
-# Calcul et affichage de l’AUC (plus l’AUC est proche de 1, mieux c’est)
-auc_logit <- auc(roc_logit)
-print(paste("AUC de la régression logistique : ", round(auc_logit, 4)))
-```
-***Interpretation***
-	- le modèle atteint une précision globale (accuracy) de 35.5 %, ce qui est faible
-	-	la no information rate est de 64 %, donc un modèle qui prédit toujours la majorité aurait fait mieux
-	-	le rappel (sensitivity) est de 0.7 %, ce qui veut dire que le modèle ne détecte quasiment jamais les individus à risque
-	-	la spécificité est de 98.5 %, donc il prédit bien les individus non à risque
-	-	la balanced accuracy est proche de 0.5, ce qui montre que le modèle est très déséquilibré
-	-	le kappa est négatif (-0.0053), ce qui confirme que les performances sont proches du hasard
-	-	la courbe ROC suit presque la diagonale, ce qui signifie que le modèle ne fait pas mieux qu’un tirage au sort
-	-	l’AUC est de 0.52, ce qui est très faible (valeur idéale : proche de 1)
-	
-	Concluison : 
-	-	le modèle de régression logistique ne parvient pas à identifier correctement les personnes à risque
-	-	malgré un seuil de 0.3 censé être plus sensible, les résultats restent très mauvais
-	-	ce modèle est donc inefficace pour cette tâche de classification dans ton jeu de données
