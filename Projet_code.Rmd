@@ -508,7 +508,7 @@ for (col in colnames(qualitative_vars)) {
 ```{r}
 for(i in 1:ncol(quantitative_vars)){
   boxplot(quantitative_vars[,i] ~ target, main=paste("Boxplot de", colnames(quantitative_vars)[i]),
-          col = c("pink", "lightblue"), xlab = "Risque d'infarctus")
+          col = c("lightgreen", "lightblue"), xlab = "Risque d'infarctus")
 }
 ```
 
