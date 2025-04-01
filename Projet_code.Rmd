@@ -2,11 +2,19 @@
 title: "Projet"
 author: "ruth"
 date: "2025-03-07"
-output: pdf_document
-editor_options: 
-  markdown: 
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+editor_options:
+  markdown:
     wrap: 72
 ---
+```{r}
+if (!require(ggplot2)) install.packages("ggplot2")
+library(ggplot2)
+```
+Lien de téléchargement de la base de données : https://www.kaggle.com/datasets/iamsouravbanerjee/heart-attack-prediction-dataset
 
 # Introduction
 
@@ -151,7 +159,7 @@ Les variables suivantes peuvent être considérées comme **quantitatives**
 > (normalisation, transformation logarithmique ou catégorisation) selon
 > le modèle utilisé.
 
-------------------------------------------------------------------------
+
 
 ### • Variables qualitatives
 
@@ -729,7 +737,18 @@ venir et garantit l’intégrité des données.
 
 ```{r}
 
-library(ggplot2)
+library(ggplot2)# Chargement du package ggplot2
+
+```
+
+
+
+```{r}
+
+# Exemple de graphique
+#ggplot(data = my_data, aes(x = var1, y = var2)) +
+ # geom_point()
+
 library(reshape2)
 
 # Calcul de la matrice de corrélation
@@ -1193,7 +1212,7 @@ plusieurs pistes peuvent être envisagées :
 -   Expérimenter d’autres méthodes de classification comme les arbres de
     décision,naïve bayesienne pour comparer les résultats.
 
-## 1.2 Méthode de cross-validation
+## 1.2 Méthode de cross-validation et calcul des moyennes sur les 10 Folds
 
 Pour pouvoir évaluer la performance du modèle de manière plus robuste et
 de déterminer la meilleure valeur de k, nous avons utilisé une
@@ -1219,8 +1238,14 @@ Recall (sensibilité)
 
 Precision (précision des prédictions positives)
 
+Moyenne de l’accuracy : reflète la proportion de bonnes classifications.
+Moyenne du recall : indique la capacité du modèle à détecter la classe
+cible. Moyenne de la précision : mesure la fiabilité des prédictions
+positives.
+
 Les performances obtenues pour chaque itération et chaque valeur de k
 sont stockées dans des matrices.
+
 
 ```{r, eval = FALSE}
 set.seed(1357)
@@ -1281,16 +1306,7 @@ rownames(precision_fold) = paste0("fold_",1:nfolds)
 colnames(accuracy_fold) = paste0("K_", KGrid)
 colnames(recall_fold) = paste0("K_", KGrid)
 colnames(precision_fold) = paste0("K_", KGrid)
-```
 
-### Calcul des Moyennes sur les 10 Folds
-
-Moyenne de l’accuracy : reflète la proportion de bonnes classifications.
-Moyenne du recall : indique la capacité du modèle à détecter la classe
-cible. Moyenne de la précision : mesure la fiabilité des prédictions
-positives.
-
-```{r}
 # 10-fold cross validated mean accuracy pour chaque valeur de K
 mean_accuracy_k = colMeans(accuracy_fold)
 
@@ -1305,6 +1321,8 @@ mean_accuracy_k
 mean_recall_k
 mean_precision_k
 ```
+
+
 
 > Analyse des Résultats de la Cross-Validation Après avoir effectué la
 > cross-validation, nous avons obtenu les valeurs moyennes des trois
@@ -1330,43 +1348,6 @@ puisse faire une bonne prediction des vrais positifs et dea faux
 positifs. Ce choix optimise la performance du classifieur tout en
 minimisant les biais liés aux valeurs extrêmes de k.
 
-### Graphes 10-fold mean accuracy en fonction des valeurs de K
-
-```{r, out.width="50%", fig.align = "center"}
-# Charger ggplot2 pour les graphiques
-library(ggplot2)
-
-# Création d'un data.frame pour ggplot
-results = data.frame(
-  K = KGrid,
-  Accuracy = mean_accuracy_k,
-  Recall = mean_recall_k,
-  Precision = mean_precision_k
-)
-
-# Graphique de l'accuracy
-ggplot(results, aes(x = K, y = Accuracy)) +
-  geom_line(color = "blue") +
-  geom_point(color = "blue") +
-  labs(title = "10-Fold Mean Accuracy vs. K", x = "K", y = "Mean Accuracy") +
-  theme_minimal()
-
-# Graphique du recall
-ggplot(results, aes(x = K, y = Recall)) +
-  geom_line(color = "red") +
-  geom_point(color = "red") +
-  labs(title = "10-Fold Mean Recall vs. K", x = "K", y = "Mean Recall") +
-  theme_minimal()
-
-# Graphique de la précision
-ggplot(results, aes(x = K, y = Precision)) +
-  geom_line(color = "green") +
-  geom_point(color = "green") +
-  labs(title = "10-Fold Mean Precision vs. K", x = "K", y = "Mean Precision") +
-  theme_minimal()
-
-
-```
 
 ### Performance du classifieur final
 
@@ -1592,7 +1573,7 @@ matrice de confusion (confusionMatrix)
 
 ```{r, eval = FALSE}
 # Prédiction sur le jeu de test
-set.seed(1234)
+set.seed(1237)
 target_pred = predict(classifTree, predictive_vars_test, type = "class")
 
 # Calcul des métriques
@@ -1613,18 +1594,22 @@ sur le jeu de test sont les suivantes :
 
 -   Accuracy : 62,86 %, Cela signifie que le modèle effectue
     correctement environ 62 % des prédictions sur l’ensemble de test.
--   Sensitivity (Recall) : 16.2 %, Ce faible score indique que le modèle
+    
+-   Sensitivity (Recall) : 8.76 %, Ce faible score indique que le modèle
     ne détecte qu’une petite partie des cas positifs (patients à
     risque). Autrement dit, il y a un grand nombre de faux négatifs.
--   Precision : 57.29 %, Cela signifie qu’environ 57% des prédictions
+    
+-   Precision : 34.6 %, Cela signifie qu’environ 34% des prédictions
     positives sont correctes.
 
 ####  Élagage de l'arbre
+Nous allons donc procéder à l’élagage de l’arbre de décision pour réduire sa complexité et améliorer sa capacité de généralisation.
 
 ```{r, eval = FALSE}
 classifTree$cptable
 ```
 
+Nous commençons par examiner la table de complexité (cptable) de l'arbre et sélectionnons la valeur optimale de cp correspondant à l'erreur minimale. Nous affichons ensuite la table des valeurs de cp et traçons le graphique de l’erreur en fonction de cp pour identifier le point optimal :
 ```{r, eval = FALSE}
 cp = classifTree$cptable[which.min(classifTree$cptable[, "xerror"]), "CP"]
 cp
@@ -1635,9 +1620,8 @@ plotcp(classifTree)   # Graphique de l'erreur en fonction de cp
 ```
 
 #### Visualisation de l’arbre élagué
-
-L’arbre de décision obtenu après élagage est visualisé ci-dessous. Cette
-représentation graphique permet d’identifier les variables les plus
+L’arbre est ensuite élagué en multipliant cp par 0.8, une approche courante pour éviter un élagage excessif. Il est visualisé ci-dessous. 
+Cette représentation graphique permet d’identifier les variables les plus
 importantes dans le processus de classification, ainsi que les règles
 utilisées pour distinguer les individus à risque d’infarctus.
 
@@ -1647,6 +1631,9 @@ par étape.
 
 ```{r, eval = FALSE}
 prunedTree = prune(classifTree, cp*0.8)
+```
+
+```{r}
 
 # Tracer l’arbre élagué
 rpart.plot(prunedTree, type = 3, extra = 2, fallen.leaves = TRUE,  
@@ -1676,10 +1663,11 @@ rpart.plot(prunedTree, type = 3, extra = 2, fallen.leaves = TRUE,
 > l'entraînement et le test. Seuls les résultats prédictifs diffèrent.
 
 Nous utilisons l’arbre élagué pour effectuer des prédictions sur le jeu
-de test
+de test pour calculer les métriques
 
 ```{r}
  # Prédiction avec l'arbre élagué
+set.seed(1237)
 target_pred_pruned = predict(prunedTree, predictive_vars_train, type = "class")
 
 # Calcul des métriques
@@ -1700,18 +1688,18 @@ precision_train_pruned
 Le modèle d’arbre de décision élagué a été évalué sur l’ensemble
 d’apprentissage. Les résultats obtenus sont les suivants :
 
--   **Accuracy** : 63.02 %. Le modèle réalise correctement 63 % des
+-   **Accuracy** : 62.95 %. Le modèle réalise correctement 63 % des
     prédictions globales, c’est-à-dire qu’il identifie correctement
     environ 2 individus sur 3, toutes classes confondues.
 
--   **Recall (Sensibilité)** : 8.98 %. Cela signifie que plus de 91 %
+-   **Recall (Sensibilité)** : 10.78 %. Cela signifie que 90 %
     des patients réellement à risque ne sont pas identifiés par le
     modèle. Ce niveau de sensibilité est très insuffisant dans un cadre
     médical, où la priorité est de limiter les faux négatifs pour éviter
     que des patients à risque soient ignorés.
 
--   **Précision** : 38.50 %. Lorsqu’un patient est identifié comme étant
-    à risque, il y a seulement 38.5 % de chances qu’il le soit
+-   **Précision** : 44.30 %. Lorsqu’un patient est identifié comme étant
+    à risque, il y a seulement 44% de chances qu’il le soit
     réellement.
 
 > Ces résultats indiquent que bien que le modèle obtienne une précision
@@ -1739,6 +1727,7 @@ classifieur.
 
 ```{r}
  # Prédiction avec l'arbre élagué
+set.seed(1237)
 target_pred_pruned = predict(prunedTree, predictive_vars_test, type = "class")
 
 # Calcul des métriques
@@ -1759,19 +1748,19 @@ L’arbre élagué a ensuite été appliqué au jeu de données de test, afin
 d’évaluer sa capacité de généralisation. Les métriques obtenues sont les
 suivantes :
 
--   **Accuracy** : 62.86 %\
--   **Recall (Sensibilité)** : 16.20 %\
--   **Précision** : 57.92 %
+-   **Accuracy** : 62.10 %\
+-   **Recall (Sensibilité)** : 8.76 %\
+-   **Précision** : 34.61 %
 
 > Ces résultats indiquent une **performance globale modérée**, avec une
 > accuracy relativement stable par rapport au jeu d’apprentissage.
 > Toutefois, on observe que la **sensibilité reste faible** : le modèle
-> ne parvient à détecter qu’environ **16 % des patients réellement à
+> ne parvient à détecter qu’environ **9 % des patients réellement à
 > risque**, ce qui est problématique dans un contexte médical où **les
 > faux négatifs doivent être minimisés**.
 
 La **précision**, en revanche, est plus élevée : parmi les patients
-prédits comme étant à risque, **environ 58 % le sont effectivement**.
+prédits comme étant à risque, **environ 34% le sont effectivement**.
 Cela signifie que, bien que le modèle **prédise peu de cas positifs**,
 il est **plutôt fiable lorsqu’il en identifie un**.
 
@@ -1804,7 +1793,7 @@ library(rpart.plot)
 
 ```{r}
 
-set.seed(1357)
+set.seed(1237)
 
 # Définition des folds
 nobs                  <- nrow(predictive_vars)
@@ -1984,7 +1973,7 @@ de la minimisation de l’erreur de validation croisée (`xerror`).
 
 Les résultats moyens obtenus sont les suivants :
 
--   **Accuracy moyenne** : 64.28 %\
+-   **Accuracy moyenne** : 64.18 %\
 -   **Recall moyen** : 0.00 %\
 -   **Précision moyenne** : NA
 
@@ -2340,3 +2329,78 @@ antécédents), **n’influencent que faiblement les probabilités
 prédictives**. Cela met en évidence la **nécessité d’utiliser des
 modèles plus flexibles** et de considérer des interactions pour
 améliorer la détection du risque dans ce type de problématique médicale.
+
+# III. Récapitulatif
+
+```{r}
+library(knitr)
+
+# Résultats fictifs à adapter avec tes vraies valeurs si besoin
+resultats_modeles <- data.frame(
+  Modèle = c("k-NN (k=4)", 
+             "Régression logistique", 
+             "Arbre de décision (non élagué)", 
+             "Arbre de décision (élagué)", 
+             "Naïve Bayes"),
+  Accuracy = c("69.40 %", 
+               "64.19 %", 
+               "62.86 %", 
+               "62.10 %", 
+               "64.46 %"),
+  Recall = c("46.17 %", 
+             "0.00 %", 
+             "8.76 %", 
+             "8.76 %", 
+             "0.00 %"),
+  Précision = c("59.42 %", 
+                "NA", 
+                "34.60 %", 
+                "34.61 %", 
+                "NA")
+)
+
+kable(resultats_modeles, caption = "Tableau comparatif des performances des différents modèles", booktabs = TRUE)
+```
+
+## Interprétation
+Le tableau ci-dessus met en évidence des performances contrastées entre les différents modèles testés :
+    - k-NN (k = 4) est celui qui offre le meilleur compromis entre accuracy, capacité à détecter les vrais positifs et précision. Il apparaît donc comme le modèle le plus performant dans ce contexte.
+    
+    - La régression logistique et le modèle Naïve Bayes présentent une accuracy correcte, mais échouent complètement à détecter les patients à risque, les rendant inadaptés pour une application médicale sans ajustement.
+    
+    - Les arbres de décision affichent une performance globale modérée, mais leur faible sensibilité (moins de 9 %) limite leur capacité à identifier les cas positifs, malgré une meilleure précision.
+    
+Ces résultats soulignent un déséquilibre de classe dans les données, pénalisant les modèles conservateurs. Ils appellent à l’intégration de techniques de rééquilibrage (comme SMOTE) et/ou de modèles plus robustes comme les forêts aléatoires ou les modèles ensemblistes pour améliorer la détection des patients à risque.
+
+# III. Bilan de l'étude
+
+Dans le cadre de ce projet académique, nous avons cherché à concevoir un modèle de classification permettant de prédire le risque d’infarctus du myocarde à partir d’un jeu de données cliniques et comportementales. Pour cela, nous avons exploré et comparé plusieurs approches supervisées, notamment les k-plus proches voisins, la régression logistique, les arbres de décision et le classifieur naïf bayésien.
+Nos expérimentations ont montré que le modèle k-NN avec k = 4 a fourni les résultats les plus équilibrés en termes de performance. Il atteint une accuracy d’environ 69 %, avec une capacité de détection des cas à risque (recall) de 46 % et une précision de 59 %. Cela signifie qu’il réussit à identifier presque un patient à risque sur deux, tout en limitant les fausses alertes.
+En revanche, certains modèles, comme la régression logistique et le naïf bayesien, bien que simples et généralement robustes, n’ont pas permis de détecter efficacement les cas à risque (recall = 0 % dans notre cas), ce qui les rend inadaptés dans une logique de prévention médicale. Les arbres de décision, même après élagage, ont présenté des performances limitées, notamment une sensibilité très faible, ce qui est problématique dans un contexte où les faux négatifs doivent être évités autant que possible.
+Nous avons également observé que certaines variables habituellement associées au risque cardiovasculaire, telles que le cholestérol ou l’indice de masse corporelle, n’avaient qu’un pouvoir prédictif modéré dans notre étude. Cela pourrait être dû aux interactions complexes entre variables, ou à des limites propres à notre jeu de données.
+
+Ce projet nous a permis de :
+    Mieux comprendre les spécificités du domaine médical, où la performance d’un modèle ne se résume pas à l’accuracy mais repose avant tout sur sa capacité à identifier correctement les individus à risque.
+    Approfondir nos compétences en préparation de données, validation croisée et interprétation des métriques de classification.
+    Réaliser à quel point le déséquilibre des classes peut affecter un modèle, et à quel point il est important d’adapter les méthodes en conséquence.
+
+# IV. Recommandations
+Notre travail reste perfectible, et plusieurs pistes pourraient être explorées dans la suite :
+    Mettre en œuvre des techniques de rééquilibrage comme SMOTE pour améliorer la détection des cas à risque.
+    Tester des modèles plus performants comme les forêts aléatoires ou le XGBoost, qui sont souvent mieux adaptés aux problématiques de santé.
+    Repenser les seuils de classification, voire utiliser des métriques plus adaptées comme le F1-score ou l’AUC-ROC, pour une évaluation plus complète.
+
+# Conclusion
+Ce projet nous a permis de confronter nos connaissances théoriques à un cas réel, en mettant en pratique différentes méthodes de classification sur un problème médical concret. Bien que les résultats obtenus soient encore modestes, cette étude constitue une première étape encourageante vers la construction de systèmes prédictifs au service de la santé publique.
+
+# Répartition du travail 
+
+Ce projet a été réalisé de manière collaborative, chaque membre de l’équipe ayant apporté une contribution spécifique tout en participant activement aux différentes étapes du travail.  
+
+La première partie, consacrée à la préparation du jeu de données et à l’analyse univariée, a été rédigée par KOSSI Essi Ruth. Elle s’est chargée du nettoyage des données, de la gestion des valeurs manquantes et de la normalisation, tout en explorant les distributions des variables pour mieux comprendre leur impact potentiel sur la prédiction du risque de crise cardiaque.  
+
+DESSI Akou Bernadette a pris en charge les analyses multivariées ainsi que la mise en œuvre des algorithmes des k-plus-proches voisins. Elle a expérimenté différentes stratégies de validation, notamment la méthode du holdout et la validation croisée, afin d’optimiser le choix de k. Elle s’est également occupée de l’implémentation et de l’analyse des arbres de décision, en ajustant les paramètres pour améliorer les performances du modèle.  
+
+Yasmina sur les méthodes de classification basées sur la régression logistique et le classifieur naïf bayésien. Elle a étudié la pertinence de ces modèles dans le contexte du projet, comparé leurs performances avec celles des autres algorithmes et cherché à améliorer leur précision par des ajustements adaptés.  
+
+Bien que chaque membre ait eu une responsabilité principale, le travail s’est déroulé dans un esprit d’entraide et d’échange constant. Lorsqu’un blocage survenait, les autres intervenaient pour proposer des solutions, tester des alternatives ou approfondir certaines analyses. Cette approche collaborative a permis d’optimiser l’efficacité du projet et de renforcer notre compréhension collective des techniques utilisées.
