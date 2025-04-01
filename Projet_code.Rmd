@@ -271,20 +271,6 @@ data$Medication.Use <- as.factor(data$Medication.Use)
 data$Alcohol.Consumption <- as.factor(data$Alcohol.Consumption)
 data$Obesity <- as.factor(data$Obesity)
 
-# Hypertension (1 si pression systolique > 140 ou diastolique > 90)
-data$Hypertension <- ifelse(data$Systolic_BP > 140 | data$Diastolic_BP > 90, 1, 0)
-
-# Catégorie de BMI
-data$BMI_cat <- cut(data$BMI, breaks = c(0, 18.5, 24.9, 29.9, 100),
-                    labels = c("Maigreur", "Normal", "Surpoids", "Obésité"))
-
-# Ratio activité/sédentarité
-data$Active_ratio <- data$Exercise.Hours.Per.Week / (data$Sedentary.Hours.Per.Day + 1)
-
-# Qualité du sommeil (mauvais si <5 ou >9h)
-data$Poor_sleep <- ifelse(data$Sleep.Hours.Per.Day < 5 | data$Sleep.Hours.Per.Day > 9, 1, 0)
-
-
 str(data) 
 
 ```
@@ -456,69 +442,27 @@ for(i in 1:ncol(quantitative_vars)){
 ```
 
 #### Interprétation
+-   Cholesterol : La médiane et la dispersion sont très proches entre les deux groupes. Il n’y a pas de valeur aberrante visible. Le cholestérol seul ne semble pas un bon discriminateur du risque.
 
--   Cholesterol : Q1 = 192, Médiane = 259, Q3 = 330 et Pas de valeurs
-    aberrantes =\> 50 % des données se situent entre 192 et 330. La
-    médiane est de 259 mg/dL. L’ensemble des observations reste dans la
-    plage normale définie par les moustaches.
+-   Heart.Rate : Les médianes sont similaires (autour de 75-80) et la dispersion est équivalente. Aucune différence notable n’apparaît visuellement entre les deux groupes.
 
--   Heart Rate : Q1 = 57, Médiane = 75, Q3 = 93 , Min = 40, Max = 110 et
-    Pas de valeurs extrêmes =\> La moitié des individus ont une
-    fréquence cardiaque entre 57 et 93 bpm. La médiane est à 75. Aucune
-    valeur n’est considérée comme aberrante selon les critères du
-    boxplot.
+-   BMI : La distribution de l’IMC est très proche entre les deux groupes, avec une médiane légèrement supérieure chez les individus à risque. Cela pourrait indiquer un lien modéré entre surpoids et risque cardiaque, à confirmer statistiquement.
 
--   xercise Hours Per Week: Q1 ≈ 5, Médiane ≈ 10, Q3 ≈ 15 ,Min ≈ 0, Max
-    ≈ 20 et Pas de points au-delà des moustaches =\> 50 % des individus
-    font entre 5 et 15 heures d’exercice par semaine. La médiane est
-    de 10. La distribution est régulière et aucune valeur n’est jugée
-    extrême.
+-   Triglycerides : Les médianes sont un peu plus élevées dans le groupe à risque, mais les distributions restent très proches. Aucun écart important ou valeur extrême n’est détecté.
 
--   Stress Level : Q1 = 3, Médiane = 5, Q3 = 8 et Min = 1, Max = 10 Pas
-    de valeurs extrêmes =\> Le niveau de stress est compris entre 3 et 8
-    pour la moitié des individus, avec une médiane de 5. Les moustaches
-    couvrent l’ensemble des données, sans valeur aberrante.
+-   Systolic_BP et Diastolic_BP : Les distributions sont presque identiques entre les groupes. Cela suggère que la pression artérielle n’est pas significativement différente selon le risque, du moins visuellement.
 
--   Sedentary Hours Per Day : Q1 ≈ 3, Médiane ≈ 6, Q3 ≈ 9, Min ≈ 0, Max
-    ≈ 12 et Pas de valeur extrême =\> Les heures passées assis par jour
-    sont comprises entre 3 et 9 pour la moitié des individus. La médiane
-    est à 6. Tous les individus restent dans les limites des moustaches.
+-   Exercise.Hours.Per.Week : Aucune différence visuelle marquée n’est observée. La médiane est proche, et les étendues sont équivalentes. Le niveau d’exercice hebdomadaire n’apparaît pas comme un facteur discriminant clair ici.
 
--   Triglycerides: Q1 = 225.5, Médiane = 417, Q3 = 612, Min = 30, Max =
-    800 et pas de valeur aberrante détectée =\> Bien que les valeurs
-    varient fortement, la distribution respecte les limites définies par
-    les moustaches. Aucune valeur extrême détectée malgré un écart
-    important.
+-   Stress.Level : Les deux groupes ont des distributions similaires. Bien que le stress soit souvent évoqué comme un facteur de risque, il ne ressort pas ici de manière nette.
 
--   Physical Activity Days Per Week : Q1 = 2, Médiane = 3, Q3 = 5, Min =
-    0, Max = 7 et Aucun point hors des moustaches =\> 50 % des individus
-    font entre 2 et 5 jours d’activité physique par semaine. La médiane
-    est de 3 jours. Toutes les valeurs sont incluses dans les
-    moustaches, donc aucune valeur extrême n’est présente.
+-   Sedentary.Hours.Per.Day : Les individus à risque semblent avoir une légère tendance à passer un peu plus de temps assis, mais la différence reste faible.
 
--   Sleep Hours Per Day : Q1 = 5, Médiane = 7, Q3 = 9, Min = 4, Max = 10
-    et Aucune valeur hors de l’intervalle attendu =\> La moitié des
-    individus dorment entre 5 et 9 heures par jour. La médiane est de 7
-    heures. La distribution est équilibrée, sans valeur aberrante
-    détectée.
+-   Physical.Activity.Days.Per.Week : On observe une distribution légèrement plus étendue dans le groupe à risque, avec une médiane équivalente. Il n’y a pas de signe fort de différence ici non plus.
 
--   Heart Attack Risk : Variable binaire : Min = 0, Max = 1, Médiane =
-    0, Q1 = 0, Q3 = 1 et Rien à détecter ici car ce n’est pas une
-    variable continue =\> Cette variable prend uniquement les valeurs 0
-    ou 1. Le boxplot n’est pas pertinent ici car la variable est
-    catégorique.
+-   Income : Les revenus semblent globalement similaires entre les groupes. La médiane et la dispersion sont quasi identiques, suggérant peu ou pas d’effet du revenu sur le risque dans ce jeu de données.
 
--   systolic_BP : Q1 = 112, Médiane = 135, Q3 = 158, Min = 90, Max = 180
-    et Toutes les valeurs sont dans les moustaches =\> La moitié des
-    pressions systoliques se situent entre 112 et 158 mmHg, avec une
-    médiane de 135. Aucune valeur extrême n’est présente selon la règle
-    de 1,5×IQR.
-
--   Diastolic_BP : Q1 = 72, Médiane = 85, Q3 = 98, Min = 60, Max = 110
-    et Pas de point en dehors des moustaches =\> La pression diastolique
-    est comprise entre 72 et 98 mmHg pour 50 % des individus. La médiane
-    est de 85. Aucun individu ne dépasse les limites définies par les
-    moustaches.
+-   Sleep.Hours.Per.Day : La médiane est identique entre les deux groupes (environ 7 heures). Les distributions sont semblables et symétriques, sans valeurs extrêmes détectées. Le sommeil ne semble donc pas différencier clairement les individus à risque des autres.
 
 ### Variables qualitatives et target : barplot
 
